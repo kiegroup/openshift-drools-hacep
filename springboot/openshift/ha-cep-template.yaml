@@ -1,0 +1,193 @@
+---
+kind: Template
+apiVersion: v1
+metadata:
+  name: drools-ha-cep-template
+message: |-
+  A new HA CEP instance has been created in your project.
+parameters:
+- displayName: Git Repository URL
+  description: Git source URI for application.
+  name: SOURCE_REPOSITORY_URL
+  required: true
+- displayName: Git Reference
+  description: Git branch/tag reference.
+  name: SOURCE_REPOSITORY_REF
+  example: master
+  required: false
+- displayName: List of directories from which archives will be copied into the deployment folder
+  description: List of directories from which archives will be copied into the deployment folder. If unspecified, all archives in /target will be copied.
+  name: ARTIFACT_DIR
+  value: 'springboot/target'
+  required: false
+objects:
+  - kind: Kafka
+    apiVersion: kafka.strimzi.io/v1alpha1
+    metadata:
+      name: my-cluster
+    spec:
+      kafka:
+        version: 2.1.0
+        replicas: 3
+        listeners:
+          plain: {}
+          external:
+            type: route
+        config:
+          offsets.topic.replication.factor: 3
+          transaction.state.log.replication.factor: 3
+          transaction.state.log.min.isr: 2
+          log.message.format.version: "2.1"
+          auto.create.topics.enable: true
+        storage:
+          type: ephemeral
+      zookeeper:
+        replicas: 3
+        storage:
+          type: ephemeral
+      entityOperator:
+        topicOperator: {}
+        userOperator: {}
+  - kind: KafkaTopic
+    apiVersion: kafka.strimzi.io/v1alpha1
+    metadata:
+      name: events
+    labels:
+      strimzi.io/cluster: "my-cluster"
+    spec:
+      partitions: 1
+      replicas: 3
+      config:
+        retention.ms: 7200000
+        segment.bytes: 1073741824
+  - kind: KafkaTopic
+    apiVersion: kafka.strimzi.io/v1alpha1
+    metadata:
+      name: control
+    labels:
+      strimzi.io/cluster: "my-cluster"
+    spec:
+      partitions: 1
+      replicas: 3
+      config:
+        retention.ms: 7200000
+        segment.bytes: 1073741824
+  - kind: KafkaTopic
+    apiVersion: kafka.strimzi.io/v1alpha1
+    metadata:
+      name: snapshot
+      labels:
+        strimzi.io/cluster: "my-cluster"
+    spec:
+      partitions: 1
+      replicas: 3
+      config:
+        retention.ms: 7200000
+        segment.bytes: 1073741824
+        cleanup.policy: compact
+        segment.ms: 100
+        min.cleanable.dirty.ratio: 0.01
+        delete.retention.ms: 100
+  - kind: Service
+    apiVersion: v1
+    metadata:
+      name: openshift-kie-springboot
+      labels:
+        app: openshift-kie-springboot
+    spec:
+      ports:
+      - name: http
+        port: 8080
+      selector:
+        app: openshift-kie-springboot
+  - kind: ImageStream
+    apiVersion: v1
+    metadata:
+      name: "openshift-kie-springboot"
+  - kind: BuildConfig
+    apiVersion: v1
+    metadata:
+      name: openshift-kie-springboot
+      labels:
+        app: openshift-kie-springboot
+      annotations:
+        template.alpha.openshift.io/wait-for-ready: "true"
+    spec:
+      source:
+        type: Git
+        git:
+          uri: "${SOURCE_REPOSITORY_URL}"
+          ref: "${SOURCE_REPOSITORY_REF}"
+      strategy:
+        type: Source
+        sourceStrategy:
+          env:
+          - name: ARTIFACT_DIR
+            value: "${ARTIFACT_DIR}"
+          forcePull: true
+          from:
+            kind: "DockerImage"
+            name: "fabric8/s2i-java"
+      output:
+        to:
+          kind: ImageStreamTag
+          name: "openshift-kie-springboot:latest"
+      triggers:
+      - type: ImageChange
+        imageChange: {}
+      - type: ConfigChange
+  - kind: DeploymentConfig
+    apiVersion: v1
+    metadata:
+      name: "openshift-kie-springboot"
+    spec:
+      revisionHistoryLimit: 10
+      strategy:
+        rollingParams:
+          maxSurge: 100%
+          maxUnavailable: 0
+        type: Rolling
+      triggers:
+      - type: ImageChange
+        imageChangeParams:
+          automatic: true
+          containerNames:
+          - "openshift-kie-springboot"
+          from:
+            kind: ImageStream
+            name: "openshift-kie-springboot"
+      - type: ConfigChange
+      replicas: 3
+      selector:
+        deploymentConfig: "openshift-kie-springboot"
+      template:
+        metadata:
+          name: "openshift-kie-springboot"
+          labels:
+            app: openshift-kie-springboot
+            deploymentConfig: "openshift-kie-springboot"
+        spec:
+          containers:
+          - name: "openshift-kie-springboot"
+            image: "openshift-kie-springboot"
+            imagePullPolicy: Always
+            livenessProbe:
+              exec:
+                command:
+                - curl
+                - localhost:8080/health
+              initialDelaySeconds: 20
+              periodSeconds: 10
+              timeoutSeconds: 1
+            readinessProbe:
+              exec:
+                command:
+                - curl
+                - localhost:8080/health
+              initialDelaySeconds: 10
+              periodSeconds: 5
+              timeoutSeconds: 1
+            ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
