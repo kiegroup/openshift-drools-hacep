@@ -5,12 +5,11 @@
   <parent>
     <groupId>org.kie</groupId>
     <artifactId>openshift-kie-parent</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>7.24.0-SNAPSHOT</version>
   </parent>
 
   <groupId>org.kie</groupId>
   <artifactId>openshift-kie-thorntail</artifactId>
-  <version>1.0-SNAPSHOT</version>
   <packaging>war</packaging>
 
   <dependencyManagement>
@@ -29,12 +28,10 @@
     <dependency>
       <groupId>org.kie</groupId>
       <artifactId>openshift-kie-hacep</artifactId>
-      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.kie</groupId>
       <artifactId>sample-hacep-project-kjar</artifactId>
-      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>io.thorntail</groupId>
@@ -43,7 +40,6 @@
     <dependency>
       <groupId>io.fabric8</groupId>
       <artifactId>kubernetes-client</artifactId>
-      <version>${version.k8s.client}</version>
     </dependency>
     <dependency>
       <groupId>javax.ws.rs</groupId>

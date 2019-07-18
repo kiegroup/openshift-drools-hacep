@@ -2,31 +2,29 @@
 <project>
   <modelVersion>4.0.0</modelVersion>
 
+  <parent>
+    <groupId>org.kie</groupId>
+    <artifactId>kie-parent</artifactId>
+    <version>7.24.0-SNAPSHOT</version> <!-- change with every build -->
+  </parent>
+
   <groupId>org.kie</groupId>
   <artifactId>openshift-kie-parent</artifactId>
-  <version>1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <properties>
     <alphanetworkCompilerEnabled>false</alphanetworkCompilerEnabled>
     <failOnMissingWebXml>false</failOnMissingWebXml>
     <generateModel>YES</generateModel>
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <surefire.forkCount>1</surefire.forkCount>
-    <surefire.version>2.22.0</surefire.version>
-    <version.com.fasterxml.jackson>2.9.9</version.com.fasterxml.jackson>
-    <version.commons.codec>1.12</version.commons.codec>
     <version.javax.cdi>2.0.SP1</version.javax.cdi>
     <version.javax.el>3.0.1-b08</version.javax.el>
     <version.javax.ws.rs>2.1.1</version.javax.ws.rs>
     <version.junit>4.12</version.junit>
-    <version.kafka.client>2.1.1</version.kafka.client>
+    <version.org.apache.kafka>2.1.1</version.org.apache.kafka>
     <version.k8s.client>4.2.1</version.k8s.client>
-    <version.logback.core>1.2.3</version.logback.core>
     <version.logback.kafka.appender>0.2.0-RC2</version.logback.kafka.appender>
-    <version.org.kie>7.23.0.Final</version.org.kie>
     <version.servlet>4.0.1</version.servlet>
     <version.slf4j>1.7.26</version.slf4j>
     <version.springboot>2.2.0.M4</version.springboot>
@@ -46,12 +44,21 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>io.thorntail</groupId>
-        <artifactId>bom-all</artifactId>
-        <version>${version.thorntail}</version>
-        <scope>import</scope>
-        <type>pom</type>
+        <groupId>org.kie</groupId>
+        <artifactId>kie-remote</artifactId>
+        <version>${version.org.kie}</version>
       </dependency>
+      <dependency>
+        <groupId>org.kie</groupId>
+        <artifactId>openshift-kie-hacep</artifactId>
+        <version>${version.org.kie}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.kie</groupId>
+        <artifactId>sample-hacep-project-kjar</artifactId>
+        <version>${version.org.kie}</version>
+      </dependency>
+
       <!-- drools -->
       <dependency>
         <groupId>org.drools</groupId>
@@ -69,7 +76,24 @@
       <dependency>
         <groupId>org.apache.kafka</groupId>
         <artifactId>kafka-clients</artifactId>
-        <version>${version.kafka.client}</version>
+        <version>${version.org.apache.kafka}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.kafka</groupId>
+        <artifactId>kafka-clients</artifactId>
+        <version>${version.org.apache.kafka}</version>
+        <classifier>test</classifier>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.kafka</groupId>
+        <artifactId>kafka_2.12</artifactId>
+        <version>${version.org.apache.kafka}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.kafka</groupId>
+        <artifactId>kafka_2.12</artifactId>
+        <version>${version.org.apache.kafka}</version>
+        <classifier>test</classifier>
       </dependency>
 
       <dependency>
@@ -120,25 +144,6 @@
         <artifactId>javax.ws.rs-api</artifactId>
         <version>${version.javax.ws.rs}</version>
         <scope>compile</scope>
-      </dependency>
-
-      <!-- Logs-->
-
-      <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-api</artifactId>
-        <version>${version.slf4j}</version>
-      </dependency>
-      <dependency>
-        <groupId>ch.qos.logback</groupId>
-        <artifactId>logback-core</artifactId>
-        <version>${version.logback.core}</version>
-      </dependency>
-      <dependency>
-        <groupId>ch.qos.logback</groupId>
-        <artifactId>logback-classic</artifactId>
-        <version>${version.logback.core}</version>
-        <scope>runtime</scope>
       </dependency>
 
       <dependency>

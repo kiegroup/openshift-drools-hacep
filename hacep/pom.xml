@@ -5,23 +5,20 @@
   <parent>
     <groupId>org.kie</groupId>
     <artifactId>openshift-kie-parent</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>7.24.0-SNAPSHOT</version>
   </parent>
   <groupId>org.kie</groupId>
   <artifactId>openshift-kie-hacep</artifactId>
-  <version>1.0-SNAPSHOT</version>
 
   <dependencies>
     <dependency>
       <groupId>org.kie</groupId>
       <artifactId>kie-remote</artifactId>
-      <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.drools</groupId>
       <artifactId>drools-compiler</artifactId>
-      <version>${version.org.kie}</version>
     </dependency>
 
     <dependency>
@@ -39,11 +36,6 @@
       <artifactId>javax.ws.rs-api</artifactId>
       <scope>compile</scope>
     </dependency>
-    <!--<dependency>
-      <groupId>javax.enterprise</groupId>
-      <artifactId>cdi-api</artifactId>
-      <scope>compile</scope>
-    </dependency>-->
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>javax.servlet-api</artifactId>
@@ -52,12 +44,14 @@
     <dependency>
       <groupId>io.fabric8</groupId>
       <artifactId>kubernetes-client</artifactId>
-      <version>${version.k8s.client}</version>
+    </dependency>
+    <dependency>
+      <groupId>javax.validation</groupId>
+      <artifactId>validation-api</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.kafka</groupId>
       <artifactId>kafka_2.12</artifactId>
-      <version>${version.kafka.client}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -66,16 +60,5 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-
-  <build>
-    <finalName>${project.artifactId}</finalName>
-    <plugins>
-      <plugin>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>${surefire.version}</version>
-      </plugin>
-    </plugins>
-  </build>
-
 
 </project>

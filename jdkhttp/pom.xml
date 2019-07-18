@@ -5,23 +5,20 @@
   <parent>
     <groupId>org.kie</groupId>
     <artifactId>openshift-kie-parent</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>7.24.0-SNAPSHOT</version>
   </parent>
   <groupId>org.kie</groupId>
   <artifactId>openshift-kie-jdkhttp</artifactId>
-  <version>1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <dependencies>
     <dependency>
       <groupId>org.kie</groupId>
       <artifactId>openshift-kie-hacep</artifactId>
-      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.kie</groupId>
       <artifactId>sample-hacep-project-kjar</artifactId>
-      <version>${project.version}</version>
     </dependency>
 
     <dependency>
@@ -45,7 +42,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>3.1.1</version>
         <configuration>
           <archive>
             <manifest>

@@ -36,7 +36,7 @@ public class Endpoints {
     }
 
     @GetMapping("/health")
-    public ResponseEntity<String> check() {
+    public ResponseEntity<Void> check() {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 }
