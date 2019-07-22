@@ -17,7 +17,6 @@ package org.kie.hacep;
 
 import java.util.ConcurrentModificationException;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.After;

@@ -23,13 +23,11 @@ import org.kie.remote.RemoteCepEntryPoint;
 import org.kie.remote.RemoteCepKieSession;
 import org.kie.remote.TopicsConfig;
 
-import static org.kie.remote.impl.producer.RemoteKieSessionImpl.DEFAULT_ENTRY_POINT;
-
 public class RemoteCepKieSessionImpl extends RemoteCepEntryPointImpl implements Closeable,
                                                                                 RemoteCepKieSession {
 
     public RemoteCepKieSessionImpl(Properties configuration, TopicsConfig envConfig) {
-        super(new Sender(configuration), DEFAULT_ENTRY_POINT, envConfig, new ConcurrentHashMap<>());
+        super(new Sender(configuration), RemoteKieSessionImpl.DEFAULT_ENTRY_POINT, envConfig, new ConcurrentHashMap<>());
         sender.start();
     }
 

@@ -40,7 +40,7 @@ public class Sender {
         producer.stop();
     }
 
-    public long sendCommand( RemoteCommand command, String topicName ) {
+    public long sendCommand(RemoteCommand command, String topicName ) {
         return producer.produceSync( topicName, command.getId(), command );
     }
 

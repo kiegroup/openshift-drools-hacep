@@ -36,10 +36,9 @@ import org.kie.remote.message.FactCountMessage;
 import org.kie.remote.message.ListKieSessionObjectMessage;
 import org.kie.remote.message.VisitableMessage;
 import org.kie.remote.message.VisitorMessage;
+import org.kie.remote.util.SerializationUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.kie.remote.util.SerializationUtil.deserialize;
 
 public class ListenerThread implements Runnable,
                                        VisitorMessage {
@@ -91,7 +90,7 @@ public class ListenerThread implements Runnable,
                 ConsumerRecords records = consumer.poll(Duration.of(CommonConfig.DEFAULT_POLL_TIMEOUT_MS, ChronoUnit.MILLIS));
                 for (Object item : records) {
                     ConsumerRecord<String, byte[]> record = (ConsumerRecord<String, byte[]>) item;
-                    Object msg = deserialize(record.value());
+                    Object msg = SerializationUtil.deserialize(record.value());
                     VisitableMessage visitable = (VisitableMessage) msg;
                     visitable.accept(this);
                 }
