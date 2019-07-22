@@ -23,6 +23,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.kie.hacep.core.Bootstrap;
 import org.kie.hacep.core.infra.election.State;
@@ -37,6 +38,7 @@ import org.slf4j.LoggerFactory;
 import static org.junit.Assert.*;
 import static org.kie.remote.util.SerializationUtil.deserialize;
 
+@Ignore
 public class PodAsLeaderTest {
 
     private final String TEST_KAFKA_LOGGER_TOPIC = "logs";

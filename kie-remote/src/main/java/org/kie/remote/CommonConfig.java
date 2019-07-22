@@ -41,7 +41,7 @@ public class CommonConfig {
 
     private static Properties config;
 
-    public static Properties getStatic() {
+    public static synchronized Properties getStatic() {
         if(config == null) {
             config = new Properties();
             config.put(KEY_SERIALIZER_KEY, "org.apache.kafka.common.serialization.StringSerializer");

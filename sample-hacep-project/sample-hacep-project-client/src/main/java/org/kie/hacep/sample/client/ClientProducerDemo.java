@@ -16,7 +16,6 @@
 package org.kie.hacep.sample.client;
 
 import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.kie.hacep.sample.kjar.StockTickEvent;

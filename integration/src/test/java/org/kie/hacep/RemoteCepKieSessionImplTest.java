@@ -18,11 +18,11 @@ package org.kie.hacep;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.kie.hacep.core.Bootstrap;
 import org.kie.hacep.core.infra.election.State;
@@ -34,6 +34,7 @@ import org.kie.remote.impl.producer.RemoteCepKieSessionImpl;
 
 import static org.junit.Assert.*;
 
+@Ignore
 public class RemoteCepKieSessionImplTest {
 
     private KafkaUtilTest kafkaServerTest;
