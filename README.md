@@ -1,3 +1,12 @@
+### Motivations (Drools)
+@TODO
+
+### Architectural (doc folder)
+@TODO with images
+
+### Customization (kjar)
+@TODO
+
 ## Installation Guide
 ### Prerequisites
 
@@ -10,7 +19,7 @@
 Create the kafka topics using the files in the kafka-topics folder, 
 the cluster's name y default is "my-cluster", change accordingly in 
 the yaml files with your cluster's name 
-##### TODO describe each topic and the single partition reason
+##### TODO describe each topic in terms of configuration and single partition reason
 ```sh
 oc create -f events.yaml
 oc create -f control.yaml
@@ -19,7 +28,7 @@ oc create -f kiesessioninfos.yaml
 ```
 Checks the topics
 ```sh
-oc exec -it my-cluster-kafka-0 -- bin/kafka-topics.sh --zookeeper localhost:2181 --describe
+oc exec -it my-cluster-kafka-<number> -- bin/kafka-topics.sh --zookeeper localhost:2181 --describe
 ```
 
 ### Pre deploy on Openshift
@@ -74,8 +83,7 @@ spec:
 From the root of the client module:
 Generate a keystore and use "password" as a password
 ```sh
-keytool -genkeypair -keyalg RSA -keystore keystore.jks
-mv keystore.jks src/main/resources
+keytool -genkeypair -keyalg RSA -keystore src/main/resources/keystore.jks
 ```
 extract the cert from openshift with:
 ```sh
