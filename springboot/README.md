@@ -11,8 +11,9 @@ kubectl create -f kubernetes/deployment.yaml
 kubectl create -f kubernetes/service.yaml 
 oc expose service  openshift-kie-springboot
 ```
+@TODO add oc commands where available
 
- ```
+ ```sh
  oc get route
  
   NAME           HOST/PORT                                      PATH      SERVICES       PORT      TERMINATION   WILDCARD
@@ -32,11 +33,13 @@ docker push <user_username>/openshift-kie-springboot:<tag>
 ```
 
 #### Deploy
-Change the image name with your in the following files nefore run the create command
+Change the image name with your in the following files before run the create command
 ```sh
 kubectl create -f kubernetes/debug_pod.yaml
 kubectl create -f kubernetes/deployment_registry.yaml
 ```
+
+@TODO add oc commands where available
 
 #### Port forward
 port forwarding 

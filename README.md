@@ -1,14 +1,16 @@
-## Prerequisites
+## Installation Guide
+### Prerequisites
 
 - Openshift 3.11 or Minishift
 
 - A Kafka Cluster on Openshift 3.11 with Strimzi https://strimzi.io/
-(tested on Openshift 3.11 and strimzi 0.11.1)
+(tested on Openshift 3.11 and strimzi 0.11.1 and 0.12.1)
 
-## Creation of Kafka's topics
+### Creation of Kafka's topics
 Create the kafka topics using the files in the kafka-topics folder, 
 the cluster's name y default is "my-cluster", change accordingly in 
 the yaml files with your cluster's name 
+##### TODO describe each topic and the single partition reason
 ```sh
 oc create -f events.yaml
 oc create -f control.yaml
@@ -20,25 +22,50 @@ Checks the topics
 oc exec -it my-cluster-kafka-0 -- bin/kafka-topics.sh --zookeeper localhost:2181 --describe
 ```
 
-#### Pre deploy on Openshift
-Relax RBAC for configmap
+### Pre deploy on Openshift
+Relax Role based access control (RBAC https://kubernetes.io/docs/reference/access-authn-authz/rbac/) for configmap
+@TODO change with one less powerful or with a different strategy
 ```sh
 kubectl create clusterrolebinding permissive-binding --clusterrole=cluster-admin --group=system:serviceaccounts
 ```
 
-## Build the pods
+### Build the pods
 ```sh
 mvn clean install -DskipTests
 ```
 ### Deployment
 Are available three modules 
 
-- Springboot     (openshift-kie-springboot.jar 52,5 mb)
-- Thorntail      (openshift-kie-thorntail.jar 111 mb)
-- Jdk HttpServer (openshift-kie-jdkhttp.jar 36,9 mb)
+- Springboot     ( openshift-kie-springboot.jar )
+- Thorntail      ( openshift-kie-thorntail.jar )
+- Jdk HttpServer ( openshift-kie-jdkhttp.jar )
 
 choose your and move in the respective module to run the resepcitve command 
 to create the Container image and then deploy on Openshift, as described in the module's README.md
+
+
+### Client outside cluster
+
+If you plan to use a client outside openshift
+you need to expose kafka with a route
+in the kafka cluster creation you could enable the https endpoint with
+listener external of type route
+
+```json
+apiVersion: kafka.strimzi.io/v1beta1
+kind: Kafka
+metadata:
+  name: my-cluster
+spec:
+  kafka:
+    version: 2.2.1
+    replicas: 3
+    listeners:
+      plain: {}
+      external:
+        type: route
+```
+
 
 ### Client module
 - sample-hacep-project-client 
@@ -58,7 +85,7 @@ oc extract secret/my-cluster-cluster-ca-cert --keys=ca.crt --to=- > src/main/res
 keytool -import -trustcacerts -alias root -file src/main/resources/ca.crt -keystore src/main/resources/keystore.jks -storepass password -noprompt
 ```
 
--In the configuration.properties add the path of the keystore.jks 
+- In the configuration.properties add the path of the keystore.jks 
 in the fields:
 "ssl.keystore.location"
 and 
@@ -67,8 +94,7 @@ in the fields
 "ssl.keystore.password"
 and 
 "ssl.truststore.password"
-the password used during the generation of the jks file
+the passwords used during the generation of the jks file and the trustore
 
--in the field
-"bootstrap.servers"
-add the address of the bootstrap.servers exposed in the routes
+- in the field
+"bootstrap.servers" add the address of the bootstrap.servers exposed in the routes
