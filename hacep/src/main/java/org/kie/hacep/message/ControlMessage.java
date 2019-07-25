@@ -65,7 +65,9 @@ public class ControlMessage implements Serializable, Message {
         this.offset = offset;
     }
 
-    public Queue<Object> getSideEffects() { return sideEffects; }
+    public Queue<Object> getSideEffects() {
+        return sideEffects;
+    }
 
     @Override
     public String toString() {

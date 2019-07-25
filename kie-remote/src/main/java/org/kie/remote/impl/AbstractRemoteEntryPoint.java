@@ -13,32 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.kie.remote.impl.producer;
+
+package org.kie.remote.impl;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import org.kie.remote.RemoteCepEntryPoint;
-import org.kie.remote.RemoteFactHandle;
+import org.kie.remote.RemoteWorkingMemory;
 import org.kie.remote.TopicsConfig;
+import org.kie.remote.command.AbstractCommand;
 import org.kie.remote.command.FactCountCommand;
-import org.kie.remote.command.InsertCommand;
 import org.kie.remote.command.ListObjectsCommand;
 import org.kie.remote.command.ListObjectsCommandClassType;
 import org.kie.remote.command.ListObjectsCommandNamedQuery;
-import org.kie.remote.impl.RemoteFactHandleImpl;
 import org.kie.remote.impl.consumer.Listener;
+import org.kie.remote.impl.producer.Sender;
 
-public class RemoteCepEntryPointImpl implements RemoteCepEntryPoint {
+public abstract class AbstractRemoteEntryPoint implements RemoteWorkingMemory {
 
     protected final Sender sender;
-    protected final Listener listener;
-    private final String entryPoint;
+    protected final String entryPoint;
     protected Map<String, CompletableFuture<Object>> requestsStore;
-    private TopicsConfig topicsConfig;
+    protected TopicsConfig topicsConfig;
+    protected final Listener listener;
 
-    public RemoteCepEntryPointImpl(Sender sender, String entryPoint, TopicsConfig topicsConfig, Map requestsStore) {
+    public AbstractRemoteEntryPoint( Sender sender, String entryPoint, TopicsConfig topicsConfig, Map requestsStore) {
         this.sender = sender;
         this.entryPoint = entryPoint;
         this.topicsConfig = topicsConfig;
@@ -46,56 +46,43 @@ public class RemoteCepEntryPointImpl implements RemoteCepEntryPoint {
         listener = new Listener(requestsStore);
     }
 
-    public void listen(){
-        listener.listen();
-    }
-
     @Override
     public String getEntryPointId() {
         return entryPoint;
     }
 
+    public void listen(){
+        listener.listen();
+    }
+
     @Override
     public CompletableFuture<Collection<? extends Object>> getObjects() {
-        CompletableFuture callback = new CompletableFuture<>();
         ListObjectsCommand command = new ListObjectsCommand(entryPoint);
-        requestsStore.put(command.getId(), callback);
-        sender.sendCommand(command, topicsConfig.getEventsTopicName());
-        return callback;
+        return executeCommand( command );
     }
 
     @Override
     public CompletableFuture<Collection<? extends Object>> getObjects(Class clazztype) {
-        CompletableFuture callback = new CompletableFuture<>();
         ListObjectsCommand command = new ListObjectsCommandClassType(entryPoint, clazztype);
-        requestsStore.put(command.getId(), callback);
-        sender.sendCommand(command, topicsConfig.getEventsTopicName());
-        return callback;
+        return executeCommand( command );
     }
 
     @Override
     public CompletableFuture<Collection<? extends Object>> getObjects(String namedQuery, String objectName, Object... params) {
-        CompletableFuture callback = new CompletableFuture<>();
         ListObjectsCommand command = new ListObjectsCommandNamedQuery(entryPoint, namedQuery, objectName, params);
-        requestsStore.put(command.getId(), callback);
-        sender.sendCommand(command, topicsConfig.getEventsTopicName());
-        return callback;
+        return executeCommand( command );
     }
 
     @Override
     public CompletableFuture<Long> getFactCount() {
-        CompletableFuture callback = new CompletableFuture<>();
         FactCountCommand command = new FactCountCommand(entryPoint );
-        requestsStore.put(command.getId(), callback);
-        sender.sendCommand(command, topicsConfig.getEventsTopicName());
+        return executeCommand( command );
+    }
+
+    protected <T> CompletableFuture<T> executeCommand( AbstractCommand command ) {
+        CompletableFuture callback = new CompletableFuture<>();
+        requestsStore.put( command.getId(), callback );
+        sender.sendCommand( command, topicsConfig.getEventsTopicName() );
         return callback;
     }
-
-    @Override
-    public void insert(Object object) {
-        RemoteFactHandle factHandle = new RemoteFactHandleImpl(object );
-        InsertCommand command = new InsertCommand(factHandle, entryPoint );
-        sender.sendCommand(command, topicsConfig.getEventsTopicName());
-    }
-
 }

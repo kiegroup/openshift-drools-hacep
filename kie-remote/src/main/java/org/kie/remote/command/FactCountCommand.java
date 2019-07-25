@@ -23,7 +23,7 @@ public class FactCountCommand extends AbstractCommand implements VisitableComman
 
     private String entryPoint;
 
-    public FactCountCommand(){} {}
+    public FactCountCommand() { }
 
     public FactCountCommand(String entryPoint) {
         super(UUID.randomUUID().toString());

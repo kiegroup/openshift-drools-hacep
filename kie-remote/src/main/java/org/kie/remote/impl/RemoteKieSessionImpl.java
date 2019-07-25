@@ -13,22 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.kie.remote.impl.producer;
+package org.kie.remote.impl;
 
 import java.io.Closeable;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.kie.remote.RemoteEntryPoint;
 import org.kie.remote.RemoteKieSession;
 import org.kie.remote.TopicsConfig;
+import org.kie.remote.impl.producer.Sender;
 
 public class RemoteKieSessionImpl extends RemoteEntryPointImpl implements Closeable, RemoteKieSession {
 
     public static final String DEFAULT_ENTRY_POINT = "DEFAULT"; // EntryPointId.DEFAULT.getEntryPointId();
 
+    private final Map<String, RemoteEntryPoint> entryPoints = new HashMap<>();
+
     public RemoteKieSessionImpl(Properties configuration, TopicsConfig envConfig) {
-        super(new Sender(configuration), DEFAULT_ENTRY_POINT, envConfig , new ConcurrentHashMap<>());
+        super(new Sender(configuration), DEFAULT_ENTRY_POINT, envConfig, new ConcurrentHashMap<>());
         sender.start();
     }
 
@@ -40,6 +46,21 @@ public class RemoteKieSessionImpl extends RemoteEntryPointImpl implements Closea
 
     @Override
     public RemoteEntryPoint getEntryPoint( String name ) {
-        return getEntryPoint(name);
+        return entryPoints.computeIfAbsent( name, k -> new RemoteEntryPointImpl(sender, k, topicsConfig, requestsStore, delegate) );
+    }
+
+    @Override
+    public CompletableFuture<Integer> fireAllRules() {
+        return delegate.fireAllRules();
+    }
+
+    @Override
+    public void fireUntilHalt() {
+        delegate.fireUntilHalt();
+    }
+
+    @Override
+    public void halt() {
+        delegate.fireUntilHalt();
     }
 }

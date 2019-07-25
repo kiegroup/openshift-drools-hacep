@@ -24,12 +24,13 @@ import java.util.Set;
 import org.drools.core.common.InternalFactHandle;
 import org.kie.api.event.rule.DefaultRuleRuntimeEventListener;
 import org.kie.api.event.rule.ObjectDeletedEvent;
+import org.kie.api.runtime.ClassObjectFilter;
 import org.kie.api.runtime.KieSession;
 import org.kie.api.runtime.rule.FactHandle;
 import org.kie.remote.RemoteFactHandle;
 
 public class FactHandlesManager implements Serializable {
-    private BidirectionalMap<RemoteFactHandle, Integer> fhIdMap = new BidirectionalMap<>();
+    private BidirectionalMap<RemoteFactHandle, Long> fhIdMap = new BidirectionalMap<>();
 
     private transient KieSession kieSession;
 
@@ -70,8 +71,8 @@ public class FactHandlesManager implements Serializable {
     }
 
     private InternalFactHandle getFactHandleById(RemoteFactHandle remoteFH) {
-        int id = fhIdMap.get(remoteFH);
-        for (FactHandle fh : kieSession.getFactHandles()) {
+        long id = fhIdMap.get(remoteFH);
+        for (FactHandle fh : kieSession.getFactHandles( new ClassObjectFilter( remoteFH.getObject().getClass() ) )) {
             InternalFactHandle ifh = ( InternalFactHandle ) fh;
             if ( ifh.getId() == id) {
                 return ifh;

@@ -59,7 +59,7 @@ public class DroolsConsumerHandler implements ConsumerHandler {
         this.config = envConfig;
         this.producer = producer;
         commandHandler = new CommandHandler(kieSessionContext, config, producer);
-        if(config.isUnderTest()){
+        if (config.isUnderTest()) {
             loggerForTest = PrinterUtil.getKafkaLoggerForTest(envConfig);
         }
     }
@@ -68,20 +68,22 @@ public class DroolsConsumerHandler implements ConsumerHandler {
         return snapshooter;
     }
 
-    public void process( ItemToProcess item, State state, Queue<Object> sideEffects) {
+    public void process( ItemToProcess item, State state, Queue<Object> sideEffects ) {
         RemoteCommand command  = deserialize((byte[])item.getObject());
         if (state.equals(State.LEADER)) {
             processCommand( command, state );
             Queue<Object> sideEffectsResults = DroolsExecutor.getInstance().getAndReset();
             ControlMessage newControlMessage = new ControlMessage(command.getId(), sideEffectsResults);
             producer.produceSync(config.getControlTopicName(), command.getId(), newControlMessage);
-            if(config.isUnderTest()){
+            if (config.isUnderTest()) {
                 loggerForTest.warn("sideEffectOnLeader:{}", sideEffectsResults);
             }
-        }else{
-            if(sideEffects != null) {
-                if(logger.isInfoEnabled()) { logger.info("sideEffectOnReplica:{}", sideEffects); }
-                if(config.isUnderTest()){
+        } else {
+            if (sideEffects != null) {
+                if (logger.isInfoEnabled()) {
+                    logger.info("sideEffectOnReplica:{}", sideEffects);
+                }
+                if (config.isUnderTest()) {
                     loggerForTest.warn("sideEffectOnReplica:{}", sideEffects);
                 }
                 DroolsExecutor.getInstance().setResult(sideEffects);
@@ -117,8 +119,8 @@ public class DroolsConsumerHandler implements ConsumerHandler {
 
     private void processCommand( RemoteCommand command, State state ) {
         boolean execute = state.equals(State.LEADER) || command.isPermittedForReplicas();
-        VisitableCommand visitable = (VisitableCommand) command;
         if (execute) {
+            VisitableCommand visitable = (VisitableCommand) command;
             visitable.accept(commandHandler);
         }
     }

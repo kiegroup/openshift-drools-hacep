@@ -57,7 +57,7 @@ public class EventProducer<T> implements Producer {
         } catch (ExecutionException e) {
             logger.error("Error in produceSync!", e);
         }
-        return  recordMetadata.offset();
+        return recordMetadata.offset();
     }
 
 

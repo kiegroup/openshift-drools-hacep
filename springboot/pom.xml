@@ -16,7 +16,7 @@
       <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-dependencies</artifactId>
-        <version>${version.springboot}</version>
+        <version>${version.org.spring-boot}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -47,6 +47,10 @@
           <groupId>commons-logging</groupId>
           <artifactId>commons-logging</artifactId>
         </exclusion>
+        <exclusion>
+          <groupId>javax.validation</groupId>
+          <artifactId>validation-api</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
 
@@ -58,7 +62,7 @@
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
-        <version>${version.springboot}</version>
+        <version>${version.org.spring-boot}</version>
         <configuration>
           <executable>true</executable>
         </configuration>

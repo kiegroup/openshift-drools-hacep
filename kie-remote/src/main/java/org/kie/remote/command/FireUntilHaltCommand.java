@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Red Hat
+ * Copyright 2019 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,19 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.kie.remote.command;
 
 import java.io.Serializable;
+import java.util.UUID;
 
-import org.kie.remote.RemoteFactHandle;
+public class FireUntilHaltCommand extends AbstractCommand implements VisitableCommand, Serializable {
 
-public class DeleteCommand extends WorkingMemoryActionCommand implements VisitableCommand, Serializable {
-
-    public DeleteCommand(){}
-
-    public DeleteCommand(RemoteFactHandle factHandle, String entryPoint ) {
-        super(factHandle, entryPoint);
+    public FireUntilHaltCommand() {
+        super(UUID.randomUUID().toString());
     }
 
     @Override
@@ -36,9 +32,8 @@ public class DeleteCommand extends WorkingMemoryActionCommand implements Visitab
 
     @Override
     public String toString() {
-        return "Delete of " + getFactHandle() + " from entry-point " + getEntryPoint();
+        return "Fire until halt of " + getId();
     }
 
-
-
 }
+

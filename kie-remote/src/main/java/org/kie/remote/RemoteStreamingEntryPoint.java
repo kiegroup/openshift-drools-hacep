@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Red Hat
+ * Copyright 2019 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,10 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.kie.remote;
 
-public interface RemoteKieSession extends RemoteEntryPoint, RemoteStatefulSession {
+public interface RemoteStreamingEntryPoint extends RemoteWorkingMemory {
 
-    RemoteEntryPoint getEntryPoint(String name);
+    /**
+     * Inserts a new fact into this entry point
+     *
+     * @param object
+     *        the fact to be inserted
+     *
+     * @return the fact handle created for the given fact
+     */
+    void insert(Object object);
 }
+

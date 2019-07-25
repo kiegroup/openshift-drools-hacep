@@ -27,7 +27,7 @@ import org.kie.hacep.core.Bootstrap;
 import org.kie.hacep.core.infra.election.State;
 import org.kie.remote.RemoteKieSession;
 import org.kie.remote.TopicsConfig;
-import org.kie.remote.impl.producer.RemoteKieSessionImpl;
+import org.kie.remote.impl.RemoteKieSessionImpl;
 
 import static org.junit.Assert.assertTrue;
 
@@ -68,6 +68,7 @@ public class RemoteKieSessionImplTest {
                                                     RemoteKieSession.class);
         try (RemoteKieSessionImpl client = new RemoteKieSessionImpl(Config.getProducerConfig("getFactCountTest"),
                                                                     topicsConfig)) {
+            client.fireUntilHalt();
             client.listen();
             CompletableFuture<Long> factCountFuture = client.getFactCount();
             Long factCount = factCountFuture.get(20, TimeUnit.SECONDS);
