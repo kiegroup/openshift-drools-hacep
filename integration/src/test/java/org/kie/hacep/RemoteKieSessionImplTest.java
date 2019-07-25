@@ -31,7 +31,6 @@ import org.kie.remote.impl.RemoteKieSessionImpl;
 
 import static org.junit.Assert.assertTrue;
 
-@Ignore
 public class RemoteKieSessionImplTest {
 
     private KafkaUtilTest kafkaServerTest;

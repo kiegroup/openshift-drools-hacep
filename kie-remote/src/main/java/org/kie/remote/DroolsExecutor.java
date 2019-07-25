@@ -51,6 +51,10 @@ public abstract class DroolsExecutor {
         throw new UnsupportedOperationException();
     }
 
+    public void appendSideEffects(Queue<Object> sideEffects) {
+        throw new UnsupportedOperationException();
+    }
+
     public static class Master extends DroolsExecutor {
 
         private static final Master INSTANCE = new Master();
@@ -93,6 +97,11 @@ public abstract class DroolsExecutor {
         @Override
         public void setResult(Queue<Object> results) {
             executionResults = results;
+        }
+
+        @Override
+        public void appendSideEffects(Queue<Object> sideEffects) {
+            executionResults.addAll(sideEffects);
         }
     }
 

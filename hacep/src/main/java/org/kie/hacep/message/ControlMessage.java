@@ -72,7 +72,7 @@ public class ControlMessage implements Serializable, Message {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("ControlMessage{");
-        sb.append(", key='").append(key).append('\'');
+        sb.append(" key='").append(key).append('\'');
         if(offset != 0l) {
             sb.append(", offset=").append(offset);
         }
@@ -81,6 +81,8 @@ public class ControlMessage implements Serializable, Message {
         }
         if(sideEffects != null && !sideEffects.isEmpty()){
             sb.append(", sideEffects=").append("\n").append(sideEffects);
+        }else{
+            sb.append(", sideEffects=[]");
         }
         sb.append('}');
         return sb.toString();

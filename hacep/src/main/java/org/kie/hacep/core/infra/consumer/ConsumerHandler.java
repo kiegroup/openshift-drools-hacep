@@ -15,16 +15,13 @@
  */
 package org.kie.hacep.core.infra.consumer;
 
-import java.util.Queue;
-
 import org.kie.hacep.core.infra.election.State;
 
 public interface ConsumerHandler {
 
-    void process(ItemToProcess item, State currentState,
-                 Queue<Object> sideEffects);
+    void process(ItemToProcess item, State currentState);
 
-    void processWithSnapshot(ItemToProcess item, State currentState,Queue<Object> sideEffects );
+    void processWithSnapshot(ItemToProcess item, State currentState);
 
     void stop();
 }

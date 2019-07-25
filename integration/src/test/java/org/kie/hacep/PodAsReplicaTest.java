@@ -69,10 +69,11 @@ public class PodAsReplicaTest {
                 withSnapshotTopicName(Config.DEFAULT_SNAPSHOT_TOPIC).
                 withKieSessionInfosTopicName(CommonConfig.DEFAULT_KIE_SESSION_INFOS_TOPIC).
                 withPrinterType(PrinterKafkaImpl.class.getName()).
+                withPollTimeout("10").
                 isUnderTest(Boolean.TRUE.toString()).build();
     }
 
-    @Test(timeout = 60000L)
+    @Test
     public void processOneSentMessageAsLeaderAndThenReplicaTest() {
         Bootstrap.startEngine(config);
         Bootstrap.getConsumerController().getCallback().updateStatus(State.LEADER);
@@ -163,8 +164,7 @@ public class PodAsReplicaTest {
             assertNotNull(sideEffectOnLeader);
             assertNotNull(sideEffectOnReplica);
 
-            // TODO Max FIXME
-            // assertEquals(sideEffectOnLeader, sideEffectOnReplica);
+            assertEquals(sideEffectOnLeader, sideEffectOnReplica);
         } catch (Exception ex) {
             logger.error(ex.getMessage(),
                          ex);

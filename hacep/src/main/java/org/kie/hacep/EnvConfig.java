@@ -28,6 +28,7 @@ public final class EnvConfig {
     private String snapshotTopicName;
     private String kieSessionInfosTopicName;
     private String printerType;
+    private Integer pollTimeout = 1000;
     private boolean test;
 
     public static EnvConfig getDefaultEnvConfig(){
@@ -38,7 +39,8 @@ public final class EnvConfig {
                 withSnapshotTopicName(Optional.ofNullable(System.getenv(Config.DEFAULT_SNAPSHOT_TOPIC)).orElse(Config.DEFAULT_SNAPSHOT_TOPIC)).
                 withKieSessionInfosTopicName(Optional.ofNullable(System.getenv(CommonConfig.DEFAULT_KIE_SESSION_INFOS_TOPIC)).orElse(CommonConfig.DEFAULT_KIE_SESSION_INFOS_TOPIC)).
                 withPrinterType(Optional.ofNullable(System.getenv(Config.DEFAULT_PRINTER_TYPE)).orElse(PrinterLogImpl.class.getName())).
-                isUnderTest(Optional.ofNullable(System.getenv(Config.TEST)).orElse(Boolean.FALSE.toString())).build();
+                withPollTimeout(Optional.ofNullable(System.getenv(Config.POLL_TIMEOUT_MS)).orElse(String.valueOf(Config.DEFAULT_POLL_TIMEOUT_MS))).
+                isUnderTest(Optional.ofNullable(System.getenv(Config.UNDER_TEST)).orElse(Config.TEST)).build();
     }
 
     private EnvConfig() { }
@@ -75,6 +77,11 @@ public final class EnvConfig {
         return this;
     }
 
+    public EnvConfig withPollTimeout(String pollTimeout) {
+        this.pollTimeout = Integer.valueOf(pollTimeout);
+        return this;
+    }
+
     public EnvConfig isUnderTest(String underTest){
         this.test = Boolean.valueOf(underTest);
         return this;
@@ -89,6 +96,7 @@ public final class EnvConfig {
         envConfig.kieSessionInfosTopicName = this.kieSessionInfosTopicName;
         envConfig.printerType = this.printerType;
         envConfig.test = this.test;
+        envConfig.pollTimeout = this.pollTimeout;
         return envConfig;
     }
 
@@ -105,6 +113,10 @@ public final class EnvConfig {
     public String getPrinterType() { return printerType; }
 
     public Boolean isUnderTest(){ return test; }
+
+    public Integer getPollTimeout() {
+        return pollTimeout;
+    }
 
     @Override
     public String toString() {

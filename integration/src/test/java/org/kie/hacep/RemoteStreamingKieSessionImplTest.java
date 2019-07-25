@@ -34,7 +34,6 @@ import org.kie.remote.impl.RemoteStreamingKieSessionImpl;
 
 import static org.junit.Assert.*;
 
-@Ignore
 public class RemoteStreamingKieSessionImplTest {
 
     private KafkaUtilTest kafkaServerTest;

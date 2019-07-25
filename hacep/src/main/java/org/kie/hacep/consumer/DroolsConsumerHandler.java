@@ -15,6 +15,8 @@
  */
 package org.kie.hacep.consumer;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.Queue;
 
 import org.kie.api.KieServices;
@@ -29,6 +31,8 @@ import org.kie.hacep.core.infra.election.State;
 import org.kie.hacep.message.ControlMessage;
 import org.kie.remote.DroolsExecutor;
 import org.kie.hacep.EnvConfig;
+import org.kie.remote.command.AbstractCommand;
+import org.kie.remote.command.InsertCommand;
 import org.kie.remote.command.RemoteCommand;
 import org.kie.remote.command.VisitableCommand;
 import org.kie.remote.impl.producer.EventProducer;
@@ -50,6 +54,7 @@ public class DroolsConsumerHandler implements ConsumerHandler {
     private KieSessionContext kieSessionContext;
     private CommandHandler commandHandler;
     private SnapshotInfos infos;
+    private Queue<Object> sideEffects;
 
     public DroolsConsumerHandler(EventProducer producer, EnvConfig envConfig) {
         this.snapshooter = new DeafultSessionSnapShooter(envConfig);
@@ -62,53 +67,45 @@ public class DroolsConsumerHandler implements ConsumerHandler {
         if (config.isUnderTest()) {
             loggerForTest = PrinterUtil.getKafkaLoggerForTest(envConfig);
         }
+        sideEffects = new LinkedList<>();
     }
 
     public DeafultSessionSnapShooter getSnapshooter(){
         return snapshooter;
     }
 
-    public void process( ItemToProcess item, State state, Queue<Object> sideEffects ) {
+    public void process( ItemToProcess item, State state) {
         RemoteCommand command  = deserialize((byte[])item.getObject());
+
+        if(config.isUnderTest()) {  loggerForTest.info("Remote command on process:{}", command); }
+
         if (state.equals(State.LEADER)) {
             processCommand( command, state );
             Queue<Object> sideEffectsResults = DroolsExecutor.getInstance().getAndReset();
+            if (logger.isInfoEnabled()) { logger.info("sideEffectOnLeader:{}", sideEffectsResults); }
+            if (config.isUnderTest()) { loggerForTest.warn("sideEffectOnLeader:{}", sideEffectsResults); }
+
             ControlMessage newControlMessage = new ControlMessage(command.getId(), sideEffectsResults);
             producer.produceSync(config.getControlTopicName(), command.getId(), newControlMessage);
-            if (config.isUnderTest()) {
-                loggerForTest.warn("sideEffectOnLeader:{}", sideEffectsResults);
-            }
         } else {
-            if (sideEffects != null) {
-                if (logger.isInfoEnabled()) {
-                    logger.info("sideEffectOnReplica:{}", sideEffects);
-                }
-                if (config.isUnderTest()) {
-                    loggerForTest.warn("sideEffectOnReplica:{}", sideEffects);
-                }
-                DroolsExecutor.getInstance().setResult(sideEffects);
-            }
+            if (logger.isInfoEnabled()) { logger.info("sideEffectOnReplica:{}", sideEffects); }
+            if (config.isUnderTest()) { loggerForTest.warn("sideEffectOnReplica:{}", sideEffects); }
+            DroolsExecutor.getInstance().appendSideEffects(sideEffects);//@TODO
             processCommand( command, state );
         }
     }
 
-    public void processSideEffectsOnReplica(State state, Queue<Object> sideEffects) {
-        if (state.equals(State.REPLICA)) {
-            if(sideEffects != null) {
-                if(logger.isInfoEnabled()) { logger.info("sideEffectOnReplica:{}", sideEffects); }
-                if(config.isUnderTest()){
-                    loggerForTest.warn("sideEffectOnReplica:{}", sideEffects);
-                }
-                DroolsExecutor.getInstance().setResult(sideEffects);
-            }
-        }
+    public void processSideEffectsOnReplica(Queue<Object> newSideEffects) {
+        sideEffects.addAll(newSideEffects);
+        if(config.isUnderTest()){ loggerForTest.warn("sideEffectOnReplica:{}", sideEffects);}
+        DroolsExecutor.getInstance().appendSideEffects(sideEffects);
     }
 
 
-    public void processWithSnapshot(ItemToProcess item, State currentState, Queue<Object> sideEffects) {
+    public void processWithSnapshot(ItemToProcess item, State currentState) {
         if (logger.isInfoEnabled()){ logger.info("SNAPSHOT"); }
         snapshooter.serialize(kieSessionContext, item.getKey(), item.getOffset());
-        process(item, currentState, sideEffects);
+        process(item, currentState);
     }
 
     @Override
