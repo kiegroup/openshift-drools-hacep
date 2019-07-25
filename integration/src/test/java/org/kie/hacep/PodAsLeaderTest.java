@@ -53,7 +53,7 @@ public class PodAsLeaderTest {
 
     @Before
     public void setUp() throws Exception {
-        config = TestUtils.getEnvConfig();
+        config = KafkaUtilTest.getEnvConfig();
         topicsConfig = TopicsConfig.getDefaultTopicsConfig();
         kafkaServerTest = new KafkaUtilTest();
         kafkaServerTest.startServer();

@@ -15,7 +15,6 @@ import org.kie.hacep.core.Bootstrap;
 import org.kie.hacep.core.infra.election.State;
 import org.kie.hacep.message.ControlMessage;
 import org.kie.hacep.sample.kjar.StockTickEvent;
-import org.kie.remote.CommonConfig;
 import org.kie.remote.RemoteFactHandle;
 import org.kie.remote.RemoteKieSession;
 import org.kie.remote.TopicsConfig;
@@ -40,7 +39,7 @@ public class PodAsReplicaTest {
 
     @Before
     public void setUp() throws Exception {
-        config = TestUtils.getEnvConfig();
+        config = KafkaUtilTest.getEnvConfig();
         topicsConfig = TopicsConfig.getDefaultTopicsConfig();
         kafkaServerTest = new KafkaUtilTest();
         kafkaServerTest.startServer();
