@@ -195,7 +195,7 @@ public class KafkaUtilTest implements AutoCloseable {
                 }
             }
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            throw new RuntimeException(e.getMessage(), e);
         }
     }
 
@@ -211,7 +211,7 @@ public class KafkaUtilTest implements AutoCloseable {
                 }
             }
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            throw new RuntimeException(e.getMessage(), e);
         }
     }
 
