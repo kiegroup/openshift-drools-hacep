@@ -360,7 +360,7 @@ public class DefaultKafkaConsumer<T> implements EventConsumerWithStatus, Leaders
                 ConsumerRecord<String, T> first = records.iterator().next();
                 eventsBuffer = records.records(new TopicPartition(first.topic(), first.partition()));
                 consumeEventsFromBufferAsAReplica();
-            }else{
+            } else {
                 stopPollingEvents();
                 startPollingControl();
             }
@@ -422,7 +422,7 @@ public class DefaultKafkaConsumer<T> implements EventConsumerWithStatus, Leaders
 
 
     private void processEventsAsAReplica(ConsumerRecord<String, T> record) {
-        if(config.isUnderTest()){ loggerForTest.warn("DefaulKafkaConsumer.processEventsAsAReplica record:{}", record); }
+        if (config.isUnderTest()){ loggerForTest.warn("DefaulKafkaConsumer.processEventsAsAReplica record:{}", record); }
         if (record.key().equals(processingKey)) {
             stopPollingEvents();
             startPollingControl();
@@ -438,7 +438,7 @@ public class DefaultKafkaConsumer<T> implements EventConsumerWithStatus, Leaders
 
 
     private void processControlAsAReplica(ConsumerRecord<String, T> record) {
-        if(config.isUnderTest()){ loggerForTest.warn("DefaulKafkaConsumer.processControlAsAReplica record:{}", record);}
+        if (config.isUnderTest()){ loggerForTest.warn("DefaulKafkaConsumer.processControlAsAReplica record:{}", record);}
         if (record.offset() == processingKeyOffset + 1 || record.offset() == 0) {
             processingKey = record.key();
             processingKeyOffset = record.offset();

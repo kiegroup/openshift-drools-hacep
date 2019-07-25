@@ -40,7 +40,7 @@ public class RemoteKieSessionImplTest {
     @Before
     public void setUp() throws Exception {
         topicsConfig = TopicsConfig.getDefaultTopicsConfig();
-        envConfig = EnvConfig.getDefaultEnvConfig();
+        envConfig = TestUtils.getEnvConfig();
         kafkaServerTest = new KafkaUtilTest();
         kafkaServerTest.startServer();
         kafkaServerTest.createTopics(topicsConfig.getEventsTopicName(),

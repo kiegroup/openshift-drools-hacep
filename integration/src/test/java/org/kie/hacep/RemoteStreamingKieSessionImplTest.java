@@ -42,7 +42,7 @@ public class RemoteStreamingKieSessionImplTest {
 
     @Before
     public void setUp() throws Exception {
-        config = EnvConfig.getDefaultEnvConfig();
+        config = TestUtils.getEnvConfig();
         topicsConfig = TopicsConfig.getDefaultTopicsConfig();
         kafkaServerTest = new KafkaUtilTest();
         kafkaServerTest.startServer();

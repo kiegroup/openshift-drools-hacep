@@ -81,7 +81,7 @@ public class ControlMessage implements Serializable, Message {
         }
         if(sideEffects != null && !sideEffects.isEmpty()){
             sb.append(", sideEffects=").append("\n").append(sideEffects);
-        }else{
+        } else {
             sb.append(", sideEffects=[]");
         }
         sb.append('}');

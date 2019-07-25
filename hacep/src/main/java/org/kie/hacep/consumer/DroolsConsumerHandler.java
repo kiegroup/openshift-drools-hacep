@@ -15,7 +15,6 @@
  */
 package org.kie.hacep.consumer;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -31,8 +30,6 @@ import org.kie.hacep.core.infra.election.State;
 import org.kie.hacep.message.ControlMessage;
 import org.kie.remote.DroolsExecutor;
 import org.kie.hacep.EnvConfig;
-import org.kie.remote.command.AbstractCommand;
-import org.kie.remote.command.InsertCommand;
 import org.kie.remote.command.RemoteCommand;
 import org.kie.remote.command.VisitableCommand;
 import org.kie.remote.impl.producer.EventProducer;
