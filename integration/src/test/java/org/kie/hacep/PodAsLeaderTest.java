@@ -131,7 +131,7 @@ public class PodAsLeaderTest {
             assertEquals(insert.getKey(),eventsRecordTwo.key());
             assertTrue(!insert.getSideEffects().isEmpty());
         } catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
+            throw new RuntimeException(ex.getMessage(), ex);
         } finally {
             eventsConsumer.close();
             controlConsumer.close();
@@ -180,7 +180,7 @@ public class PodAsLeaderTest {
             assertTrue(snapshot.getLastInsertedEventOffset() > 0);
             assertFalse(snapshot.getFhMapKeys().isEmpty());
             assertNotNull(snapshot.getLastInsertedEventkey());
-            assertTrue(snapshot.getFhMapKeys().size() == 9);
+            assertEquals(9, snapshot.getFhMapKeys().size());
             assertNotNull(snapshot.getLastInsertedEventkey());
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);

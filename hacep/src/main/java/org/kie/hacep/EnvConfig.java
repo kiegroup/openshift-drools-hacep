@@ -28,7 +28,7 @@ public final class EnvConfig {
     private String snapshotTopicName;
     private String kieSessionInfosTopicName;
     private String printerType;
-    private Integer iterationBetweenSnapshot = 10;
+    private Integer iterationBetweenSnapshot = Config.DEFAULT_ITERATION_BETWEEN_SNAPSHOT;
     private Integer pollTimeout = 1000;
     private boolean test;
 

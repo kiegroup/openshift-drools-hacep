@@ -30,7 +30,7 @@ import org.kie.remote.impl.RemoteKieSessionImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class RemoteKieSessionImplTest {
 
@@ -73,11 +73,10 @@ public class RemoteKieSessionImplTest {
             client.fireUntilHalt();
             client.listen();
             CompletableFuture<Long> factCountFuture = client.getFactCount();
-            Long factCount = factCountFuture.get(20,
-                                                 TimeUnit.SECONDS);
-            assertTrue(factCount == 7);
+            Long factCount = factCountFuture.get(20, TimeUnit.SECONDS);
+            assertEquals( new Long(7), factCount);
         }catch (Exception e) {
-            logger.error(e.getMessage(), e);
+            throw new RuntimeException(e.getMessage(), e);
         } finally {
             client.close();
         }
