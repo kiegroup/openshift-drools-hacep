@@ -27,6 +27,8 @@ import org.kie.hacep.core.infra.election.State;
 import org.kie.remote.RemoteKieSession;
 import org.kie.remote.TopicsConfig;
 import org.kie.remote.impl.RemoteKieSessionImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.junit.Assert.assertTrue;
 
@@ -35,6 +37,7 @@ public class RemoteKieSessionImplTest {
     private KafkaUtilTest kafkaServerTest;
     private TopicsConfig topicsConfig;
     private EnvConfig envConfig;
+    private Logger logger = LoggerFactory.getLogger(RemoteKieSessionImplTest.class);
 
     @Before
     public void setUp() throws Exception {
@@ -64,15 +67,19 @@ public class RemoteKieSessionImplTest {
         kafkaServerTest.insertBatchStockTicketEvent(7,
                                                     topicsConfig,
                                                     RemoteKieSession.class);
-        try (RemoteKieSessionImpl client = new RemoteKieSessionImpl(Config.getProducerConfig("getFactCountTest"),
-                                                                    topicsConfig)) {
+        RemoteKieSessionImpl client = new RemoteKieSessionImpl(Config.getProducerConfig("getFactCountTest"),
+                                                               topicsConfig);
+        try {
             client.fireUntilHalt();
             client.listen();
             CompletableFuture<Long> factCountFuture = client.getFactCount();
-            Long factCount = factCountFuture.get(20, TimeUnit.SECONDS);
+            Long factCount = factCountFuture.get(20,
+                                                 TimeUnit.SECONDS);
             assertTrue(factCount == 7);
-        } catch (Throwable e) {
-            e.printStackTrace();
+        }catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        } finally {
+            client.close();
         }
     }
 }

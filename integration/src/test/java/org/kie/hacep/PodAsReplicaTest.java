@@ -62,7 +62,7 @@ public class PodAsReplicaTest {
 
 
 
-    @Test
+    @Test(timeout = 60000L)
     public void processOneSentMessageAsLeaderAndThenReplicaTest() {
         Bootstrap.startEngine(config);
         Bootstrap.getConsumerController().getCallback().updateStatus(State.LEADER);

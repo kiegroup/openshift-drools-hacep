@@ -47,10 +47,6 @@ public abstract class DroolsExecutor {
         throw new UnsupportedOperationException();
     }
 
-    public void setResult(Queue<Object> results) {
-        throw new UnsupportedOperationException();
-    }
-
     public void appendSideEffects(Queue<Object> sideEffects) {
         throw new UnsupportedOperationException();
     }
@@ -92,11 +88,6 @@ public abstract class DroolsExecutor {
         @Override
         public <R> R execute( Supplier<R> f ) {
             return ( R ) executionResults.poll();
-        }
-
-        @Override
-        public void setResult(Queue<Object> results) {
-            executionResults = results;
         }
 
         @Override

@@ -28,6 +28,7 @@ public final class EnvConfig {
     private String snapshotTopicName;
     private String kieSessionInfosTopicName;
     private String printerType;
+    private Integer iterationBetweenSnapshot = 10;
     private Integer pollTimeout = 1000;
     private boolean test;
 
@@ -40,6 +41,7 @@ public final class EnvConfig {
                 withKieSessionInfosTopicName(Optional.ofNullable(System.getenv(CommonConfig.DEFAULT_KIE_SESSION_INFOS_TOPIC)).orElse(CommonConfig.DEFAULT_KIE_SESSION_INFOS_TOPIC)).
                 withPrinterType(Optional.ofNullable(System.getenv(Config.DEFAULT_PRINTER_TYPE)).orElse(PrinterLogImpl.class.getName())).
                 withPollTimeout(Optional.ofNullable(System.getenv(Config.POLL_TIMEOUT_MS)).orElse(String.valueOf(Config.DEFAULT_POLL_TIMEOUT_MS))).
+                withIterationBetweenSnapshot(Optional.ofNullable(System.getenv(Config.ITERATION_BETWEEN_SNAPSHOT)).orElse(String.valueOf(Config.DEFAULT_ITERATION_BETWEEN_SNAPSHOT))).
                 isUnderTest(Optional.ofNullable(System.getenv(Config.UNDER_TEST)).orElse(Config.TEST)).build();
     }
 
@@ -82,6 +84,11 @@ public final class EnvConfig {
         return this;
     }
 
+    public EnvConfig withIterationBetweenSnapshot(String iterationBetweenSnapshot) {
+        this.iterationBetweenSnapshot = Integer.valueOf(iterationBetweenSnapshot);
+        return this;
+    }
+
     public EnvConfig isUnderTest(String underTest){
         this.test = Boolean.valueOf(underTest);
         return this;
@@ -97,6 +104,7 @@ public final class EnvConfig {
         envConfig.printerType = this.printerType;
         envConfig.test = this.test;
         envConfig.pollTimeout = this.pollTimeout;
+        envConfig.iterationBetweenSnapshot = this.iterationBetweenSnapshot;
         return envConfig;
     }
 
@@ -118,6 +126,8 @@ public final class EnvConfig {
         return pollTimeout;
     }
 
+    public Integer getIterationBetweenSnapshot() { return iterationBetweenSnapshot; }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("EnvConfig{");
@@ -127,6 +137,8 @@ public final class EnvConfig {
         sb.append(", snapshotTopicName='").append(snapshotTopicName).append('\'');
         sb.append(", kieSessionInfosTopicName='").append(kieSessionInfosTopicName).append('\'');
         sb.append(", printerType='").append(printerType).append('\'');
+        sb.append(", pollTimeout='").append(pollTimeout).append('\'');
+        sb.append(", iterationBetweenSnapshot='").append(iterationBetweenSnapshot).append('\'');
         sb.append(", underTest='").append(test).append('\'');
         sb.append('}');
         return sb.toString();

@@ -309,6 +309,7 @@ public class KafkaUtilTest implements AutoCloseable {
                 withKieSessionInfosTopicName(CommonConfig.DEFAULT_KIE_SESSION_INFOS_TOPIC).
                 withPrinterType(PrinterKafkaImpl.class.getName()).
                 withPollTimeout("10").
+                withIterationBetweenSnapshot("10").
                 isUnderTest(Boolean.TRUE.toString()).build();
     }
 }

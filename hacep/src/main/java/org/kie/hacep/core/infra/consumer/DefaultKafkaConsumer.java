@@ -79,8 +79,7 @@ public class DefaultKafkaConsumer<T> implements EventConsumerWithStatus, Leaders
 
     public DefaultKafkaConsumer(EnvConfig config) {
         this.config = config;
-
-        iterationBetweenSnapshot = Integer.valueOf(Config.getDefaultConfig().getProperty(Config.ITERATION_BETWEEN_SNAPSHOT));
+        iterationBetweenSnapshot = config.getIterationBetweenSnapshot();
         this.printer = PrinterUtil.getPrinter(config);
         if (config.isUnderTest()) {
             loggerForTest = PrinterUtil.getKafkaLoggerForTest(config);
@@ -333,7 +332,9 @@ public class DefaultKafkaConsumer<T> implements EventConsumerWithStatus, Leaders
 
     private void processLeader(ConsumerRecord<String, T> record,
                                AtomicInteger counter) {
-        printer.prettyPrinter("DefaulKafkaConsumer.processLeader record:{}", record, processingLeader);
+        if(logger.isInfoEnabled() || config.isUnderTest()) {
+            printer.prettyPrinter("DefaulKafkaConsumer.processLeader record:{}", record, processingLeader);
+        }
         if (record.key().equals(processingKey)) {
             startProcessingLeader();
         } else if (processingLeader) {

@@ -36,6 +36,7 @@ public class Config {
     public static final String DEFAULT_CONTROL_TOPIC = "control";
     public static final String DEFAULT_SNAPSHOT_TOPIC = "snapshot";
     public static final String ITERATION_BETWEEN_SNAPSHOT = "iteration.between.snapshot";
+    public static final int DEFAULT_ITERATION_BETWEEN_SNAPSHOT = 10;
     public static final String DEFAULT_PRINTER_TYPE = "printer.type";
 
     public static final String MY_CLUSTER_KAFKA_BOOTSTRAP_SERVICE_HOST = "MY_CLUSTER_KAFKA_BOOTSTRAP_SERVICE_HOST";

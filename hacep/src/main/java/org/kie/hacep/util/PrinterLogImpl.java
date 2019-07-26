@@ -35,7 +35,7 @@ public class PrinterLogImpl implements Printer {
     @Override
     public void prettyPrinter(String caller, ConsumerRecord consumerRecord,
                               boolean processed) {
-        if (consumerRecord != null && logger.isInfoEnabled()) {
+        if (consumerRecord != null) {
             logger.info("Caller:{} - Processed:{} - Topic: {} - Partition: {} - Offset: {} - Value: {}\n",
                         caller,
                         processed,
