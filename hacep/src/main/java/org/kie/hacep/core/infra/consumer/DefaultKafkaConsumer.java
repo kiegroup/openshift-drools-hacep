@@ -73,12 +73,14 @@ public class DefaultKafkaConsumer<T> implements EventConsumerWithStatus, Leaders
     private AtomicInteger counter = new AtomicInteger(0);
     private SnapshotInfos snapshotInfos;
     private DeafultSessionSnapShooter snapShooter;
+    private Boolean skipOnDemandSnapshot;
     private Printer printer;
     private EnvConfig config;
     private Logger loggerForTest;
 
     public DefaultKafkaConsumer(EnvConfig config) {
         this.config = config;
+        skipOnDemandSnapshot = config.isSkipOnDemanSnapshot();
         iterationBetweenSnapshot = config.getIterationBetweenSnapshot();
         this.printer = PrinterUtil.getPrinter(config);
         if (config.isUnderTest()) {
@@ -125,6 +127,10 @@ public class DefaultKafkaConsumer<T> implements EventConsumerWithStatus, Leaders
         if (started) {
             updateOnRunningConsumer(state);
         } else {
+            //ask and wait a snapshot before start
+            if(!config.isSkipOnDemanSnapshot()){
+                boolean completed = consumerHandler.initializeKieSessionFromSnapshotOnDemand(config);
+            }
             enableConsumeAndStartLoop(state);
         }
         currentState = state;
@@ -284,10 +290,10 @@ public class DefaultKafkaConsumer<T> implements EventConsumerWithStatus, Leaders
 
 
     private void setLastProcessedKey() {
-        ControlMessage lastWrapper = ConsumerUtils.getLastEvent(config.getControlTopicName(), config.getPollTimeout());
-        settingsOnAEmptyControlTopic(lastWrapper);
-        processingKey = lastWrapper.getKey();
-        processingKeyOffset = lastWrapper.getOffset();
+        ControlMessage lastControlMessage = ConsumerUtils.getLastEvent(config.getControlTopicName(), config.getPollTimeout());
+        settingsOnAEmptyControlTopic(lastControlMessage);
+        processingKey = lastControlMessage.getKey();
+        processingKeyOffset = lastControlMessage.getOffset();
     }
 
 
@@ -338,11 +344,9 @@ public class DefaultKafkaConsumer<T> implements EventConsumerWithStatus, Leaders
         if (record.key().equals(processingKey)) {
             startProcessingLeader();
         } else if (processingLeader) {
-            int iteration = counter.incrementAndGet();
-            if (iteration == iterationBetweenSnapshot) {
-                counter.set(0);
-                consumerHandler.processWithSnapshot(ItemToProcess.getItemToProcess(record), currentState);
-            } else {
+            if(config.isSkipOnDemanSnapshot()){
+                handleSnapshotBetweenIteration(record, counter);
+            }else{
                 consumerHandler.process(ItemToProcess.getItemToProcess(record), currentState);
             }
             processingKey = record.key();// the new processed became the new processingKey
@@ -350,6 +354,16 @@ public class DefaultKafkaConsumer<T> implements EventConsumerWithStatus, Leaders
         }
     }
 
+    private void handleSnapshotBetweenIteration(ConsumerRecord<String, T> record,
+                                                AtomicInteger counter) {
+        int iteration = counter.incrementAndGet();
+        if (iteration == iterationBetweenSnapshot) {
+            counter.set(0);
+            consumerHandler.processWithSnapshot(ItemToProcess.getItemToProcess(record), currentState);
+        } else {
+            consumerHandler.process(ItemToProcess.getItemToProcess(record), currentState);
+        }
+    }
 
     private void defaultProcessAsAReplica(int size) {
         if (pollingEvents) {

@@ -17,26 +17,23 @@
 package org.kie.remote.command;
 
 import java.io.Serializable;
+import java.util.UUID;
 
-import org.kie.remote.RemoteFactHandle;
+public class SnapshotOnDemandCommand extends AbstractCommand implements Serializable {
 
-public class DeleteCommand extends WorkingMemoryActionCommand implements VisitableCommand, Serializable {
+    public SnapshotOnDemandCommand(){ super(UUID.randomUUID().toString());}
 
-    public DeleteCommand(){}
+    public SnapshotOnDemandCommand(String key){ super(key);}
 
-    public DeleteCommand(RemoteFactHandle factHandle, String entryPoint ) {
-        super(factHandle, entryPoint);
+    @Override
+    public boolean isPermittedForReplicas() {
+        return false;
     }
-
-    @Override
-    public void accept(VisitorCommand visitor) { visitor.visit(this); }
-
-    @Override
-    public boolean isPermittedForReplicas() { return true; }
 
     @Override
     public String toString() {
-        return "Delete of " + getFactHandle() + " from entry-point " + getEntryPoint();
+        return "SnapshotOnDemandCommand";
     }
+
 
 }

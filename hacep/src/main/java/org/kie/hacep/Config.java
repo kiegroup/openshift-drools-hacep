@@ -43,6 +43,7 @@ public class Config {
     public static final String BROKER_URL = System.getenv(MY_CLUSTER_KAFKA_BOOTSTRAP_SERVICE_HOST);
     public static final int DEFAULT_POLL_TIMEOUT_MS = 1000;
     public static final String POLL_TIMEOUT_MS = "poll.timeout";
+    public static final String SKIP_ON_DEMAND_SNAPSHOT = "skip.ondemandsnapshoot";
     public static final String TEST = Boolean.FALSE.toString();
     public static final String UNDER_TEST = "undertest";
     private static final Logger logger = LoggerFactory.getLogger(Config.class);

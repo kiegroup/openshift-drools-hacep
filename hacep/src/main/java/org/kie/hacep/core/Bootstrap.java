@@ -53,8 +53,7 @@ public class Bootstrap {
         try {
             leadership.stop();
         } catch (Exception e) {
-            logger.error(e.getMessage(),
-                         e);
+            logger.error(e.getMessage(), e);
         }
         if ( consumerController != null) {
             consumerController.stop();

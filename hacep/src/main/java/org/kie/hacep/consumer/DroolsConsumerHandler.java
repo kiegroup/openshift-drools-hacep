@@ -52,16 +52,33 @@ public class DroolsConsumerHandler implements ConsumerHandler {
     private SnapshotInfos infos;
 
     public DroolsConsumerHandler(EventProducer producer, EnvConfig envConfig) {
-        this.snapshooter = new DeafultSessionSnapShooter(envConfig);
-        this.infos = snapshooter.deserialize();
-        this.kieSessionContext = createSessionHolder( infos );
-        clock = kieSessionContext.getKieSession().getSessionClock();
         this.config = envConfig;
+        this.snapshooter = new DeafultSessionSnapShooter(config);
+        initializeKieSessionFromSnapshot(config);
         this.producer = producer;
-        commandHandler = new CommandHandler(kieSessionContext, config, producer);
+        commandHandler = new CommandHandler(kieSessionContext, config, producer, snapshooter);
         if (config.isUnderTest()) {
             loggerForTest = PrinterUtil.getKafkaLoggerForTest(envConfig);
         }
+    }
+
+    private void initializeKieSessionFromSnapshot(EnvConfig config) {
+        if(config.isSkipOnDemanSnapshot()) {// if true we reads the snapshots and waitn until the first leaderElectionUpdate
+            this.infos = snapshooter.deserialize();
+            this.kieSessionContext = createSessionHolder(infos);
+            clock = kieSessionContext.getKieSession().getSessionClock();
+        }
+    }
+
+    public boolean initializeKieSessionFromSnapshotOnDemand(EnvConfig config) {
+        if(!config.isSkipOnDemanSnapshot()) {// if true we reads the snapshots and wait until the first leaderElectionUpdate
+            //@TODO SnapshotOnDemandUtils
+            this.infos = snapshooter.deserialize();
+            this.kieSessionContext = createSessionHolder(infos);
+            clock = kieSessionContext.getKieSession().getSessionClock();
+            return true;
+        }
+        return false;
     }
 
     public DeafultSessionSnapShooter getSnapshooter(){

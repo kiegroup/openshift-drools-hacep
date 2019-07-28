@@ -62,7 +62,7 @@ public class KafkaTest {
                                                                  Base64.encodeBase64("test-message".getBytes(Charset.forName("UTF-8"))));
         kafkaServerTest.sendSingleMsg(producer, data);
 
-        ConsumerRecords<String, byte[]> records = consumer.poll(5000);
+        ConsumerRecords<String, byte[]> records = consumer.poll(10000);
         assertEquals(1, records.count());
         Iterator<ConsumerRecord<String, byte[]>> recordIterator = records.iterator();
         ConsumerRecord<String, byte[]> record = recordIterator.next();
@@ -75,7 +75,7 @@ public class KafkaTest {
     public void testKafkaLoggerWithStringTest() {
         KafkaConsumer<String, String> consumerKafkaLogger = kafkaServerTest.getStringConsumer(TEST_KAFKA_LOGGER_TOPIC);
         kafkaLogger.warn("test-message");
-        ConsumerRecords<String, String> records = consumerKafkaLogger.poll(5000);
+        ConsumerRecords<String, String> records = consumerKafkaLogger.poll(10000);
         assertEquals(1, records.count());
         Iterator<ConsumerRecord<String, String>> recordIterator = records.iterator();
         ConsumerRecord<String, String> record = recordIterator.next();
