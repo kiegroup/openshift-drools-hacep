@@ -127,11 +127,13 @@ public class DefaultKafkaConsumer<T> implements EventConsumerWithStatus, Leaders
         if (started) {
             updateOnRunningConsumer(state);
         } else {
-            //ask and wait a snapshot before start
-            if(!config.isSkipOnDemanSnapshot()){
-                boolean completed = consumerHandler.initializeKieSessionFromSnapshotOnDemand(config);
-                if(!completed){
-                    throw new RuntimeException("Can't obtain a snapshot on demand");
+            if(state.equals(State.REPLICA)) {
+                //ask and wait a snapshot before start
+                if (!config.isSkipOnDemanSnapshot()) {
+                    boolean completed = consumerHandler.initializeKieSessionFromSnapshotOnDemand(config);
+                    if (!completed) {
+                        throw new RuntimeException("Can't obtain a snapshot on demand");
+                    }
                 }
             }
             enableConsumeAndStartLoop(state);
@@ -286,7 +288,6 @@ public class DefaultKafkaConsumer<T> implements EventConsumerWithStatus, Leaders
             DroolsExecutor.setAsMaster();
             stopLeaderProcessing();
         }
-
         setLastProcessedKey();
         assignAndStartConsume();
     }

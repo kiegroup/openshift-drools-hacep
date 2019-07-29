@@ -15,6 +15,7 @@
  */
 package org.kie.hacep.consumer;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -47,18 +48,17 @@ import org.kie.remote.impl.producer.Producer;
 public class CommandHandler implements VisitorCommand {
 
     private KieSessionContext kieSessionContext;
-    private EnvConfig config;
+    private EnvConfig envConfig;
     private Producer producer;
     private SessionSnapshooter sessionSnapshooter;
-
     private volatile boolean firingUntilHalt;
 
     public CommandHandler(KieSessionContext kieSessionContext,
-                          EnvConfig config,
+                          EnvConfig envConfig,
                           Producer producer,
                           SessionSnapshooter sessionSnapshooter) {
         this.kieSessionContext = kieSessionContext;
-        this.config = config;
+        this.envConfig = envConfig;
         this.producer = producer;
         this.sessionSnapshooter = sessionSnapshooter;
     }
@@ -66,7 +66,7 @@ public class CommandHandler implements VisitorCommand {
     @Override
     public void visit(FireAllRulesCommand command) {
         int fires = kieSessionContext.getKieSession().fireAllRules();
-        producer.produceSync(config.getKieSessionInfosTopicName(),
+        producer.produceSync(envConfig.getKieSessionInfosTopicName(),
                              command.getId(),
                              fires);
     }
@@ -124,7 +124,7 @@ public class CommandHandler implements VisitorCommand {
         List serializableItems = getObjectList(command);
         ListKieSessionObjectMessageImpl msg = new ListKieSessionObjectMessageImpl(command.getId(),
                                                                                   serializableItems);
-        producer.produceSync(config.getKieSessionInfosTopicName(),
+        producer.produceSync(envConfig.getKieSessionInfosTopicName(),
                              command.getId(),
                              msg);
     }
@@ -139,7 +139,7 @@ public class CommandHandler implements VisitorCommand {
         List serializableItems = getSerializableItemsByClassType(command);
         ListKieSessionObjectMessageImpl msg = new ListKieSessionObjectMessageImpl(command.getId(),
                                                                                   serializableItems);
-        producer.produceSync(config.getKieSessionInfosTopicName(),
+        producer.produceSync(envConfig.getKieSessionInfosTopicName(),
                              command.getId(),
                              msg);
     }
@@ -165,7 +165,7 @@ public class CommandHandler implements VisitorCommand {
         List serializableItems = getSerializableItemsByNamedQuery(command);
         ListKieSessionObjectMessageImpl msg = new ListKieSessionObjectMessageImpl(command.getId(),
                                                                                   serializableItems);
-        producer.produceSync(config.getKieSessionInfosTopicName(),
+        producer.produceSync(envConfig.getKieSessionInfosTopicName(),
                              command.getId(),
                              msg);
     }
@@ -182,18 +182,30 @@ public class CommandHandler implements VisitorCommand {
     public void visit(FactCountCommand command) {
         FactCountMessageImpl msg = new FactCountMessageImpl(command.getId(),
                                                             kieSessionContext.getKieSession().getFactCount());
-        producer.produceSync(config.getKieSessionInfosTopicName(),
+        producer.produceSync(envConfig.getKieSessionInfosTopicName(),
                              command.getId(),
                              msg);
     }
 
     @Override
     public void visit(SnapshotOnDemandCommand command) {
-        ControlMessage lastControlMessage = ConsumerUtils.getLastEvent(config.getControlTopicName(),
-                                                                       config.getPollTimeout());
-        //@TODO enable the leader to skip if the last snapshot is young (env max.snapshot.age)
-        sessionSnapshooter.serialize(kieSessionContext,
-                                     lastControlMessage.getKey(),
-                                     lastControlMessage.getOffset());
+        LocalDateTime lastSnapshotTime = sessionSnapshooter.getLastSnapshotTime();
+        LocalDateTime limitAge = LocalDateTime.now().minusSeconds(envConfig.getMaxSnapshotAge());
+        //if the lastSnapshot time is after the the age we perform a snapshot
+        if(lastSnapshotTime != null && limitAge.isAfter(lastSnapshotTime)) {
+            ControlMessage lastControlMessage = ConsumerUtils.getLastEvent(envConfig.getControlTopicName(),
+                                                                           envConfig.getPollTimeout());
+            if(lastControlMessage != null) {
+                sessionSnapshooter.serialize(kieSessionContext,
+                                             lastControlMessage.getKey(),
+                                             lastControlMessage.getOffset());
+            }else {
+                sessionSnapshooter.serialize(kieSessionContext,
+                                             command.getId(),
+                                             0l);
+            }
+        }
+
+
     }
 }
