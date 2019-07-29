@@ -310,6 +310,8 @@ public class KafkaUtilTest implements AutoCloseable {
                 withPrinterType(PrinterKafkaImpl.class.getName()).
                 withPollTimeout("10").
                 withIterationBetweenSnapshot("10").
+                skipOnDemandSnapshot("true").
+                withMaxSnapshotAge("60000").
                 isUnderTest(Boolean.TRUE.toString()).build();
     }
 }

@@ -38,6 +38,8 @@ public class Config {
     public static final String ITERATION_BETWEEN_SNAPSHOT = "iteration.between.snapshot";
     public static final Integer DEFAULT_ITERATION_BETWEEN_SNAPSHOT = 10;
     public static final String DEFAULT_PRINTER_TYPE = "printer.type";
+    public static final String MAX_SNAPSHOT_AGE = "max.snapshot.age";
+    public static final String DEFAULT_MAX_SNAPSHOT_AGE_SEC = "600";
 
     public static final String MY_CLUSTER_KAFKA_BOOTSTRAP_SERVICE_HOST = "MY_CLUSTER_KAFKA_BOOTSTRAP_SERVICE_HOST";
     public static final String BROKER_URL = System.getenv(MY_CLUSTER_KAFKA_BOOTSTRAP_SERVICE_HOST);

@@ -15,6 +15,10 @@
  */
 package org.kie.hacep.core.infra;
 
+import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+
 import org.kie.api.runtime.KieSession;
 import org.kie.hacep.consumer.FactHandlesManager;
 import org.slf4j.Logger;
@@ -28,18 +32,18 @@ public class SnapshotInfos {
     private FactHandlesManager fhManager;
     private String keyDuringSnaphot;
     private long offsetDuringSnapshot;
-
-    public SnapshotInfos() {
-    }
+    private LocalDateTime time;
 
     public SnapshotInfos(KieSession kieSession,
                          FactHandlesManager fhManager,
                          String keyDuringSnaphot,
-                         long offsetDuringSnapshot) {
+                         long offsetDuringSnapshot,
+                         LocalDateTime time) {
         this.kieSession = kieSession;
         this.fhManager = fhManager.initFromKieSession( kieSession );
         this.keyDuringSnaphot = keyDuringSnaphot;
         this.offsetDuringSnapshot = offsetDuringSnapshot;
+        this.time = time;
     }
 
     public KieSession getKieSession() {
@@ -58,12 +62,17 @@ public class SnapshotInfos {
         return offsetDuringSnapshot;
     }
 
+    public LocalDateTime getTime() {
+        return time;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("SnapshotInfos{");
         sb.append("kieSession=").append(kieSession);
         sb.append(", keyDuringSnaphot='").append(keyDuringSnaphot).append('\'');
         sb.append(", offsetDuringSnapshot=").append(offsetDuringSnapshot);
+        sb.append(", time=").append(time);
         sb.append('}');
         return sb.toString();
     }

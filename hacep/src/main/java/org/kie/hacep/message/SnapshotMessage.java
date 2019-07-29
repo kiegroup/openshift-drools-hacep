@@ -17,6 +17,8 @@
 package org.kie.hacep.message;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Set;
 
 import org.kie.hacep.consumer.FactHandlesManager;
@@ -27,15 +29,17 @@ public class SnapshotMessage implements Serializable {
     private FactHandlesManager fhManager;
     private String lastInsertedEventkey;
     private long lastInsertedEventOffset;
+    private LocalDateTime time;
 
     /* Empty constructor for serialization */
     public SnapshotMessage() { }
 
-    public SnapshotMessage( byte[] serializedSession, FactHandlesManager fhManager, String lastInsertedEventkey, long lastInsertedEventOffset ) {
+    public SnapshotMessage( byte[] serializedSession, FactHandlesManager fhManager, String lastInsertedEventkey, long lastInsertedEventOffset, LocalDateTime time ) {
         this.serializedSession = serializedSession;
         this.fhManager = fhManager;
         this.lastInsertedEventkey = lastInsertedEventkey;
         this.lastInsertedEventOffset = lastInsertedEventOffset;
+        this.time = time;
     }
 
     public byte[] getSerializedSession() {
@@ -70,6 +74,9 @@ public class SnapshotMessage implements Serializable {
         this.lastInsertedEventOffset = lastInsertedEventOffset;
     }
 
+    public LocalDateTime getTime() {
+        return time;
+    }
 
     @Override
     public String toString() {
@@ -78,6 +85,7 @@ public class SnapshotMessage implements Serializable {
         sb.append(", fhMapKeys=").append(fhManager);
         sb.append(", lastInsertedEventkey='").append(lastInsertedEventkey).append('\'');
         sb.append(", lastInsertedEventOffset=").append(lastInsertedEventOffset);
+        sb.append(", time=").append(time);
         sb.append('}');
         return sb.toString();
     }

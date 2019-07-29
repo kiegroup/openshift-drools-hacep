@@ -130,6 +130,9 @@ public class DefaultKafkaConsumer<T> implements EventConsumerWithStatus, Leaders
             //ask and wait a snapshot before start
             if(!config.isSkipOnDemanSnapshot()){
                 boolean completed = consumerHandler.initializeKieSessionFromSnapshotOnDemand(config);
+                if(!completed){
+                    throw new RuntimeException("Can't obtain a snapshot on demand");
+                }
             }
             enableConsumeAndStartLoop(state);
         }

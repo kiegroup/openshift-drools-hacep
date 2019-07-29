@@ -23,8 +23,6 @@ public class SnapshotOnDemandCommand extends AbstractCommand implements Serializ
 
     public SnapshotOnDemandCommand(){ super(UUID.randomUUID().toString());}
 
-    public SnapshotOnDemandCommand(String key){ super(key);}
-
     @Override
     public boolean isPermittedForReplicas() {
         return false;

@@ -31,6 +31,7 @@ public final class EnvConfig {
     private Integer iterationBetweenSnapshot = Config.DEFAULT_ITERATION_BETWEEN_SNAPSHOT;
     private Integer pollTimeout = 1000;
     private Boolean skipOnDemanSnapshot;
+    private Long maxSnapshotAge;
     private boolean test;
 
     public static EnvConfig getDefaultEnvConfig(){
@@ -42,8 +43,9 @@ public final class EnvConfig {
                 withKieSessionInfosTopicName(Optional.ofNullable(System.getenv(CommonConfig.DEFAULT_KIE_SESSION_INFOS_TOPIC)).orElse(CommonConfig.DEFAULT_KIE_SESSION_INFOS_TOPIC)).
                 withPrinterType(Optional.ofNullable(System.getenv(Config.DEFAULT_PRINTER_TYPE)).orElse(PrinterLogImpl.class.getName())).
                 withPollTimeout(Optional.ofNullable(System.getenv(Config.POLL_TIMEOUT_MS)).orElse(String.valueOf(Config.DEFAULT_POLL_TIMEOUT_MS))).
-                skipOnDemandSnapshoot(Optional.ofNullable(System.getenv(Config.SKIP_ON_DEMAND_SNAPSHOT)).orElse("false")).
+                skipOnDemandSnapshot(Optional.ofNullable(System.getenv(Config.SKIP_ON_DEMAND_SNAPSHOT)).orElse(Boolean.FALSE.toString())).
                 withIterationBetweenSnapshot(Optional.ofNullable(System.getenv(Config.ITERATION_BETWEEN_SNAPSHOT)).orElse(String.valueOf(Config.DEFAULT_ITERATION_BETWEEN_SNAPSHOT))).
+                withMaxSnapshotAge(Optional.ofNullable(System.getenv(Config.MAX_SNAPSHOT_AGE)).orElse(String.valueOf(Config.DEFAULT_MAX_SNAPSHOT_AGE_SEC))).
                 isUnderTest(Optional.ofNullable(System.getenv(Config.UNDER_TEST)).orElse(Config.TEST)).build();
     }
 
@@ -96,8 +98,13 @@ public final class EnvConfig {
         return this;
     }
 
-    public EnvConfig skipOnDemandSnapshoot(String skipOnDemandSnapshoot){
+    public EnvConfig skipOnDemandSnapshot(String skipOnDemandSnapshoot){
         this.skipOnDemanSnapshot = Boolean.valueOf(skipOnDemandSnapshoot);
+        return this;
+    }
+
+    public EnvConfig withMaxSnapshotAge(String maxSnapshotAge){
+        this.maxSnapshotAge = Long.valueOf(maxSnapshotAge);
         return this;
     }
 
@@ -113,6 +120,7 @@ public final class EnvConfig {
         envConfig.pollTimeout = this.pollTimeout;
         envConfig.iterationBetweenSnapshot = this.iterationBetweenSnapshot;
         envConfig.skipOnDemanSnapshot = this.skipOnDemanSnapshot;
+        envConfig.maxSnapshotAge = this.maxSnapshotAge;
         return envConfig;
     }
 
@@ -138,6 +146,8 @@ public final class EnvConfig {
 
     public Boolean isSkipOnDemanSnapshot() { return skipOnDemanSnapshot; }
 
+    public Long getMaxSnapshotAge() { return maxSnapshotAge; }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("EnvConfig{");
@@ -150,6 +160,7 @@ public final class EnvConfig {
         sb.append(", pollTimeout='").append(pollTimeout).append('\'');
         sb.append(", iterationBetweenSnapshot='").append(iterationBetweenSnapshot).append('\'');
         sb.append(", skipOnDemanSnapshot='").append(skipOnDemanSnapshot).append('\'');
+        sb.append(", maxSnapshotAge='").append(maxSnapshotAge).append('\'');
         sb.append(", underTest='").append(test).append('\'');
         sb.append('}');
         return sb.toString();

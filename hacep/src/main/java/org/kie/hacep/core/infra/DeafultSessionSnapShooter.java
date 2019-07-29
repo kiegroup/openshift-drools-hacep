@@ -19,6 +19,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -48,8 +49,6 @@ public class DeafultSessionSnapShooter implements SessionSnapshooter{
 
     private final String key = "LAST-SNAPSHOT";
     private final Logger logger = LoggerFactory.getLogger(DeafultSessionSnapShooter.class);
-    private EventProducer<byte[]> producer;
-    private KafkaConsumer<String, byte[]> consumer;
     private KieContainer kieContainer;
     private EnvConfig envConfig;
 
@@ -58,9 +57,6 @@ public class DeafultSessionSnapShooter implements SessionSnapshooter{
         KieServices srv = KieServices.get();
         if(srv != null){
             kieContainer = srv.newKieClasspathContainer();
-            producer = new EventProducer<>();
-            producer.start(Config.getSnapshotProducerConfig());
-            configConsumer();
         }else{
             logger.error("KieServices is null");
         }
@@ -69,11 +65,14 @@ public class DeafultSessionSnapShooter implements SessionSnapshooter{
     public void serialize(KieSessionContext kieSessionContext, String lastInsertedEventkey, long lastInsertedEventOffset) {
         KieMarshallers marshallers = KieServices.get().getMarshallers();
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            EventProducer<byte[]> producer = new EventProducer<>();
+            producer.start(Config.getSnapshotProducerConfig());
             marshallers.newMarshaller(kieSessionContext.getKieSession().getKieBase()).marshall(out, kieSessionContext.getKieSession());
             /* We are storing the last inserted key and offset together with the session's bytes */
             byte[] bytes = out.toByteArray();
-            SnapshotMessage message = new SnapshotMessage( bytes, kieSessionContext.getFhManager(), lastInsertedEventkey, lastInsertedEventOffset);
+            SnapshotMessage message = new SnapshotMessage(bytes, kieSessionContext.getFhManager(), lastInsertedEventkey, lastInsertedEventOffset, LocalDateTime.now());
             producer.produceSync(envConfig.getSnapshotTopicName(), key,message);
+            producer.stop();
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
         }
@@ -82,6 +81,7 @@ public class DeafultSessionSnapShooter implements SessionSnapshooter{
     public SnapshotInfos deserialize() {
         KieServices srv = KieServices.get();
         if(srv != null) {
+            KafkaConsumer<String, byte[]> consumer  = getConfiguredSnapshotConsumer();
             KieMarshallers marshallers = KieServices.get().getMarshallers();
             KieSession kSession = null;
             ConsumerRecords<String, byte[]> records = consumer.poll(Duration.of(Integer.valueOf(Config.DEFAULT_POLL_TIMEOUT_MS),
@@ -90,7 +90,7 @@ public class DeafultSessionSnapShooter implements SessionSnapshooter{
             for (ConsumerRecord record : records) {
                 bytes = (byte[])record.value();
             }
-
+            consumer.close();
             SnapshotMessage snapshotMsg = bytes != null ? SerializationUtil.deserialize(bytes) : null;
 
             if (snapshotMsg != null) {
@@ -104,14 +104,15 @@ public class DeafultSessionSnapShooter implements SessionSnapshooter{
                 return new SnapshotInfos(kSession,
                                          snapshotMsg.getFhManager(),
                                          snapshotMsg.getLastInsertedEventkey(),
-                                         snapshotMsg.getLastInsertedEventOffset());
+                                         snapshotMsg.getLastInsertedEventOffset(),
+                                         snapshotMsg.getTime());
             }
         }
         return null;
     }
 
-    private void configConsumer() {
-        consumer = new KafkaConsumer(Config.getSnapshotConsumerConfig());
+    private KafkaConsumer getConfiguredSnapshotConsumer() {
+        KafkaConsumer<String, byte[]> consumer = new KafkaConsumer(Config.getSnapshotConsumerConfig());
         List<PartitionInfo> partitionsInfo = consumer.partitionsFor(envConfig.getSnapshotTopicName());
         List<TopicPartition> partitions = null;
         Collection<TopicPartition> partitionCollection = new ArrayList<>();
@@ -128,10 +129,25 @@ public class DeafultSessionSnapShooter implements SessionSnapshooter{
             }
         }
         consumer.assignment().forEach(topicPartition -> consumer.seekToBeginning(partitionCollection));
+        return consumer;
     }
 
-    public void stop() {
-        producer.stop();
+
+    @Override
+    public LocalDateTime getLastSnapshotTime() {
+        KafkaConsumer<String, byte[]> consumer  = getConfiguredSnapshotConsumer();
+        ConsumerRecords<String, byte[]> records = consumer.poll(Duration.of(Integer.valueOf(Config.DEFAULT_POLL_TIMEOUT_MS),
+                                                                            ChronoUnit.MILLIS));
+        byte[] bytes = null;
+        for (ConsumerRecord record : records) {
+            bytes = (byte[])record.value();
+        }
         consumer.close();
+        SnapshotMessage snapshotMsg = bytes != null ? SerializationUtil.deserialize(bytes) : null;
+        if (snapshotMsg != null) {
+            return snapshotMsg.getTime();
+        }else{
+            return null;
+        }
     }
 }

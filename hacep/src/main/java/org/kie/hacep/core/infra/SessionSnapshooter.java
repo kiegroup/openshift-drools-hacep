@@ -15,6 +15,8 @@
  */
 package org.kie.hacep.core.infra;
 
+import java.time.LocalDateTime;
+
 import org.kie.hacep.core.KieSessionContext;
 
 public interface SessionSnapshooter {
@@ -23,5 +25,5 @@ public interface SessionSnapshooter {
 
     SnapshotInfos deserialize();
 
-    void stop();
+    LocalDateTime getLastSnapshotTime();
 }
