@@ -66,9 +66,7 @@ public class CommandHandler implements VisitorCommand {
     @Override
     public void visit(FireAllRulesCommand command) {
         int fires = kieSessionContext.getKieSession().fireAllRules();
-        producer.produceSync(envConfig.getKieSessionInfosTopicName(),
-                             command.getId(),
-                             fires);
+        producer.produceSync(envConfig.getKieSessionInfosTopicName(), command.getId(), fires);
     }
 
     @Override
@@ -85,8 +83,7 @@ public class CommandHandler implements VisitorCommand {
     public void visit(InsertCommand command) {
         RemoteFactHandle remoteFH = command.getFactHandle();
         FactHandle fh = kieSessionContext.getKieSession().getEntryPoint(command.getEntryPoint()).insert(remoteFH.getObject());
-        kieSessionContext.getFhManager().registerHandle(remoteFH,
-                                                        fh);
+        kieSessionContext.getFhManager().registerHandle(remoteFH, fh);
         if (firingUntilHalt) {
             kieSessionContext.getKieSession().fireAllRules();
         }
@@ -112,8 +109,7 @@ public class CommandHandler implements VisitorCommand {
     @Override
     public void visit(UpdateCommand command) {
         FactHandle factHandle = kieSessionContext.getFhManager().mapRemoteFactHandle(command.getFactHandle());
-        kieSessionContext.getKieSession().getEntryPoint(command.getEntryPoint()).update(factHandle,
-                                                                                        command.getObject());
+        kieSessionContext.getKieSession().getEntryPoint(command.getEntryPoint()).update(factHandle, command.getObject());
         if (firingUntilHalt) {
             kieSessionContext.getKieSession().fireAllRules();
         }
@@ -122,11 +118,8 @@ public class CommandHandler implements VisitorCommand {
     @Override
     public void visit(ListObjectsCommand command) {
         List serializableItems = getObjectList(command);
-        ListKieSessionObjectMessageImpl msg = new ListKieSessionObjectMessageImpl(command.getId(),
-                                                                                  serializableItems);
-        producer.produceSync(envConfig.getKieSessionInfosTopicName(),
-                             command.getId(),
-                             msg);
+        ListKieSessionObjectMessageImpl msg = new ListKieSessionObjectMessageImpl(command.getId(), serializableItems);
+        producer.produceSync(envConfig.getKieSessionInfosTopicName(), command.getId(), msg);
     }
 
     private List getObjectList(ListObjectsCommand command) {
@@ -137,11 +130,8 @@ public class CommandHandler implements VisitorCommand {
     @Override
     public void visit(ListObjectsCommandClassType command) {
         List serializableItems = getSerializableItemsByClassType(command);
-        ListKieSessionObjectMessageImpl msg = new ListKieSessionObjectMessageImpl(command.getId(),
-                                                                                  serializableItems);
-        producer.produceSync(envConfig.getKieSessionInfosTopicName(),
-                             command.getId(),
-                             msg);
+        ListKieSessionObjectMessageImpl msg = new ListKieSessionObjectMessageImpl(command.getId(), serializableItems);
+        producer.produceSync(envConfig.getKieSessionInfosTopicName(), command.getId(), msg);
     }
 
     private List getSerializableItemsByClassType(ListObjectsCommandClassType command) {
@@ -163,11 +153,8 @@ public class CommandHandler implements VisitorCommand {
     @Override
     public void visit(ListObjectsCommandNamedQuery command) {
         List serializableItems = getSerializableItemsByNamedQuery(command);
-        ListKieSessionObjectMessageImpl msg = new ListKieSessionObjectMessageImpl(command.getId(),
-                                                                                  serializableItems);
-        producer.produceSync(envConfig.getKieSessionInfosTopicName(),
-                             command.getId(),
-                             msg);
+        ListKieSessionObjectMessageImpl msg = new ListKieSessionObjectMessageImpl(command.getId(), serializableItems);
+        producer.produceSync(envConfig.getKieSessionInfosTopicName(), command.getId(), msg);
     }
 
     private List getSerializableItemsByNamedQuery(ListObjectsCommandNamedQuery command) {
@@ -182,9 +169,7 @@ public class CommandHandler implements VisitorCommand {
     public void visit(FactCountCommand command) {
         FactCountMessageImpl msg = new FactCountMessageImpl(command.getId(),
                                                             kieSessionContext.getKieSession().getFactCount());
-        producer.produceSync(envConfig.getKieSessionInfosTopicName(),
-                             command.getId(),
-                             msg);
+        producer.produceSync(envConfig.getKieSessionInfosTopicName(), command.getId(), msg);
     }
 
     @Override
@@ -193,16 +178,11 @@ public class CommandHandler implements VisitorCommand {
         LocalDateTime limitAge = LocalDateTime.now().minusSeconds(envConfig.getMaxSnapshotAge());
         //if the lastSnapshot time is after the the age we perform a snapshot
         if(lastSnapshotTime != null && limitAge.isAfter(lastSnapshotTime)) {
-            ControlMessage lastControlMessage = ConsumerUtils.getLastEvent(envConfig.getControlTopicName(),
-                                                                           envConfig.getPollTimeout());
+            ControlMessage lastControlMessage = ConsumerUtils.getLastEvent(envConfig.getControlTopicName(), envConfig.getPollTimeout());
             if(lastControlMessage != null) {
-                sessionSnapshooter.serialize(kieSessionContext,
-                                             lastControlMessage.getKey(),
-                                             lastControlMessage.getOffset());
+                sessionSnapshooter.serialize(kieSessionContext, lastControlMessage.getKey(), lastControlMessage.getOffset());
             }else {
-                sessionSnapshooter.serialize(kieSessionContext,
-                                             command.getId(),
-                                             0l);
+                sessionSnapshooter.serialize(kieSessionContext, command.getId(), 0l);
             }
         }
 
