@@ -177,7 +177,9 @@ public class CommandHandler implements VisitorCommand {
         LocalDateTime lastSnapshotTime = sessionSnapshooter.getLastSnapshotTime();
         LocalDateTime limitAge = LocalDateTime.now().minusSeconds(envConfig.getMaxSnapshotAge());
         //if the lastSnapshot time is after the the age we perform a snapshot
-        if(lastSnapshotTime != null && limitAge.isAfter(lastSnapshotTime)) {
+        if(lastSnapshotTime == null){
+            sessionSnapshooter.serialize(kieSessionContext, command.getId(), 0l);
+        }else if(limitAge.isAfter(lastSnapshotTime)) {
             ControlMessage lastControlMessage = ConsumerUtils.getLastEvent(envConfig.getControlTopicName(), envConfig.getPollTimeout());
             if(lastControlMessage != null) {
                 sessionSnapshooter.serialize(kieSessionContext, lastControlMessage.getKey(), lastControlMessage.getOffset());

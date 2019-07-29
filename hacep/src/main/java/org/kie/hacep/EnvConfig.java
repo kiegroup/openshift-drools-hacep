@@ -30,9 +30,9 @@ public final class EnvConfig {
     private String printerType;
     private Integer iterationBetweenSnapshot = Config.DEFAULT_ITERATION_BETWEEN_SNAPSHOT;
     private Integer pollTimeout = 1000;
-    private Boolean skipOnDemanSnapshot;
+    private Boolean skipOnDemanSnapshot = false;
     private Long maxSnapshotAge;
-    private boolean test;
+    private boolean test = false;
 
     public static EnvConfig getDefaultEnvConfig(){
         return anEnvConfig().
@@ -109,6 +109,9 @@ public final class EnvConfig {
     }
 
     public EnvConfig build() {
+        if(this.skipOnDemanSnapshot== null){
+            this.skipOnDemanSnapshot = false;
+        }
         EnvConfig envConfig = new EnvConfig();
         envConfig.eventsTopicName = this.eventsTopicName;
         envConfig.namespace = this.namespace;

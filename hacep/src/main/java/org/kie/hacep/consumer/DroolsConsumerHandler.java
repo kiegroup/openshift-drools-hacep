@@ -68,6 +68,9 @@ public class DroolsConsumerHandler implements ConsumerHandler {
             this.infos = snapshooter.deserialize();
             this.kieSessionContext = createSessionHolder(infos);
             clock = kieSessionContext.getKieSession().getSessionClock();
+        } else{
+            kieSessionContext = new KieSessionContext();
+            createClasspathSession( kieSessionContext );
         }
     }
 
@@ -117,7 +120,9 @@ public class DroolsConsumerHandler implements ConsumerHandler {
 
     @Override
     public void stop() {
-        kieSessionContext.getKieSession().dispose();
+        if(kieSessionContext != null) {
+            kieSessionContext.getKieSession().dispose();
+        }
     }
 
     private void processCommand( RemoteCommand command, State state ) {

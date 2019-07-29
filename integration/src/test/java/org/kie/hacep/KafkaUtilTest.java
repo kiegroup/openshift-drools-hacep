@@ -52,8 +52,10 @@ import org.kie.remote.CommonConfig;
 import org.kie.remote.RemoteStreamingKieSession;
 import org.kie.remote.RemoteKieSession;
 import org.kie.remote.TopicsConfig;
+import org.kie.remote.command.SnapshotOnDemandCommand;
 import org.kie.remote.impl.RemoteStreamingKieSessionImpl;
 import org.kie.remote.impl.RemoteKieSessionImpl;
+import org.kie.remote.impl.producer.Sender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -298,6 +300,16 @@ public class KafkaUtilTest implements AutoCloseable {
                 producer.close();
             }
         }
+    }
+
+    public static void insertSnapshotOnDemandCommand() {
+        Properties props = Config.getProducerConfig("insertSnapshotOnDemandCommand");
+
+        Sender sender = new Sender(props);
+        sender.start();
+        SnapshotOnDemandCommand command = new SnapshotOnDemandCommand();
+        sender.sendCommand(command, TopicsConfig.getDefaultTopicsConfig().getEventsTopicName());
+        sender.stop();
     }
 
     public static EnvConfig getEnvConfig() {

@@ -19,7 +19,7 @@ package org.kie.remote.command;
 import java.io.Serializable;
 import java.util.UUID;
 
-public class SnapshotOnDemandCommand extends AbstractCommand implements Serializable {
+public class SnapshotOnDemandCommand extends AbstractCommand implements VisitableCommand, Serializable {
 
     public SnapshotOnDemandCommand(){ super(UUID.randomUUID().toString());}
 
@@ -27,6 +27,9 @@ public class SnapshotOnDemandCommand extends AbstractCommand implements Serializ
     public boolean isPermittedForReplicas() {
         return false;
     }
+
+    @Override
+    public void accept(VisitorCommand visitor) { visitor.visit(this); }
 
     @Override
     public String toString() {
