@@ -191,6 +191,7 @@ public class CommandHandler implements VisitorCommand {
     public void visit(SnapshotOnDemandCommand command) {
         ControlMessage lastControlMessage = ConsumerUtils.getLastEvent(config.getControlTopicName(),
                                                                        config.getPollTimeout());
+        //@TODO enable the leader to skip if the last snapshot is young (env max.snapshot.age)
         sessionSnapshooter.serialize(kieSessionContext,
                                      lastControlMessage.getKey(),
                                      lastControlMessage.getOffset());
