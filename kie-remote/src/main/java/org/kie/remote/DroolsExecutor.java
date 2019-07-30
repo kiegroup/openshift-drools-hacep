@@ -47,7 +47,7 @@ public abstract class DroolsExecutor {
         throw new UnsupportedOperationException();
     }
 
-    public void setResult(Queue<Object> results) {
+    public void appendSideEffects(Queue<Object> sideEffects) {
         throw new UnsupportedOperationException();
     }
 
@@ -91,8 +91,8 @@ public abstract class DroolsExecutor {
         }
 
         @Override
-        public void setResult(Queue<Object> results) {
-            executionResults = results;
+        public void appendSideEffects(Queue<Object> sideEffects) {
+            executionResults.addAll(sideEffects);
         }
     }
 

@@ -59,7 +59,7 @@ public class DroolsConsumerHandler implements ConsumerHandler {
         this.config = envConfig;
         this.producer = producer;
         commandHandler = new CommandHandler(kieSessionContext, config, producer);
-        if(config.isUnderTest()){
+        if (config.isUnderTest()) {
             loggerForTest = PrinterUtil.getKafkaLoggerForTest(envConfig);
         }
     }
@@ -68,45 +68,34 @@ public class DroolsConsumerHandler implements ConsumerHandler {
         return snapshooter;
     }
 
-    public void process( ItemToProcess item, State state, Queue<Object> sideEffects) {
+    @Override
+    public void process( ItemToProcess item, State state) {
         RemoteCommand command  = deserialize((byte[])item.getObject());
+
+        if(config.isUnderTest()) {  loggerForTest.warn("Remote command on process:{}", command); }
+
         if (state.equals(State.LEADER)) {
             processCommand( command, state );
             Queue<Object> sideEffectsResults = DroolsExecutor.getInstance().getAndReset();
+            if (config.isUnderTest()) { loggerForTest.warn("sideEffectOnLeader:{}", sideEffectsResults); }
+
             ControlMessage newControlMessage = new ControlMessage(command.getId(), sideEffectsResults);
             producer.produceSync(config.getControlTopicName(), command.getId(), newControlMessage);
-            if(config.isUnderTest()){
-                loggerForTest.warn("sideEffectOnLeader:{}", sideEffectsResults);
-            }
-        }else{
-            if(sideEffects != null) {
-                if(logger.isInfoEnabled()) { logger.info("sideEffectOnReplica:{}", sideEffects); }
-                if(config.isUnderTest()){
-                    loggerForTest.warn("sideEffectOnReplica:{}", sideEffects);
-                }
-                DroolsExecutor.getInstance().setResult(sideEffects);
-            }
+        } else {
             processCommand( command, state );
         }
     }
 
-    public void processSideEffectsOnReplica(State state, Queue<Object> sideEffects) {
-        if (state.equals(State.REPLICA)) {
-            if(sideEffects != null) {
-                if(logger.isInfoEnabled()) { logger.info("sideEffectOnReplica:{}", sideEffects); }
-                if(config.isUnderTest()){
-                    loggerForTest.warn("sideEffectOnReplica:{}", sideEffects);
-                }
-                DroolsExecutor.getInstance().setResult(sideEffects);
-            }
-        }
+    public void processSideEffectsOnReplica(Queue<Object> newSideEffects) {
+        if(config.isUnderTest()){ loggerForTest.warn("sideEffectOnReplica:{}", newSideEffects);}
+        DroolsExecutor.getInstance().appendSideEffects(newSideEffects);
     }
 
-
-    public void processWithSnapshot(ItemToProcess item, State currentState, Queue<Object> sideEffects) {
+    @Override
+    public void processWithSnapshot(ItemToProcess item, State currentState) {
         if (logger.isInfoEnabled()){ logger.info("SNAPSHOT"); }
+        process(item, currentState);
         snapshooter.serialize(kieSessionContext, item.getKey(), item.getOffset());
-        process(item, currentState, sideEffects);
     }
 
     @Override
@@ -117,8 +106,8 @@ public class DroolsConsumerHandler implements ConsumerHandler {
 
     private void processCommand( RemoteCommand command, State state ) {
         boolean execute = state.equals(State.LEADER) || command.isPermittedForReplicas();
-        VisitableCommand visitable = (VisitableCommand) command;
         if (execute) {
+            VisitableCommand visitable = (VisitableCommand) command;
             visitable.accept(commandHandler);
         }
     }

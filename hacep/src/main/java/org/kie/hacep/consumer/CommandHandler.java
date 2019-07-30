@@ -23,24 +23,30 @@ import java.util.List;
 import org.kie.api.runtime.rule.FactHandle;
 import org.kie.hacep.EnvConfig;
 import org.kie.hacep.core.KieSessionContext;
-import org.kie.remote.impl.producer.Producer;
 import org.kie.hacep.message.FactCountMessageImpl;
 import org.kie.hacep.message.ListKieSessionObjectMessageImpl;
 import org.kie.remote.RemoteFactHandle;
 import org.kie.remote.command.DeleteCommand;
+import org.kie.remote.command.EventInsertCommand;
 import org.kie.remote.command.FactCountCommand;
+import org.kie.remote.command.FireAllRulesCommand;
+import org.kie.remote.command.FireUntilHaltCommand;
+import org.kie.remote.command.HaltCommand;
 import org.kie.remote.command.InsertCommand;
 import org.kie.remote.command.ListObjectsCommand;
 import org.kie.remote.command.ListObjectsCommandClassType;
 import org.kie.remote.command.ListObjectsCommandNamedQuery;
 import org.kie.remote.command.UpdateCommand;
 import org.kie.remote.command.VisitorCommand;
+import org.kie.remote.impl.producer.Producer;
 
 public class CommandHandler implements VisitorCommand {
 
     private KieSessionContext kieSessionContext;
     private EnvConfig config;
     private Producer producer;
+
+    private volatile boolean firingUntilHalt;
 
     public CommandHandler(KieSessionContext kieSessionContext,
                           EnvConfig config,
@@ -51,36 +57,62 @@ public class CommandHandler implements VisitorCommand {
     }
 
     @Override
+    public void visit(FireAllRulesCommand command) {
+        int fires = kieSessionContext.getKieSession().fireAllRules();
+        producer.produceSync(config.getKieSessionInfosTopicName(), command.getId(), fires);
+    }
+
+    @Override
+    public void visit(FireUntilHaltCommand command) {
+        firingUntilHalt = true;
+    }
+
+    @Override
+    public void visit(HaltCommand command) {
+        firingUntilHalt = false;
+    }
+
+    @Override
     public void visit(InsertCommand command) {
         RemoteFactHandle remoteFH = command.getFactHandle();
         FactHandle fh = kieSessionContext.getKieSession().getEntryPoint(command.getEntryPoint()).insert(remoteFH.getObject());
         kieSessionContext.getFhManager().registerHandle(remoteFH, fh);
-        kieSessionContext.getKieSession().fireAllRules();
+        if (firingUntilHalt) {
+            kieSessionContext.getKieSession().fireAllRules();
+        }
+    }
+
+    @Override
+    public void visit(EventInsertCommand command) {
+        FactHandle fh = kieSessionContext.getKieSession().getEntryPoint(command.getEntryPoint()).insert(command.getObject());
+        if (firingUntilHalt) {
+            kieSessionContext.getKieSession().fireAllRules();
+        }
     }
 
     @Override
     public void visit(DeleteCommand command) {
-        RemoteFactHandle remoteFH = command.getFactHandle();
-        kieSessionContext.getKieSession().getEntryPoint(command.getEntryPoint()).delete(kieSessionContext.getFhManager().mapRemoteFactHandle(remoteFH));
-        kieSessionContext.getKieSession().fireAllRules();
+        FactHandle factHandle = kieSessionContext.getFhManager().mapRemoteFactHandle(command.getFactHandle());
+        kieSessionContext.getKieSession().getEntryPoint(command.getEntryPoint()).delete(factHandle);
+        if (firingUntilHalt) {
+            kieSessionContext.getKieSession().fireAllRules();
+        }
     }
 
     @Override
     public void visit(UpdateCommand command) {
-        RemoteFactHandle remoteFH = command.getFactHandle();
-        FactHandle factHandle = kieSessionContext.getFhManager().mapRemoteFactHandle(remoteFH);
-        kieSessionContext.getKieSession().getEntryPoint(command.getEntryPoint()).update(factHandle,
-                                                                                        command.getObject());
-        kieSessionContext.getKieSession().fireAllRules();
+        FactHandle factHandle = kieSessionContext.getFhManager().mapRemoteFactHandle(command.getFactHandle());
+        kieSessionContext.getKieSession().getEntryPoint(command.getEntryPoint()).update(factHandle, command.getObject());
+        if (firingUntilHalt) {
+            kieSessionContext.getKieSession().fireAllRules();
+        }
     }
 
     @Override
     public void visit(ListObjectsCommand command) {
         List serializableItems = getObjectList(command);
         ListKieSessionObjectMessageImpl msg = new ListKieSessionObjectMessageImpl(command.getId(), serializableItems);
-        producer.produceSync(config.getKieSessionInfosTopicName(),
-                             command.getId(),
-                             msg);
+        producer.produceSync(config.getKieSessionInfosTopicName(), command.getId(), msg);
     }
 
     private List getObjectList(ListObjectsCommand command) {

@@ -21,27 +21,28 @@ import java.util.concurrent.TimeUnit;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.kie.hacep.core.Bootstrap;
 import org.kie.hacep.core.infra.election.State;
 import org.kie.remote.RemoteKieSession;
 import org.kie.remote.TopicsConfig;
-import org.kie.remote.impl.producer.RemoteKieSessionImpl;
+import org.kie.remote.impl.RemoteKieSessionImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
-@Ignore
 public class RemoteKieSessionImplTest {
 
     private KafkaUtilTest kafkaServerTest;
     private TopicsConfig topicsConfig;
     private EnvConfig envConfig;
+    private Logger logger = LoggerFactory.getLogger(RemoteKieSessionImplTest.class);
 
     @Before
     public void setUp() throws Exception {
         topicsConfig = TopicsConfig.getDefaultTopicsConfig();
-        envConfig = EnvConfig.getDefaultEnvConfig();
+        envConfig = KafkaUtilTest.getEnvConfig();
         kafkaServerTest = new KafkaUtilTest();
         kafkaServerTest.startServer();
         kafkaServerTest.createTopics(topicsConfig.getEventsTopicName(),
@@ -66,14 +67,18 @@ public class RemoteKieSessionImplTest {
         kafkaServerTest.insertBatchStockTicketEvent(7,
                                                     topicsConfig,
                                                     RemoteKieSession.class);
-        try (RemoteKieSessionImpl client = new RemoteKieSessionImpl(Config.getProducerConfig("getFactCountTest"),
-                                                                    topicsConfig)) {
+        RemoteKieSessionImpl client = new RemoteKieSessionImpl(Config.getProducerConfig("getFactCountTest"),
+                                                               topicsConfig);
+        try {
+            client.fireUntilHalt();
             client.listen();
             CompletableFuture<Long> factCountFuture = client.getFactCount();
             Long factCount = factCountFuture.get(20, TimeUnit.SECONDS);
-            assertTrue(factCount == 7);
-        } catch (Throwable e) {
-            e.printStackTrace();
+            assertEquals( new Long(7), factCount);
+        }catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+        } finally {
+            client.close();
         }
     }
 }

@@ -21,7 +21,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import org.kie.hacep.sample.kjar.StockTickEvent;
 import org.kie.remote.CommonConfig;
 import org.kie.remote.TopicsConfig;
-import org.kie.remote.impl.producer.RemoteKieSessionImpl;
+import org.kie.remote.impl.RemoteKieSessionImpl;
 
 public class ClientProducerDemo {
 
@@ -33,6 +33,7 @@ public class ClientProducerDemo {
         TopicsConfig envConfig = TopicsConfig.getDefaultTopicsConfig();
         Properties props = getProperties();
         RemoteKieSessionImpl producer = new RemoteKieSessionImpl(props, envConfig);
+        producer.fireUntilHalt();
         try {
             for (int i = 0; i < items; i++) {
                 StockTickEvent eventA = new StockTickEvent("RHT",
@@ -50,9 +51,9 @@ public class ClientProducerDemo {
         props.put("bootstrap.servers", "my-cluster-kafka-bootstrap-my-kafka-project.<ip>.nip.io:443");
         props.put("security.protocol", "SSL");
         props.put("ssl.keystore.location", "/<path>/openshift-drools-hacep/sample-hacep-project/sample-hacep-project-client/src/main/resources/keystore.jks");
-        props.put("ssl.keystore.password", "password");
+        props.put("ssl.keystore.password", "<password>");
         props.put("ssl.truststore.location", "/<path>/openshift-drools-hacep/sample-hacep-project/sample-hacep-project-client/src/main/resources/keystore.jks");
-        props.put("ssl.truststore.password", "password");
+        props.put("ssl.truststore.password", "<password>");
         return props;
     }
 }

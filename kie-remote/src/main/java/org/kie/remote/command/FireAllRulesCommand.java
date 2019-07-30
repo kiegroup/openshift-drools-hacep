@@ -13,12 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.kie.hacep.util;
+package org.kie.remote.command;
 
-import org.apache.kafka.clients.consumer.ConsumerRecord;
+import java.io.Serializable;
+import java.util.UUID;
 
-public interface Printer {
+public class FireAllRulesCommand extends AbstractCommand implements VisitableCommand, Serializable {
 
-    void prettyPrinter(String caller, ConsumerRecord consumerRecord, boolean processed);
+    public FireAllRulesCommand() {
+        super(UUID.randomUUID().toString());
+    }
+
+    @Override
+    public void accept(VisitorCommand visitor) { visitor.visit(this); }
+
+    @Override
+    public boolean isPermittedForReplicas() { return true; }
+
+    @Override
+    public String toString() {
+        return "Fire all rules of " + getId();
+    }
 
 }
+

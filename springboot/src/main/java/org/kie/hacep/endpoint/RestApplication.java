@@ -22,7 +22,6 @@ import org.springframework.boot.cloud.CloudPlatform;
 import org.springframework.boot.web.servlet.ServletComponentScan;
 
 @SpringBootApplication
-@ConditionalOnCloudPlatform(CloudPlatform.KUBERNETES)
 @ServletComponentScan
 public class RestApplication {
 

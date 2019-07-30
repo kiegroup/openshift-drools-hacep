@@ -43,8 +43,8 @@ public class ConsumerUtils {
 
     private static Logger logger = LoggerFactory.getLogger(ConsumerUtils.class);
 
-    public static ControlMessage getLastEvent( String topic) {
-        return getLastEvent(topic, Config.getConsumerConfig("LastEventConsumer"));
+    public static ControlMessage getLastEvent( String topic, Integer pollTimeout) {
+        return getLastEvent(topic, Config.getConsumerConfig("LastEventConsumer"), pollTimeout);
     }
 
     public Map<TopicPartition, Long> getOffsets(String topic) {
@@ -60,7 +60,7 @@ public class ConsumerUtils {
         return offsets;
     }
 
-    public static ControlMessage getLastEvent( String topic, Properties properties) {
+    public static ControlMessage getLastEvent( String topic, Properties properties, Integer pollTimeout) {
         KafkaConsumer consumer = new KafkaConsumer(properties);
         List<PartitionInfo> infos = consumer.partitionsFor(topic);
         List<TopicPartition> partitions = new ArrayList<>();
@@ -86,7 +86,7 @@ public class ConsumerUtils {
 
         ControlMessage lastMessage = new ControlMessage();
         try {
-            ConsumerRecords records = consumer.poll(Duration.of(Config.DEFAULT_POLL_TIMEOUT_MS, ChronoUnit.MILLIS));
+            ConsumerRecords records = consumer.poll(Duration.of(pollTimeout, ChronoUnit.MILLIS));
             for (Object item : records) {
                 ConsumerRecord<String, byte[]> record = (ConsumerRecord<String, byte[]>) item;
                 lastMessage = deserialize(record.value());

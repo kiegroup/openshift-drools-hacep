@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,8 +36,7 @@ public class CommonConfig {
     public static final String VALUE_SERIALIZER_KEY = "value.serializer";
     public static final String KEY_DESERIALIZER_KEY = "key.deserializer";
     public static final String VALUE_DESERIALIZER_KEY = "value.deserializer";
-    private static Properties consumerConf, producerConf;
-    private static final String CONSUMER_CONF = "consumer.properties";
+    private static Properties producerConf;
     private static final String PRODUCER_CONF = "producer.properties";
 
     private static Properties config;
@@ -48,6 +48,7 @@ public class CommonConfig {
             config.put(VALUE_SERIALIZER_KEY, "org.apache.kafka.common.serialization.ByteArraySerializer");
             config.put(KEY_DESERIALIZER_KEY, "org.apache.kafka.common.serialization.StringDeserializer");
             config.put(VALUE_DESERIALIZER_KEY, "org.apache.kafka.common.serialization.ByteArrayDeserializer");
+            config.put(ConsumerConfig.GROUP_ID_CONFIG, "drools");
         }
         return config;
     }

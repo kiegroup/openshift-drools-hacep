@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Red Hat
+ * Copyright 2019 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,10 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.kie.remote.command;
 
-package org.kie.remote;
+import java.io.Serializable;
+import java.util.UUID;
 
-public interface RemoteKieSession extends RemoteEntryPoint, RemoteStatefulSession {
+public class HaltCommand extends AbstractCommand implements VisitableCommand, Serializable {
 
-    RemoteEntryPoint getEntryPoint(String name);
+    public HaltCommand() {
+        super(UUID.randomUUID().toString());
+    }
+
+    @Override
+    public void accept(VisitorCommand visitor) { visitor.visit(this); }
+
+    @Override
+    public boolean isPermittedForReplicas() { return true; }
+
+    @Override
+    public String toString() {
+        return "Halt of " + getId();
+    }
+
 }
+

@@ -22,20 +22,18 @@ import java.util.concurrent.TimeUnit;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.kie.hacep.core.Bootstrap;
 import org.kie.hacep.core.infra.election.State;
 import org.kie.hacep.sample.kjar.StockTickEvent;
 import org.kie.remote.CommonConfig;
-import org.kie.remote.RemoteCepKieSession;
+import org.kie.remote.RemoteStreamingKieSession;
 import org.kie.remote.TopicsConfig;
-import org.kie.remote.impl.producer.RemoteCepKieSessionImpl;
+import org.kie.remote.impl.RemoteStreamingKieSessionImpl;
 
 import static org.junit.Assert.*;
 
-@Ignore
-public class RemoteCepKieSessionImplTest {
+public class RemoteStreamingKieSessionImplTest {
 
     private KafkaUtilTest kafkaServerTest;
     private EnvConfig config;
@@ -43,7 +41,7 @@ public class RemoteCepKieSessionImplTest {
 
     @Before
     public void setUp() throws Exception {
-        config = EnvConfig.getDefaultEnvConfig();
+        config = KafkaUtilTest.getEnvConfig();
         topicsConfig = TopicsConfig.getDefaultTopicsConfig();
         kafkaServerTest = new KafkaUtilTest();
         kafkaServerTest.startServer();
@@ -68,8 +66,8 @@ public class RemoteCepKieSessionImplTest {
         Bootstrap.getConsumerController().getCallback().updateStatus(State.LEADER);
         kafkaServerTest.insertBatchStockTicketEvent(7,
                                                     topicsConfig,
-                                                    RemoteCepKieSession.class);
-        RemoteCepKieSessionImpl client = new RemoteCepKieSessionImpl(Config.getProducerConfig("FactCountConsumerTest"),
+                                                    RemoteStreamingKieSession.class);
+        RemoteStreamingKieSessionImpl client = new RemoteStreamingKieSessionImpl(Config.getProducerConfig("FactCountConsumerTest"),
                                                                      topicsConfig);
         try {
             client.listen();
@@ -87,9 +85,9 @@ public class RemoteCepKieSessionImplTest {
         Bootstrap.getConsumerController().getCallback().updateStatus(State.LEADER);
         kafkaServerTest.insertBatchStockTicketEvent(1,
                                                     topicsConfig,
-                                                    RemoteCepKieSession.class);
+                                                    RemoteStreamingKieSession.class);
 
-        RemoteCepKieSessionImpl client = new RemoteCepKieSessionImpl(CommonConfig.getProducerConfig("ListKieSessionObjectsConsumerTest"),
+        RemoteStreamingKieSessionImpl client = new RemoteStreamingKieSessionImpl(CommonConfig.getProducerConfig("ListKieSessionObjectsConsumerTest"),
                                                                      topicsConfig);
         try {
             client.listen();
@@ -111,8 +109,8 @@ public class RemoteCepKieSessionImplTest {
         Bootstrap.getConsumerController().getCallback().updateStatus(State.LEADER);
         kafkaServerTest.insertBatchStockTicketEvent(1,
                                                     topicsConfig,
-                                                    RemoteCepKieSession.class);
-        RemoteCepKieSessionImpl client = new RemoteCepKieSessionImpl(Config.getProducerConfig("ListKieSessionObjectsWithClassTypeTest"),
+                                                    RemoteStreamingKieSession.class);
+        RemoteStreamingKieSessionImpl client = new RemoteStreamingKieSessionImpl(Config.getProducerConfig("ListKieSessionObjectsWithClassTypeTest"),
                                                                      topicsConfig);
         try {
             client.listen();
@@ -132,8 +130,8 @@ public class RemoteCepKieSessionImplTest {
         Bootstrap.getConsumerController().getCallback().updateStatus(State.LEADER);
         kafkaServerTest.insertBatchStockTicketEvent(1,
                                                     topicsConfig,
-                                                    RemoteCepKieSession.class);
-        RemoteCepKieSessionImpl client = new RemoteCepKieSessionImpl(Config.getProducerConfig("ListKieSessionObjectsWithNamedQueryTest"),
+                                                    RemoteStreamingKieSession.class);
+        RemoteStreamingKieSessionImpl client = new RemoteStreamingKieSessionImpl(Config.getProducerConfig("ListKieSessionObjectsWithNamedQueryTest"),
                                                                      topicsConfig);
         try{
             client.listen();
@@ -148,7 +146,7 @@ public class RemoteCepKieSessionImplTest {
         }
     }
 
-    private Collection<?> doQuery( RemoteCepKieSessionImpl client, String stockName, int expectedResult) throws InterruptedException, java.util.concurrent.ExecutionException, java.util.concurrent.TimeoutException {
+    private Collection<?> doQuery( RemoteStreamingKieSessionImpl client, String stockName, int expectedResult) throws InterruptedException, java.util.concurrent.ExecutionException, java.util.concurrent.TimeoutException {
         CompletableFuture<Collection<?>> listKieObjectsFuture;
         Collection<?> listKieObjects;
         listKieObjectsFuture = client.getObjects("stockTickEventQuery" , "stock", stockName);

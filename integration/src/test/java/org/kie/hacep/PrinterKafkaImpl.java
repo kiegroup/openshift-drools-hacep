@@ -33,10 +33,11 @@ public class PrinterKafkaImpl implements Printer {
     private Logger kafkaLogger = LoggerFactory.getLogger("org.hacep");
 
     @Override
-    public void prettyPrinter(ConsumerRecord consumerRecord,
+    public void prettyPrinter(String caller, ConsumerRecord consumerRecord,
                               boolean processed) {
         if (consumerRecord != null && kafkaLogger.isWarnEnabled()) {
-            kafkaLogger.warn("Processed:{} - Topic: {} - Partition: {} - Offset: {} - Value: {}\n",
+            kafkaLogger.warn("Caller:{} - Processed:{} - Topic: {} - Partition: {} - Offset: {} - Value: {}\n",
+                             caller,
                              processed,
                              consumerRecord.topic(),
                              consumerRecord.partition(),

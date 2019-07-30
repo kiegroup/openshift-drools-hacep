@@ -36,12 +36,15 @@ public class Config {
     public static final String DEFAULT_CONTROL_TOPIC = "control";
     public static final String DEFAULT_SNAPSHOT_TOPIC = "snapshot";
     public static final String ITERATION_BETWEEN_SNAPSHOT = "iteration.between.snapshot";
+    public static final Integer DEFAULT_ITERATION_BETWEEN_SNAPSHOT = 10;
     public static final String DEFAULT_PRINTER_TYPE = "printer.type";
 
     public static final String MY_CLUSTER_KAFKA_BOOTSTRAP_SERVICE_HOST = "MY_CLUSTER_KAFKA_BOOTSTRAP_SERVICE_HOST";
     public static final String BROKER_URL = System.getenv(MY_CLUSTER_KAFKA_BOOTSTRAP_SERVICE_HOST);
     public static final int DEFAULT_POLL_TIMEOUT_MS = 1000;
+    public static final String POLL_TIMEOUT_MS = "poll.timeout";
     public static final String TEST = Boolean.FALSE.toString();
+    public static final String UNDER_TEST = "undertest";
     private static final Logger logger = LoggerFactory.getLogger(Config.class);
     private static Properties config;
     private static Properties consumerConf, producerConf, snapshotConsumerConf, snapshotProducerConf;

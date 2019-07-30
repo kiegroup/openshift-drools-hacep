@@ -13,27 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.kie.remote;
 
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
-public interface RemoteCepEntryPoint<T> {
-
+public interface RemoteWorkingMemory {
     /**
      * @return the String Id of this entry point
      */
     String getEntryPointId();
-
-    /**
-     * Inserts a new fact into this entry point
-     *
-     * @param object
-     *        the fact to be inserted
-     *
-     * @return the fact handle created for the given fact
-     */
-    void insert(Object object);
 
     /**
      * <p>This class is <i>not</i> a general-purpose <tt>Collection</tt>
@@ -71,4 +61,3 @@ public interface RemoteCepEntryPoint<T> {
      */
     CompletableFuture<Long> getFactCount();
 }
-
