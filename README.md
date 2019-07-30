@@ -21,10 +21,10 @@ the cluster's name y default is "my-cluster", change accordingly in
 the yaml files with your cluster's name 
 ##### TODO describe each topic in terms of configuration and single partition reason
 ```sh
-oc create -f events.yaml
-oc create -f control.yaml
-oc create -f snapshot.yaml
-oc create -f kiesessioninfos.yaml
+oc create -f kafka-topisc/events.yaml
+oc create -f kafka-topisc/control.yaml
+oc create -f kafka-topisc/snapshot.yaml
+oc create -f kafka-topisc/kiesessioninfos.yaml
 ```
 Checks the topics
 ```sh
