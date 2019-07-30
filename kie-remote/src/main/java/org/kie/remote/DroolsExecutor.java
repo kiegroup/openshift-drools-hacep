@@ -96,7 +96,7 @@ public abstract class DroolsExecutor {
         }
     }
 
-    private static class EmptyResult implements Serializable {
-        private static final EmptyResult INSTANCE = new EmptyResult();
+    public static class EmptyResult implements Serializable {
+        public static final EmptyResult INSTANCE = new EmptyResult();
     }
 }
