@@ -27,8 +27,8 @@
     <version.logback.kafka.appender>0.2.0-RC2</version.logback.kafka.appender>
     <version.servlet>4.0.1</version.servlet>
     <version.slf4j>1.7.26</version.slf4j>
-    <version.org.springframework>5.1.3.RELEASE</version.org.springframework>
-    <version.org.spring-boot>2.1.1.RELEASE</version.org.spring-boot>
+    <version.org.springframework>5.2.0.M3</version.org.springframework>
+    <version.org.spring-boot>2.2.0.M4</version.org.spring-boot>
     <version.thorntail>2.5.0.Final</version.thorntail>
   </properties>
 
@@ -176,12 +176,38 @@
         <enabled>true</enabled>
       </snapshots>
     </repository>
+    <repository>
+      <id>spring-snapshots</id>
+      <name>Spring Snapshots</name>
+      <url>https://repo.spring.io/snapshot</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>spring-milestones</id>
+      <name>Spring Milestones</name>
+      <url>https://repo.spring.io/milestone</url>
+    </repository>
   </repositories>
   <pluginRepositories>
     <pluginRepository>
       <id>central</id>
       <name>Maven Central</name>
       <url>http://repo.maven.apache.org/maven2</url>
+    </pluginRepository>
+    <pluginRepository>
+      <id>spring-snapshots</id>
+      <name>Spring Snapshots</name>
+      <url>https://repo.spring.io/snapshot</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </pluginRepository>
+    <pluginRepository>
+      <id>spring-milestones</id>
+      <name>Spring Milestones</name>
+      <url>https://repo.spring.io/milestone</url>
     </pluginRepository>
   </pluginRepositories>
 

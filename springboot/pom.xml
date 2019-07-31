@@ -11,6 +11,10 @@
   <artifactId>openshift-kie-springboot</artifactId>
   <packaging>jar</packaging>
 
+  <properties>
+    <enforcer.skip>true</enforcer.skip>
+  </properties>
+
   <dependencyManagement>
     <dependencies>
       <dependency>
