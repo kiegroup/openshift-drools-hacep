@@ -82,6 +82,13 @@ public class VisitableCommandsTest {
         testVisitor.visit(insertCommand);
     }
 
+    @Test
+    public void testSnapshotOnDemandCommandAcceptMethod() {
+        final SnapshotOnDemandCommand insertCommand = new SnapshotOnDemandCommand();
+        final TestVisitor testVisitor = new TestVisitor(insertCommand);
+        testVisitor.visit(insertCommand);
+    }
+
     private class TestVisitor implements VisitorCommand {
 
         private VisitableCommand visitableCommand;
@@ -137,6 +144,11 @@ public class VisitableCommandsTest {
 
         @Override
         public void visit(ListObjectsCommandNamedQuery command) {
+            Assertions.assertThat(visitableCommand).isEqualTo(command);
+        }
+
+        @Override
+        public void visit(SnapshotOnDemandCommand command) {
             Assertions.assertThat(visitableCommand).isEqualTo(command);
         }
 
