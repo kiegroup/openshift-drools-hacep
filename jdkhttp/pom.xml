@@ -15,6 +15,12 @@
     <dependency>
       <groupId>org.kie</groupId>
       <artifactId>openshift-kie-hacep</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>javax.validation</groupId>
+          <artifactId>validation-api</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.kie</groupId>
