@@ -37,7 +37,6 @@ public class RemoteKieSessionImplTest {
     private KafkaUtilTest kafkaServerTest;
     private TopicsConfig topicsConfig;
     private EnvConfig envConfig;
-    private Logger logger = LoggerFactory.getLogger(RemoteKieSessionImplTest.class);
 
     @Before
     public void setUp() throws Exception {

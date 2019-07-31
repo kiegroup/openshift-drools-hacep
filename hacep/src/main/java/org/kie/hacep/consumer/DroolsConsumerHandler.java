@@ -17,6 +17,7 @@ package org.kie.hacep.consumer;
 
 import java.util.Queue;
 
+import org.drools.core.impl.StatefulKnowledgeSessionImpl;
 import org.kie.api.KieServices;
 import org.kie.api.runtime.KieContainer;
 import org.kie.api.time.SessionPseudoClock;
@@ -115,7 +116,9 @@ public class DroolsConsumerHandler implements ConsumerHandler {
     public void processWithSnapshot(ItemToProcess item, State currentState) {
         if (logger.isInfoEnabled()){ logger.info("SNAPSHOT"); }
         process(item, currentState);
-        snapshooter.serialize(kieSessionContext, item.getKey(), item.getOffset());
+        if(((StatefulKnowledgeSessionImpl)kieSessionContext.getKieSession()).isAlive()) {
+            snapshooter.serialize(kieSessionContext, item.getKey(), item.getOffset());
+        }
     }
 
     @Override
