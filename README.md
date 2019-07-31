@@ -1,5 +1,23 @@
-### Motivations (Drools)
-@TODO
+### Motivation and general overview
+```
+The purpose of this project is providing a reference architecture for High Availability Drools (especially for Complex Event Processing scenarios) 
+
+to support failover that automatically recovers from a server failure.
+
+High availability is achieved by processing the same events on both leader and one or more replica(s). 
+
+In this way, when the leader has a failure, one of the replica can seamlessly take its place and continue the processing of new event practically without any interruption.
+
+The election of the leader is implemented with Kubernetes ConfigMaps and its coordination with the replicas is performed via messages exchange through Kafka. 
+
+The leader is always the first to process an event and when done notifies the replicas. 
+
+A replica starts executing an event only after it has been completely processed on leader. 
+
+When a new replica joins the cluster it asks a snapshot of the current drools session to the leader (that could produce it on demand if there isn't a recent enough snapshot already available), 
+
+deserialzes it and eventually executes the last events not included in the snapshot before starting to process the new event in coordination with the leader.
+```
 
 ### Architectural (doc folder)
 @TODO with images
