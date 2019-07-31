@@ -39,12 +39,9 @@ public class JdkHttpServer {
         server.createContext("/health", new HealthHandler());
         server.createContext("/env/all", new EnvHandler());
         server.start();
-        try {
-            Bootstrap.startEngine(EnvConfig.getDefaultEnvConfig());
-            logger.info("Core system started");
-        }finally {
-           //Bootstrap.stopEngine();
-        }
+        Bootstrap.startEngine(EnvConfig.getDefaultEnvConfig());
+        logger.info("Core system started");
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> Bootstrap.stopEngine()));
     }
 
     static class HealthHandler implements HttpHandler {

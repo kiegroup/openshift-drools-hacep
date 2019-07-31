@@ -29,7 +29,7 @@ import org.junit.Test;
 import org.kie.hacep.core.Bootstrap;
 import org.kie.hacep.core.infra.election.State;
 import org.kie.hacep.message.SnapshotMessage;
-import org.kie.remote.CommonConfig;;
+import org.kie.remote.CommonConfig;
 
 import static org.junit.Assert.*;
 import static org.kie.remote.util.SerializationUtil.deserialize;
@@ -102,10 +102,10 @@ public class SnapshotOnDemandTest {
             KafkaUtilTest.insertSnapshotOnDemandCommand();
 
             List<SnapshotMessage> messages = new ArrayList<>();
-            while(messages.size()<1) {
+            while (messages.size() < 1) {
                 snapshotRecords = snapshotConsumer.poll(5000);
                 Iterator<ConsumerRecord<String, byte[]>> snapshotRecordIterator = snapshotRecords.iterator();
-                if(snapshotRecordIterator.hasNext()) {
+                if (snapshotRecordIterator.hasNext()) {
                     ConsumerRecord<String, byte[]> controlRecord = snapshotRecordIterator.next();
                     SnapshotMessage snapshotMessage = deserialize(controlRecord.value());
                     messages.add(snapshotMessage);
@@ -117,7 +117,7 @@ public class SnapshotOnDemandTest {
             SnapshotMessage msg = messagesIter.next();
             assertNotNull(msg);
             assertTrue(msg.getFhManager().getFhMapKeys().isEmpty());
-            assertEquals(0,msg.getLastInsertedEventOffset());
+            assertEquals(0, msg.getLastInsertedEventOffset());
             assertNotNull(msg.getSerializedSession());
 
             eventsRecords = eventsConsumer.poll(1000);
@@ -125,10 +125,8 @@ public class SnapshotOnDemandTest {
 
             controlRecords = controlConsumer.poll(1000);
             assertEquals(1, controlRecords.count());
-
         } catch (Exception ex) {
-            throw new RuntimeException(ex.getMessage(),
-                                       ex);
+            throw new RuntimeException(ex.getMessage(), ex);
         } finally {
             eventsConsumer.close();
             controlConsumer.close();

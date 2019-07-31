@@ -53,7 +53,7 @@ public class Bootstrap {
         try {
             leadership.stop();
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+            throw new RuntimeException(e.getMessage(), e);
         }
         if ( consumerController != null) {
             consumerController.stop();
@@ -89,7 +89,4 @@ public class Bootstrap {
         consumerController = new ConsumerController(envConfig, eventProducer);
         consumerController.start();
     }
-
-
-
 }

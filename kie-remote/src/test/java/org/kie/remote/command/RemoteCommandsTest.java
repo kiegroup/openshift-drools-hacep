@@ -73,6 +73,7 @@ public class RemoteCommandsTest {
         commands.add(new ListObjectsCommandClassType());
         commands.add(new ListObjectsCommandNamedQuery());
         commands.add(new UpdateCommand());
+        commands.add(new SnapshotOnDemandCommand());
 
         return commands;
     }

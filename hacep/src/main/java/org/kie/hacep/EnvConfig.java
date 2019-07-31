@@ -32,11 +32,14 @@ public final class EnvConfig {
     private Integer pollTimeout = 1000;
     private Boolean skipOnDemanSnapshot = Boolean.FALSE;
     private Long maxSnapshotAge;
-    private boolean test = false;
+    private Boolean test = Boolean.FALSE;
 
-    public static EnvConfig getDefaultEnvConfig(){
+    private EnvConfig() {
+    }
+
+    public static EnvConfig getDefaultEnvConfig() {
         return anEnvConfig().
-                withNamespace(Optional.ofNullable(System.getenv( Config.NAMESPACE)).orElse(CommonConfig.DEFAULT_NAMESPACE)).
+                withNamespace(Optional.ofNullable(System.getenv(Config.NAMESPACE)).orElse(CommonConfig.DEFAULT_NAMESPACE)).
                 withControlTopicName(Optional.ofNullable(System.getenv(Config.DEFAULT_CONTROL_TOPIC)).orElse(Config.DEFAULT_CONTROL_TOPIC)).
                 withEventsTopicName(Optional.ofNullable(System.getenv(CommonConfig.DEFAULT_EVENTS_TOPIC)).orElse(CommonConfig.DEFAULT_EVENTS_TOPIC)).
                 withSnapshotTopicName(Optional.ofNullable(System.getenv(Config.DEFAULT_SNAPSHOT_TOPIC)).orElse(Config.DEFAULT_SNAPSHOT_TOPIC)).
@@ -49,9 +52,9 @@ public final class EnvConfig {
                 isUnderTest(Optional.ofNullable(System.getenv(Config.UNDER_TEST)).orElse(Config.TEST)).build();
     }
 
-    private EnvConfig() { }
-
-    public static EnvConfig anEnvConfig() { return new EnvConfig(); }
+    public static EnvConfig anEnvConfig() {
+        return new EnvConfig();
+    }
 
     public EnvConfig withNamespace(String namespace) {
         this.namespace = namespace;
@@ -93,25 +96,22 @@ public final class EnvConfig {
         return this;
     }
 
-    public EnvConfig isUnderTest(String underTest){
+    public EnvConfig isUnderTest(String underTest) {
         this.test = Boolean.valueOf(underTest);
         return this;
     }
 
-    public EnvConfig skipOnDemandSnapshot(String skipOnDemandSnapshoot){
+    public EnvConfig skipOnDemandSnapshot(String skipOnDemandSnapshoot) {
         this.skipOnDemanSnapshot = Boolean.valueOf(skipOnDemandSnapshoot);
         return this;
     }
 
-    public EnvConfig withMaxSnapshotAgeSeconds(String maxSnapshotAge){
+    public EnvConfig withMaxSnapshotAgeSeconds(String maxSnapshotAge) {
         this.maxSnapshotAge = Long.valueOf(maxSnapshotAge);
         return this;
     }
 
     public EnvConfig build() {
-        if(this.skipOnDemanSnapshot== null){
-            this.skipOnDemanSnapshot = false;
-        }
         EnvConfig envConfig = new EnvConfig();
         envConfig.eventsTopicName = this.eventsTopicName;
         envConfig.namespace = this.namespace;
@@ -127,29 +127,49 @@ public final class EnvConfig {
         return envConfig;
     }
 
-    public String getNamespace() { return namespace; }
+    public String getNamespace() {
+        return namespace;
+    }
 
-    public String getEventsTopicName() { return eventsTopicName; }
+    public String getEventsTopicName() {
+        return eventsTopicName;
+    }
 
-    public String getControlTopicName() { return controlTopicName; }
+    public String getControlTopicName() {
+        return controlTopicName;
+    }
 
-    public String getSnapshotTopicName() { return snapshotTopicName; }
+    public String getSnapshotTopicName() {
+        return snapshotTopicName;
+    }
 
-    public String getKieSessionInfosTopicName() { return kieSessionInfosTopicName; }
+    public String getKieSessionInfosTopicName() {
+        return kieSessionInfosTopicName;
+    }
 
-    public String getPrinterType() { return printerType; }
+    public String getPrinterType() {
+        return printerType;
+    }
 
-    public Boolean isUnderTest(){ return test; }
+    public Boolean isUnderTest() {
+        return test;
+    }
 
     public Integer getPollTimeout() {
         return pollTimeout;
     }
 
-    public Integer getIterationBetweenSnapshot() { return iterationBetweenSnapshot; }
+    public Integer getIterationBetweenSnapshot() {
+        return iterationBetweenSnapshot;
+    }
 
-    public Boolean isSkipOnDemanSnapshot() { return skipOnDemanSnapshot; }
+    public Boolean isSkipOnDemanSnapshot() {
+        return skipOnDemanSnapshot;
+    }
 
-    public Long getMaxSnapshotAge() { return maxSnapshotAge; }
+    public Long getMaxSnapshotAge() {
+        return maxSnapshotAge;
+    }
 
     @Override
     public String toString() {
