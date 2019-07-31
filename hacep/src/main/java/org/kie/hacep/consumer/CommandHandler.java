@@ -187,7 +187,5 @@ public class CommandHandler implements VisitorCommand {
                 sessionSnapshooter.serialize(kieSessionContext, command.getId(), 0l);
             }
         }
-
-
     }
 }

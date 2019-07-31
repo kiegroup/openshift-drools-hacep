@@ -30,7 +30,7 @@ public final class EnvConfig {
     private String printerType;
     private Integer iterationBetweenSnapshot = Config.DEFAULT_ITERATION_BETWEEN_SNAPSHOT;
     private Integer pollTimeout = 1000;
-    private Boolean skipOnDemanSnapshot = false;
+    private Boolean skipOnDemanSnapshot = Boolean.FALSE;
     private Long maxSnapshotAge;
     private boolean test = false;
 
@@ -45,7 +45,7 @@ public final class EnvConfig {
                 withPollTimeout(Optional.ofNullable(System.getenv(Config.POLL_TIMEOUT_MS)).orElse(String.valueOf(Config.DEFAULT_POLL_TIMEOUT_MS))).
                 skipOnDemandSnapshot(Optional.ofNullable(System.getenv(Config.SKIP_ON_DEMAND_SNAPSHOT)).orElse(Boolean.FALSE.toString())).
                 withIterationBetweenSnapshot(Optional.ofNullable(System.getenv(Config.ITERATION_BETWEEN_SNAPSHOT)).orElse(String.valueOf(Config.DEFAULT_ITERATION_BETWEEN_SNAPSHOT))).
-                withMaxSnapshotAge(Optional.ofNullable(System.getenv(Config.MAX_SNAPSHOT_AGE)).orElse(String.valueOf(Config.DEFAULT_MAX_SNAPSHOT_AGE_SEC))).
+                withMaxSnapshotAgeSeconds(Optional.ofNullable(System.getenv(Config.MAX_SNAPSHOT_AGE)).orElse(Config.DEFAULT_MAX_SNAPSHOT_AGE_SEC)).
                 isUnderTest(Optional.ofNullable(System.getenv(Config.UNDER_TEST)).orElse(Config.TEST)).build();
     }
 
@@ -103,7 +103,7 @@ public final class EnvConfig {
         return this;
     }
 
-    public EnvConfig withMaxSnapshotAge(String maxSnapshotAge){
+    public EnvConfig withMaxSnapshotAgeSeconds(String maxSnapshotAge){
         this.maxSnapshotAge = Long.valueOf(maxSnapshotAge);
         return this;
     }

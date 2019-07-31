@@ -30,9 +30,6 @@ import org.kie.hacep.core.Bootstrap;
 import org.kie.hacep.core.infra.election.State;
 import org.kie.hacep.message.SnapshotMessage;
 import org.kie.remote.CommonConfig;;
-import org.kie.remote.TopicsConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static org.junit.Assert.*;
 import static org.kie.remote.util.SerializationUtil.deserialize;
@@ -51,7 +48,7 @@ public class SnapshotOnDemandTest {
                 withKieSessionInfosTopicName(CommonConfig.DEFAULT_KIE_SESSION_INFOS_TOPIC).
                 withPrinterType(PrinterKafkaImpl.class.getName()).
                 withPollTimeout("10").
-                withMaxSnapshotAge("60000").
+                withMaxSnapshotAgeSeconds("60000").
                 isUnderTest(Boolean.TRUE.toString()).build();
     }
 

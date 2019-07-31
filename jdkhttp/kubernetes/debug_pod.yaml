@@ -28,10 +28,3 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: spec.nodeName
-        - resources:
-            requests:
-              memory: "256Mi"
-              cpu:  "100m"
-            limits:
-              memory: "256mi"
-              cpu: "250m"

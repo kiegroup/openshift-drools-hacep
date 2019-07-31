@@ -31,7 +31,6 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.TopicPartition;
 import org.kie.api.KieServices;
-import org.kie.api.marshalling.KieMarshallers;
 import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
 import org.kie.api.runtime.KieSessionConfiguration;
@@ -54,25 +53,24 @@ public class SnapshotOnDemandUtils {
 
     public static SnapshotInfos askASnapshotOnDemand(EnvConfig config, SessionSnapshooter snapshooter){
         LocalDateTime infosTime = snapshooter.getLastSnapshotTime();
+
         LocalDateTime limitAge = LocalDateTime.now().minusSeconds(config.getMaxSnapshotAge());
         if(infosTime != null && limitAge.isBefore(infosTime)){ //included in the max age
+            if(logger.isInfoEnabled()){logger.info("Deserialize a recent snapshot");}
             return snapshooter.deserialize();
         }else{
-            return buildNewSnapshotOnDemand(config,
-                                            limitAge);
+            if(logger.isInfoEnabled()){logger.info("Build NewSnapshotOnDemand ");}
+            return buildNewSnapshotOnDemand(config, limitAge);
         }
     }
 
-    private static SnapshotInfos buildNewSnapshotOnDemand(EnvConfig config,
-                                                          LocalDateTime limitAge) {
+    private static SnapshotInfos buildNewSnapshotOnDemand(EnvConfig config, LocalDateTime limitAge) {
         SnapshotMessage snapshotMsg = askAndReadSnapshotOnDemand(config, limitAge);
-        KieContainer kieContainer = getKieContainer();
-        KieMarshallers marshallers = KieServices.get().getMarshallers();
         KieSession kSession = null;
         try (ByteArrayInputStream in = new ByteArrayInputStream(snapshotMsg.getSerializedSession())) {
             KieSessionConfiguration conf = KieServices.get().newKieSessionConfiguration();
             conf.setOption(ClockTypeOption.get("pseudo"));
-            kSession = marshallers.newMarshaller(kieContainer.getKieBase()).unmarshall(in, conf, null);
+            kSession = KieServices.get().getMarshallers().newMarshaller(getKieContainer().getKieBase()).unmarshall(in, conf, null);
         } catch (IOException | ClassNotFoundException e) {
             logger.error(e.getMessage(), e);
         }

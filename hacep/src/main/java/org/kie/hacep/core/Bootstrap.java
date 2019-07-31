@@ -43,7 +43,7 @@ public class Bootstrap {
         if(!envConfig.isUnderTest()) {
             leaderElection();
         }
-        logger.info("CONFIGURE on start engine:{}", Config.getDefaultConfig());
+        logger.info("CONFIGURE on start engine:{}", envConfig);
     }
 
     public static void stopEngine() {

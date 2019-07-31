@@ -73,14 +73,13 @@ public class DefaultKafkaConsumer<T> implements EventConsumerWithStatus, Leaders
     private AtomicInteger counter = new AtomicInteger(0);
     private SnapshotInfos snapshotInfos;
     private DeafultSessionSnapShooter snapShooter;
-    private Boolean skipOnDemandSnapshot;
     private Printer printer;
     private EnvConfig config;
     private Logger loggerForTest;
+    private volatile boolean askedSnapshotOnDemand;
 
     public DefaultKafkaConsumer(EnvConfig config) {
         this.config = config;
-        skipOnDemandSnapshot = config.isSkipOnDemanSnapshot();
         iterationBetweenSnapshot = config.getIterationBetweenSnapshot();
         this.printer = PrinterUtil.getPrinter(config);
         if (config.isUnderTest()) {
@@ -129,18 +128,25 @@ public class DefaultKafkaConsumer<T> implements EventConsumerWithStatus, Leaders
         } else {
             if(state.equals(State.REPLICA)) {
                 //ask and wait a snapshot before start
-                if (!config.isSkipOnDemanSnapshot()) {
-                    boolean completed = consumerHandler.initializeKieSessionFromSnapshotOnDemand(config);
-                    if (!completed) {
-                        throw new RuntimeException("Can't obtain a snapshot on demand");
-                    }
+                if (!config.isSkipOnDemanSnapshot() && !askedSnapshotOnDemand) {
+                    askAndProcessSnapshotOnDemand();
                 }
             }
-            enableConsumeAndStartLoop(state);
+            //State.BECOMING_LEADER state won't start the pod
+            if(state.equals(State.LEADER) || state.equals(State.REPLICA)) {
+                enableConsumeAndStartLoop(state);
+            }
         }
         currentState = state;
     }
 
+    private void askAndProcessSnapshotOnDemand() {
+        askedSnapshotOnDemand = true;
+        boolean completed = consumerHandler.initializeKieSessionFromSnapshotOnDemand(config);
+        if (!completed) {
+            throw new RuntimeException("Can't obtain a snapshot on demand");
+        }
+    }
 
     private void assign(List partitions) {
         if (leader) {
@@ -283,10 +289,6 @@ public class DefaultKafkaConsumer<T> implements EventConsumerWithStatus, Leaders
             startProcessingNotLeader();
             stopPollingEvents();
             startPollingControl();
-        } else if (state.equals(State.BECOMING_LEADER) && !leader) {
-            leader = true;
-            DroolsExecutor.setAsMaster();
-            stopLeaderProcessing();
         }
         setLastProcessedKey();
         assignAndStartConsume();
@@ -333,6 +335,7 @@ public class DefaultKafkaConsumer<T> implements EventConsumerWithStatus, Leaders
 
     private void defaultProcessAsLeader(int size) {
         startPollingEvents();
+        startProcessingLeader();
         ConsumerRecords<String, T> records = kafkaConsumer.poll(Duration.of(size, ChronoUnit.MILLIS));
         for (ConsumerRecord<String, T> record : records) {
             processLeader(record, counter);
@@ -342,12 +345,7 @@ public class DefaultKafkaConsumer<T> implements EventConsumerWithStatus, Leaders
 
     private void processLeader(ConsumerRecord<String, T> record,
                                AtomicInteger counter) {
-        if(logger.isInfoEnabled() || config.isUnderTest()) {
-            printer.prettyPrinter("DefaulKafkaConsumer.processLeader record:{}", record, processingLeader);
-        }
-        if (record.key().equals(processingKey)) {
-            startProcessingLeader();
-        } else if (processingLeader) {
+        if (processingLeader) {
             if(config.isSkipOnDemanSnapshot()){
                 handleSnapshotBetweenIteration(record, counter);
             }else{
@@ -356,6 +354,10 @@ public class DefaultKafkaConsumer<T> implements EventConsumerWithStatus, Leaders
             processingKey = record.key();// the new processed became the new processingKey
             saveOffset(record, kafkaConsumer);
         }
+        if(logger.isInfoEnabled() || config.isUnderTest()) {
+            printer.prettyPrinter("DefaulKafkaConsumer.processLeader record:{}", record, processingLeader);
+        }
+
     }
 
     private void handleSnapshotBetweenIteration(ConsumerRecord<String, T> record,

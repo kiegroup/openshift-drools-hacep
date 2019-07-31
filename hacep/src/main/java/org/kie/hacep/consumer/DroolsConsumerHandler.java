@@ -67,7 +67,8 @@ public class DroolsConsumerHandler implements ConsumerHandler {
         if(config.isSkipOnDemanSnapshot()) {// if true we reads the snapshots and waitn until the first leaderElectionUpdate
             this.infos = snapshooter.deserialize();
             this.kieSessionContext = createSessionHolder(infos);
-            clock = kieSessionContext.getKieSession().getSessionClock();
+            clock = kieSessionContext.getKieSession().getSessionClock();//@TODO Mario
+            //clock.advanceTime(stock.getTimestamp() - clock.getCurrentTime(), TimeUnit.MILLISECONDS); //@TODO Mario
         } else{
             kieSessionContext = new KieSessionContext();
             createClasspathSession( kieSessionContext );
@@ -78,7 +79,8 @@ public class DroolsConsumerHandler implements ConsumerHandler {
         if(!config.isSkipOnDemanSnapshot()) {// if true we reads the snapshots and wait until the first leaderElectionUpdate
             this.infos = SnapshotOnDemandUtils.askASnapshotOnDemand(config, snapshooter);
             this.kieSessionContext = createSessionHolder(infos);
-            clock = kieSessionContext.getKieSession().getSessionClock();
+            clock = kieSessionContext.getKieSession().getSessionClock();//@TODO Mario
+            //clock.advanceTime(stock.getTimestamp() - clock.getCurrentTime(), TimeUnit.MILLISECONDS); //@TODO Mario
             return true;
         }
         return false;
@@ -93,22 +95,20 @@ public class DroolsConsumerHandler implements ConsumerHandler {
         RemoteCommand command  = deserialize((byte[])item.getObject());
 
         if(config.isUnderTest()) {  loggerForTest.warn("Remote command on process:{}", command); }
-
         if (state.equals(State.LEADER)) {
             processCommand( command, state );
             Queue<Object> sideEffectsResults = DroolsExecutor.getInstance().getAndReset();
-            if (config.isUnderTest()) { loggerForTest.warn("sideEffectOnLeader:{}", sideEffectsResults); }
-
             ControlMessage newControlMessage = new ControlMessage(command.getId(), sideEffectsResults);
             producer.produceSync(config.getControlTopicName(), command.getId(), newControlMessage);
+            if (config.isUnderTest()) { loggerForTest.warn("sideEffectOnLeader:{}", sideEffectsResults); }
         } else {
             processCommand( command, state );
         }
     }
 
     public void processSideEffectsOnReplica(Queue<Object> newSideEffects) {
-        if(config.isUnderTest()){ loggerForTest.warn("sideEffectOnReplica:{}", newSideEffects);}
         DroolsExecutor.getInstance().appendSideEffects(newSideEffects);
+        if(config.isUnderTest()){ loggerForTest.warn("sideEffectOnReplica:{}", newSideEffects);}
     }
 
     @Override

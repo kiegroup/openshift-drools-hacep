@@ -5,4 +5,4 @@ WORKDIR $APP_HOME
 COPY target/*-jdkhttp-fat.jar /usr/app/
 RUN chmod 775 /usr/app
 EXPOSE 8080
-CMD ["java","-Xmx130m", "-XX:+UnlockExperimentalVMOptions", "-XX:+UseCGroupMemoryLimitForHeap", "-jar","openshift-kie-jdkhttp-fat.jar"]
+CMD ["java", "-jar","openshift-kie-jdkhttp-fat.jar"]
