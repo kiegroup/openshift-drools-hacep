@@ -21,7 +21,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import org.drools.core.impl.StatefulKnowledgeSessionImpl;
 import org.kie.api.runtime.rule.FactHandle;
 import org.kie.hacep.EnvConfig;
 import org.kie.hacep.core.KieSessionContext;
@@ -181,37 +180,24 @@ public class CommandHandler implements VisitorCommand {
 
     @Override
     public void visit(FactCountCommand command) {
-        FactCountMessageImpl msg = new FactCountMessageImpl(command.getId(),
-                                                            kieSessionContext.getKieSession().getFactCount());
-        producer.produceSync(envConfig.getKieSessionInfosTopicName(),
-                             command.getId(),
-                             msg);
+        FactCountMessageImpl msg = new FactCountMessageImpl(command.getId(), kieSessionContext.getKieSession().getFactCount());
+        producer.produceSync(envConfig.getKieSessionInfosTopicName(), command.getId(), msg);
     }
 
     @Override
     public void visit(SnapshotOnDemandCommand command) {
         LocalDateTime lastSnapshotTime = sessionSnapshooter.getLastSnapshotTime();
-        LocalDateTime limitAge = LocalDateTime.now().minusSeconds(envConfig.getMaxSnapshotAge());
+
         //if the lastSnapshot time is after the the age we perform a snapshot
         if (lastSnapshotTime == null) {
-            if (((StatefulKnowledgeSessionImpl) kieSessionContext.getKieSession()).isAlive()) {
-                sessionSnapshooter.serialize(kieSessionContext,
-                                             command.getId(),
-                                             0l);
-            }
-        } else if (limitAge.isAfter(lastSnapshotTime)) {
-            ControlMessage lastControlMessage = ConsumerUtils.getLastEvent(envConfig.getControlTopicName(),
-                                                                           envConfig.getPollTimeout());
-            if (((StatefulKnowledgeSessionImpl) kieSessionContext.getKieSession()).isAlive()) {
-                if (lastControlMessage != null) {
-                    sessionSnapshooter.serialize(kieSessionContext,
-                                                 lastControlMessage.getKey(),
-                                                 lastControlMessage.getOffset());
-                } else {
-                    sessionSnapshooter.serialize(kieSessionContext,
-                                                 command.getId(),
-                                                 0l);
-                }
+            sessionSnapshooter.serialize(kieSessionContext, command.getId(), 0l);
+        } else if (LocalDateTime.now().minusSeconds(envConfig.getMaxSnapshotAge()).isAfter(lastSnapshotTime)) {
+
+            ControlMessage lastControlMessage = ConsumerUtils.getLastEvent(envConfig.getControlTopicName(), envConfig.getPollTimeout());
+            if (lastControlMessage != null) {
+                sessionSnapshooter.serialize(kieSessionContext, lastControlMessage.getKey(), lastControlMessage.getOffset());
+            } else {
+                sessionSnapshooter.serialize(kieSessionContext, command.getId(), 0l);
             }
         }
     }

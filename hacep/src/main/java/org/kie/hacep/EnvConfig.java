@@ -30,9 +30,9 @@ public final class EnvConfig {
     private String printerType;
     private Integer iterationBetweenSnapshot = Config.DEFAULT_ITERATION_BETWEEN_SNAPSHOT;
     private Integer pollTimeout = 1000;
-    private Boolean skipOnDemanSnapshot = Boolean.FALSE;
+    private boolean skipOnDemanSnapshot;
     private Long maxSnapshotAge;
-    private Boolean test = Boolean.FALSE;
+    private boolean test;
 
     private EnvConfig() {
     }
