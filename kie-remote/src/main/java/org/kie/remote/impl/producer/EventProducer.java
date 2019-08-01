@@ -21,7 +21,6 @@ import java.util.concurrent.ExecutionException;
 import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.clients.producer.RecordMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,18 +47,13 @@ public class EventProducer<T> implements Producer {
     }
 
 
-    public long produceSync(String topicName, String key, Object object) {
-        RecordMetadata recordMetadata = null;
+    public void produceSync(String topicName, String key, Object object) {
         try {
-            recordMetadata = producer.send(getFreshProducerRecord(topicName, key, object)).get();
-        } catch (InterruptedException e) {
-            logger.error("Error in produceSync!", e);
-        } catch (ExecutionException e) {
+            producer.send(getFreshProducerRecord(topicName, key, object)).get();
+        } catch (InterruptedException | ExecutionException e) {
             logger.error("Error in produceSync!", e);
         }
-        return recordMetadata.offset();
     }
-
 
     public void produceAsync(String topicName, String key, Object object, Callback callback) {
         producer.send(getFreshProducerRecord(topicName, key, object), callback);

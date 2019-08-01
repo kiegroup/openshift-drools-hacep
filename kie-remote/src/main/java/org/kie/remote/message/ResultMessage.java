@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.kie.remote.message;
 
-public interface VisitableMessage {
+public interface ResultMessage<T> {
+    String getKey();
 
-    void accept(VisitorMessage visitor);
+    T getResult();
 }

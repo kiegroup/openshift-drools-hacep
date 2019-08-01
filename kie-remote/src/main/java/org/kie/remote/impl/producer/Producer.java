@@ -19,7 +19,9 @@ import java.util.Properties;
 
 import org.apache.kafka.clients.producer.Callback;
 
-public interface Producer{
+import static org.kie.remote.CommonConfig.LOCAL_MESSAGE_SYSTEM_CONF;
+
+public interface Producer {
 
     void start(Properties properties);
 
@@ -27,7 +29,16 @@ public interface Producer{
 
     void produceFireAndForget(String topicName, String key, Object object);
 
-    long produceSync(String topicName, String key, Object object);
+    void produceSync(String topicName, String key, Object object);
 
     void produceAsync(String topicName, String key, Object object, Callback callback);
+
+    static Producer get(Properties configuration) {
+        Boolean isLocal = (Boolean) configuration.get( LOCAL_MESSAGE_SYSTEM_CONF );
+        return get(isLocal != null && isLocal);
+    }
+
+    static Producer get(boolean isLocal) {
+        return isLocal ? new LocalProducer() : new EventProducer();
+    }
 }

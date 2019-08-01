@@ -13,23 +13,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.kie.hacep.core.infra.consumer;
 
-import org.kie.hacep.core.infra.election.LeadershipCallback;
-import org.kie.hacep.core.infra.election.State;
+package org.kie.hacep.sample.kjar;
 
-public class InfraCallback implements LeadershipCallback {
+import java.io.Serializable;
 
-    private LeadershipCallback consumer;
+public class Result implements Serializable {
+    private String stockName;
+    private Object value;
 
-    public InfraCallback() { }
+    public Result() { }
 
-    public void setConsumer(LeadershipCallback newConsumer) {
-        this.consumer = newConsumer;
+    public Result( String stockName ) {
+        this.stockName = stockName;
+    }
+
+    public String getStockName() {
+        return stockName;
+    }
+
+    public Object getValue() {
+        return value;
+    }
+
+    public void setValue( Object value ) {
+        this.value = value;
     }
 
     @Override
-    public void updateStatus(State state) {
-        consumer.updateStatus(state);
+    public String toString() {
+        return "Result{" +
+                "stockName='" + stockName + '\'' +
+                ", value=" + value +
+                '}';
     }
 }

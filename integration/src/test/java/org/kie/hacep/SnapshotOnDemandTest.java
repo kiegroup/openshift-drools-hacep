@@ -49,7 +49,7 @@ public class SnapshotOnDemandTest {
                 withPrinterType(PrinterKafkaImpl.class.getName()).
                 withPollTimeout("10").
                 withMaxSnapshotAgeSeconds("60000").
-                isUnderTest(Boolean.TRUE.toString()).build();
+                underTest(true);
     }
 
     @Before

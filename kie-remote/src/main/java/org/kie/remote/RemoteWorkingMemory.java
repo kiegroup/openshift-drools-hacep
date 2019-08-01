@@ -44,7 +44,7 @@ public interface RemoteWorkingMemory {
      * @param clazztype the filter to be applied to the returned collection of facts.
      * @@return CompletableFuture of Collection<? extends Object> to read all facts from the current session that are accepted by the given <code>ObjectFilter</code>.
      */
-    CompletableFuture<Collection<? extends Object>> getObjects(Class clazztype);
+    <T> CompletableFuture<Collection<T>> getObjects(Class<T> clazztype);
 
 
     /**

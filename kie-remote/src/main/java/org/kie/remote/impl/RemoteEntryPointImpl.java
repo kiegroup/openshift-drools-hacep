@@ -16,6 +16,7 @@
 package org.kie.remote.impl;
 
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 import org.kie.remote.RemoteEntryPoint;
 import org.kie.remote.RemoteFactHandle;
@@ -23,25 +24,21 @@ import org.kie.remote.TopicsConfig;
 import org.kie.remote.command.DeleteCommand;
 import org.kie.remote.command.InsertCommand;
 import org.kie.remote.command.UpdateCommand;
+import org.kie.remote.impl.consumer.Listener;
 import org.kie.remote.impl.producer.Sender;
 
 public class RemoteEntryPointImpl extends AbstractRemoteEntryPoint implements RemoteEntryPoint {
 
     protected final RemoteStatefulSessionImpl delegate;
 
-    protected RemoteEntryPointImpl(Sender sender, String entryPoint, TopicsConfig topicsConfig, Map requestsStore) {
-        super(sender, entryPoint, topicsConfig, requestsStore);
-        delegate = new RemoteStatefulSessionImpl( sender, requestsStore, topicsConfig );
+    protected RemoteEntryPointImpl(Sender sender, String entryPoint, TopicsConfig topicsConfig, Listener listener) {
+        super(sender, entryPoint, topicsConfig);
+        delegate = new RemoteStatefulSessionImpl( sender, listener, topicsConfig );
     }
 
-    protected RemoteEntryPointImpl(Sender sender, String entryPoint, TopicsConfig topicsConfig, Map requestsStore, RemoteStatefulSessionImpl delegate) {
-        super(sender, entryPoint, topicsConfig, requestsStore);
+    protected RemoteEntryPointImpl(Sender sender, String entryPoint, TopicsConfig topicsConfig, RemoteStatefulSessionImpl delegate) {
+        super(sender, entryPoint, topicsConfig);
         this.delegate = delegate;
-    }
-
-    public void stop() {
-        listener.stopConsumeEvents();
-        requestsStore.clear();
     }
 
     @Override
@@ -62,5 +59,9 @@ public class RemoteEntryPointImpl extends AbstractRemoteEntryPoint implements Re
     public void update( RemoteFactHandle handle, Object object ) {
         UpdateCommand command = new UpdateCommand( handle, object, entryPoint );
         sender.sendCommand(command, topicsConfig.getEventsTopicName());
+    }
+
+    protected Map<String, CompletableFuture<Object>> getRequestsStore() {
+        return delegate.getRequestsStore();
     }
 }

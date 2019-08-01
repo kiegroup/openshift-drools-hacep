@@ -21,7 +21,7 @@ import org.kie.hacep.Config;
 import org.kie.hacep.EnvConfig;
 import org.kie.hacep.core.infra.consumer.ConsumerController;
 import org.kie.hacep.core.infra.election.LeaderElection;
-import org.kie.remote.impl.producer.EventProducer;
+import org.kie.remote.impl.producer.Producer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,15 +31,15 @@ import org.slf4j.LoggerFactory;
 public class Bootstrap {
 
     private static final Logger logger = LoggerFactory.getLogger(Bootstrap.class);
-    private static EventProducer<?> eventProducer;
+    private static Producer eventProducer;
     private static ConsumerController consumerController;
     private static CoreKube coreKube;
 
     public static void startEngine(EnvConfig envConfig) {
         //order matter
         coreKube = new CoreKube(envConfig.getNamespace(), null);
-        startProducer();
-        startConsumers(envConfig);
+        eventProducer = startProducer(envConfig);
+        startConsumers(envConfig, eventProducer);
         if(!envConfig.isUnderTest()) {
             leaderElection();
         }
@@ -66,7 +66,7 @@ public class Bootstrap {
     }
 
     // only for tests
-    public static ConsumerController getConsumerController(){
+    public static ConsumerController getConsumerController() {
         return consumerController;
     }
 
@@ -80,13 +80,14 @@ public class Bootstrap {
         }
     }
 
-    private static void startProducer() {
-        eventProducer = new EventProducer<>();
-        eventProducer.start(Config.getProducerConfig("EventProducer"));
+    private static Producer startProducer(EnvConfig envConfig) {
+        Producer producer = Producer.get( envConfig.isLocal() );
+        producer.start(Config.getProducerConfig("EventProducer"));
+        return producer;
     }
 
-    private static void startConsumers(EnvConfig envConfig) {
-        consumerController = new ConsumerController(envConfig, eventProducer);
+    private static void startConsumers(EnvConfig envConfig, Producer producer) {
+        consumerController = new ConsumerController(envConfig, producer);
         consumerController.start();
     }
 }

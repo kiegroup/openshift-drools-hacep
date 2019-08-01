@@ -22,26 +22,26 @@ import org.kie.remote.impl.ClientUtils;
 
 public class Sender {
 
-    private EventProducer producer;
+    private Producer producer;
     private Properties configuration;
 
     public Sender( Properties configuration ) {
-        producer = new EventProducer();
-        if ( configuration != null && !configuration.isEmpty() ) {
-            this.configuration = configuration;
-        }
+        this.configuration = configuration != null && !configuration.isEmpty() ?
+                configuration :
+                ClientUtils.getConfiguration( ClientUtils.PRODUCER_CONF );
+        this.producer = Producer.get(configuration);
     }
 
     public void start() {
-        producer.start( configuration != null ? configuration : ClientUtils.getConfiguration( ClientUtils.PRODUCER_CONF ) );
+        producer.start( configuration );
     }
 
     public void stop() {
         producer.stop();
     }
 
-    public long sendCommand(RemoteCommand command, String topicName ) {
-        return producer.produceSync( topicName, command.getId(), command );
+    public void sendCommand(RemoteCommand command, String topicName ) {
+        producer.produceSync( topicName, command.getId(), command );
     }
 
     public void insertFireAndForget( RemoteCommand command, String topicName ) {

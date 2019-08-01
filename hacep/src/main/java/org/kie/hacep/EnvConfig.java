@@ -28,11 +28,12 @@ public final class EnvConfig {
     private String snapshotTopicName;
     private String kieSessionInfosTopicName;
     private String printerType;
-    private Integer iterationBetweenSnapshot = Config.DEFAULT_ITERATION_BETWEEN_SNAPSHOT;
-    private Integer pollTimeout = 1000;
+    private int iterationBetweenSnapshot = Config.DEFAULT_ITERATION_BETWEEN_SNAPSHOT;
+    private int pollTimeout = 1000;
     private boolean skipOnDemanSnapshot;
-    private Long maxSnapshotAge;
+    private long maxSnapshotAge;
     private boolean test;
+    private boolean local;
 
     private EnvConfig() {
     }
@@ -49,7 +50,7 @@ public final class EnvConfig {
                 skipOnDemandSnapshot(Optional.ofNullable(System.getenv(Config.SKIP_ON_DEMAND_SNAPSHOT)).orElse(Boolean.FALSE.toString())).
                 withIterationBetweenSnapshot(Optional.ofNullable(System.getenv(Config.ITERATION_BETWEEN_SNAPSHOT)).orElse(String.valueOf(Config.DEFAULT_ITERATION_BETWEEN_SNAPSHOT))).
                 withMaxSnapshotAgeSeconds(Optional.ofNullable(System.getenv(Config.MAX_SNAPSHOT_AGE)).orElse(Config.DEFAULT_MAX_SNAPSHOT_AGE_SEC)).
-                isUnderTest(Optional.ofNullable(System.getenv(Config.UNDER_TEST)).orElse(Config.TEST)).build();
+                underTest(Optional.ofNullable(System.getenv(Config.UNDER_TEST)).orElse(Config.TEST));
     }
 
     public static EnvConfig anEnvConfig() {
@@ -96,8 +97,17 @@ public final class EnvConfig {
         return this;
     }
 
-    public EnvConfig isUnderTest(String underTest) {
-        this.test = Boolean.valueOf(underTest);
+    public EnvConfig underTest(String underTest) {
+        return underTest(Boolean.valueOf(underTest));
+    }
+
+    public EnvConfig underTest(boolean underTest) {
+        this.test = underTest;
+        return this;
+    }
+
+    public EnvConfig local(boolean local) {
+        this.local = local;
         return this;
     }
 
@@ -111,7 +121,7 @@ public final class EnvConfig {
         return this;
     }
 
-    public EnvConfig build() {
+    public EnvConfig clone() {
         EnvConfig envConfig = new EnvConfig();
         envConfig.eventsTopicName = this.eventsTopicName;
         envConfig.namespace = this.namespace;
@@ -120,6 +130,7 @@ public final class EnvConfig {
         envConfig.kieSessionInfosTopicName = this.kieSessionInfosTopicName;
         envConfig.printerType = this.printerType;
         envConfig.test = this.test;
+        envConfig.local = this.local;
         envConfig.pollTimeout = this.pollTimeout;
         envConfig.iterationBetweenSnapshot = this.iterationBetweenSnapshot;
         envConfig.skipOnDemanSnapshot = this.skipOnDemanSnapshot;
@@ -151,24 +162,28 @@ public final class EnvConfig {
         return printerType;
     }
 
-    public Boolean isUnderTest() {
+    public boolean isUnderTest() {
         return test;
     }
 
-    public Integer getPollTimeout() {
+    public int getPollTimeout() {
         return pollTimeout;
     }
 
-    public Integer getIterationBetweenSnapshot() {
+    public int getIterationBetweenSnapshot() {
         return iterationBetweenSnapshot;
     }
 
-    public Boolean isSkipOnDemanSnapshot() {
+    public boolean isSkipOnDemanSnapshot() {
         return skipOnDemanSnapshot;
     }
 
-    public Long getMaxSnapshotAge() {
+    public long getMaxSnapshotAge() {
         return maxSnapshotAge;
+    }
+
+    public boolean isLocal() {
+        return local;
     }
 
     @Override

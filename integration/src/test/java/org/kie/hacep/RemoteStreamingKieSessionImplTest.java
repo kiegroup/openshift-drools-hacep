@@ -70,7 +70,6 @@ public class RemoteStreamingKieSessionImplTest {
         RemoteStreamingKieSessionImpl client = new RemoteStreamingKieSessionImpl(Config.getProducerConfig("FactCountConsumerTest"),
                                                                      topicsConfig);
         try {
-            client.listen();
             CompletableFuture<Long> factCountFuture = client.getFactCount();
             Long factCount = factCountFuture.get(5, TimeUnit.SECONDS);
             assertTrue(factCount == 7);
@@ -90,7 +89,6 @@ public class RemoteStreamingKieSessionImplTest {
         RemoteStreamingKieSessionImpl client = new RemoteStreamingKieSessionImpl(CommonConfig.getProducerConfig("ListKieSessionObjectsConsumerTest"),
                                                                      topicsConfig);
         try {
-            client.listen();
             CompletableFuture<Collection<? extends Object>> listKieObjectsFuture = client.getObjects();
             Collection<? extends Object> listKieObjects = listKieObjectsFuture.get(5,
                                                                                    TimeUnit.SECONDS);
@@ -113,8 +111,7 @@ public class RemoteStreamingKieSessionImplTest {
         RemoteStreamingKieSessionImpl client = new RemoteStreamingKieSessionImpl(Config.getProducerConfig("ListKieSessionObjectsWithClassTypeTest"),
                                                                      topicsConfig);
         try {
-            client.listen();
-            CompletableFuture<Collection<? extends Object>> listKieObjectsFuture = client.getObjects(StockTickEvent.class);
+            CompletableFuture<Collection<StockTickEvent>> listKieObjectsFuture = client.getObjects(StockTickEvent.class);
             Collection<? extends Object> listKieObjects = listKieObjectsFuture.get(5, TimeUnit.SECONDS);
             assertTrue(listKieObjects.size() == 1);
             StockTickEvent event = (StockTickEvent) listKieObjects.iterator().next();
@@ -134,7 +131,6 @@ public class RemoteStreamingKieSessionImplTest {
         RemoteStreamingKieSessionImpl client = new RemoteStreamingKieSessionImpl(Config.getProducerConfig("ListKieSessionObjectsWithNamedQueryTest"),
                                                                      topicsConfig);
         try{
-            client.listen();
 
             doQuery( client, "IBM", 0 );
 

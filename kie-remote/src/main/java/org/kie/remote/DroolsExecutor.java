@@ -23,20 +23,20 @@ import java.util.function.Supplier;
 
 public abstract class DroolsExecutor {
 
-    private static boolean isMaster;
+    private static boolean isLeader;
 
     protected Queue<Object> executionResults = new ArrayDeque<>();
 
     public static DroolsExecutor getInstance() {
-        return isMaster ? Master.INSTANCE : Slave.INSTANCE;
+        return isLeader ? Leader.INSTANCE : Slave.INSTANCE;
     }
 
-    public static void setAsMaster() {
-        isMaster = true;
+    public static void setAsLeader() {
+        isLeader = true;
     }
 
-    public static void setAsSlave() {
-        isMaster = false;
+    public static void setAsReplica() {
+        isLeader = false;
     }
 
     public abstract void execute( Runnable f );
@@ -51,9 +51,9 @@ public abstract class DroolsExecutor {
         throw new UnsupportedOperationException();
     }
 
-    public static class Master extends DroolsExecutor {
+    public static class Leader extends DroolsExecutor {
 
-        private static final Master INSTANCE = new Master();
+        private static final Leader INSTANCE = new Leader();
 
         @Override
         public void execute( Runnable f ) {

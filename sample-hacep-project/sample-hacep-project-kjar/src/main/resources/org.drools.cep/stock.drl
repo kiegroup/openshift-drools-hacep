@@ -1,14 +1,16 @@
 package org.drools.cep
 
 import org.kie.hacep.sample.kjar.StockTickEvent
+import org.kie.hacep.sample.kjar.Result
 import org.kie.remote.DroolsExecutor
 import java.util.UUID
 
 rule StockAverage when
-  $name : String()
-  accumulate ( StockTickEvent( company == $name, $p : price ) over window:time(30s), $avg : average( $p ) )
+  $r : Result($name : stockName)
+  accumulate ( StockTickEvent( company == $name, $p : price ), $avg : average( $p ) )
 then
   System.out.println("Average price for " + $name + " is " + $avg);
+  $r.setValue($avg);
 end
 
 rule StockLog when

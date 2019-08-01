@@ -17,13 +17,9 @@ package org.kie.hacep.message;
 
 import java.io.Serializable;
 
-import org.kie.remote.message.FactCountMessage;
-import org.kie.remote.message.VisitableMessage;
-import org.kie.remote.message.VisitorMessage;
+import org.kie.remote.message.ResultMessage;
 
-public class FactCountMessageImpl implements Serializable,
-                                             VisitableMessage,
-                                             FactCountMessage {
+public class FactCountMessageImpl implements Serializable, ResultMessage<Long> {
 
     private String key;
     private long factCount;
@@ -43,6 +39,10 @@ public class FactCountMessageImpl implements Serializable,
     }
 
     @Override
+    public Long getResult() {
+        return getFactCount();
+    }
+
     public long getFactCount() {
         return factCount;
     }
@@ -54,10 +54,5 @@ public class FactCountMessageImpl implements Serializable,
         sb.append(", factCount=").append(factCount);
         sb.append('}');
         return sb.toString();
-    }
-
-    @Override
-    public void accept(VisitorMessage visitor) {
-        visitor.visit(this, key);
     }
 }

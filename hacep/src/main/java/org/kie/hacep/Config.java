@@ -36,7 +36,7 @@ public class Config {
     public static final String DEFAULT_CONTROL_TOPIC = "control";
     public static final String DEFAULT_SNAPSHOT_TOPIC = "snapshot";
     public static final String ITERATION_BETWEEN_SNAPSHOT = "iteration.between.snapshot";
-    public static final Integer DEFAULT_ITERATION_BETWEEN_SNAPSHOT = 10;
+    public static final int DEFAULT_ITERATION_BETWEEN_SNAPSHOT = 10;
     public static final String DEFAULT_PRINTER_TYPE = "printer.type";
     public static final String MAX_SNAPSHOT_AGE = "max.snapshot.age";
     public static final String DEFAULT_MAX_SNAPSHOT_AGE_SEC = "600";

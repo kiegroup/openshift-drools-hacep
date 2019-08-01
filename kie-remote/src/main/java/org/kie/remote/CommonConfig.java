@@ -39,6 +39,8 @@ public class CommonConfig {
     private static Properties producerConf;
     private static final String PRODUCER_CONF = "producer.properties";
 
+    public static final String LOCAL_MESSAGE_SYSTEM_CONF = "local.message.system";
+
     private static Properties config;
 
     public static synchronized Properties getStatic() {
@@ -51,6 +53,12 @@ public class CommonConfig {
             config.put(ConsumerConfig.GROUP_ID_CONFIG, "drools");
         }
         return config;
+    }
+
+    public static Properties getTestProperties() {
+        Properties props = new Properties();
+        props.put( LOCAL_MESSAGE_SYSTEM_CONF, true );
+        return props;
     }
 
     public static Properties getProducerConfig(String caller) {

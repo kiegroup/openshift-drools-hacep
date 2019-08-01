@@ -15,9 +15,18 @@
  */
 package org.kie.hacep.core.infra.consumer;
 
-public interface EventConsumer {
+import org.kie.hacep.EnvConfig;
+import org.kie.hacep.core.infra.election.LeadershipCallback;
+
+public interface EventConsumer extends LeadershipCallback {
+
+    void initConsumer(ConsumerHandler consumerHandler);
 
     void poll(int durationMillis);
 
     void stop();
+
+    static EventConsumer get(EnvConfig config) {
+        return config.isLocal() ? new LocalConsumer( config ) : new DefaultKafkaConsumer( config );
+    }
 }

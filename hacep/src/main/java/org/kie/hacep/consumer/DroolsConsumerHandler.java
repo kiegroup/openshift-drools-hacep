@@ -17,10 +17,10 @@ package org.kie.hacep.consumer;
 
 import java.util.Queue;
 
-import org.drools.core.impl.StatefulKnowledgeSessionImpl;
 import org.kie.api.KieServices;
 import org.kie.api.runtime.KieContainer;
 import org.kie.api.time.SessionPseudoClock;
+import org.kie.hacep.EnvConfig;
 import org.kie.hacep.core.KieSessionContext;
 import org.kie.hacep.core.infra.DeafultSessionSnapShooter;
 import org.kie.hacep.core.infra.SnapshotInfos;
@@ -29,13 +29,11 @@ import org.kie.hacep.core.infra.consumer.ItemToProcess;
 import org.kie.hacep.core.infra.election.State;
 import org.kie.hacep.core.infra.utils.SnapshotOnDemandUtils;
 import org.kie.hacep.message.ControlMessage;
+import org.kie.hacep.util.PrinterUtil;
 import org.kie.remote.DroolsExecutor;
-import org.kie.hacep.EnvConfig;
 import org.kie.remote.command.RemoteCommand;
 import org.kie.remote.command.VisitableCommand;
-import org.kie.remote.impl.producer.EventProducer;
 import org.kie.remote.impl.producer.Producer;
-import org.kie.hacep.util.PrinterUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,7 +52,7 @@ public class DroolsConsumerHandler implements ConsumerHandler {
     private SnapshotInfos infos;
     private boolean shutdown;
 
-    public DroolsConsumerHandler(EventProducer producer, EnvConfig envConfig) {
+    public DroolsConsumerHandler(Producer producer, EnvConfig envConfig) {
         this.config = envConfig;
         this.snapshooter = new DeafultSessionSnapShooter(config);
         initializeKieSessionFromSnapshot(config);
@@ -95,7 +93,11 @@ public class DroolsConsumerHandler implements ConsumerHandler {
     @Override
     public void process( ItemToProcess item, State state) {
         RemoteCommand command  = deserialize((byte[])item.getObject());
+        process( command, state );
+    }
 
+    @Override
+    public void process( RemoteCommand command, State state ) {
         if(config.isUnderTest()) {  loggerForTest.warn("Remote command on process:{}", command); }
         if (state.equals(State.LEADER)) {
             processCommand( command, state );

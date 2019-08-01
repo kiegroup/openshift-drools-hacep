@@ -324,6 +324,6 @@ public class KafkaUtilTest implements AutoCloseable {
                 withIterationBetweenSnapshot("10").
                 skipOnDemandSnapshot("true").
                 withMaxSnapshotAgeSeconds("60000").
-                isUnderTest(Boolean.TRUE.toString()).build();
+                underTest(true);
     }
 }

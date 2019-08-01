@@ -27,10 +27,8 @@ import org.kie.hacep.core.infra.election.State;
 import org.kie.remote.RemoteKieSession;
 import org.kie.remote.TopicsConfig;
 import org.kie.remote.impl.RemoteKieSessionImpl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class RemoteKieSessionImplTest {
 
@@ -70,7 +68,6 @@ public class RemoteKieSessionImplTest {
                                                                topicsConfig);
         try {
             client.fireUntilHalt();
-            client.listen();
             CompletableFuture<Long> factCountFuture = client.getFactCount();
             Long factCount = factCountFuture.get(20, TimeUnit.SECONDS);
             assertEquals( new Long(7), factCount);

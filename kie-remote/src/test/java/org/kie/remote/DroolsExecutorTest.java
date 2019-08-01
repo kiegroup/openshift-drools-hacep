@@ -32,7 +32,7 @@ public class DroolsExecutorTest {
     public void testGetMaster() {
         final DroolsExecutor master = getMasterExecutor();
 
-        Assertions.assertThat(master).isInstanceOf(DroolsExecutor.Master.class);
+        Assertions.assertThat(master).isInstanceOf( DroolsExecutor.Leader.class);
     }
 
     @Test
@@ -88,12 +88,12 @@ public class DroolsExecutorTest {
     }
 
     private static DroolsExecutor getMasterExecutor() {
-        DroolsExecutor.setAsMaster();
+        DroolsExecutor.setAsLeader();
         return DroolsExecutor.getInstance();
     }
 
     private static DroolsExecutor getSlaveExecutor() {
-        DroolsExecutor.setAsSlave();
+        DroolsExecutor.setAsReplica();
         return DroolsExecutor.getInstance();
     }
 

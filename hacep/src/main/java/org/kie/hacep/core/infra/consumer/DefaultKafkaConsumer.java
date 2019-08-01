@@ -38,7 +38,6 @@ import org.kie.hacep.consumer.DroolsConsumerHandler;
 import org.kie.hacep.core.infra.DeafultSessionSnapShooter;
 import org.kie.hacep.core.infra.OffsetManager;
 import org.kie.hacep.core.infra.SnapshotInfos;
-import org.kie.hacep.core.infra.election.LeadershipCallback;
 import org.kie.hacep.core.infra.election.State;
 import org.kie.hacep.core.infra.utils.ConsumerUtils;
 import org.kie.hacep.message.ControlMessage;
@@ -54,8 +53,7 @@ import static org.kie.remote.util.SerializationUtil.deserialize;
  * The default consumer relies on the Consumer thread and
  * is based on the loop around poll method.
  */
-public class DefaultKafkaConsumer<T> implements EventConsumerWithStatus,
-                                                LeadershipCallback {
+public class DefaultKafkaConsumer<T> implements EventConsumer {
 
     private Logger logger = LoggerFactory.getLogger(DefaultKafkaConsumer.class);
     private Map<TopicPartition, OffsetAndMetadata> offsetsEvents = new HashMap<>();
@@ -88,7 +86,7 @@ public class DefaultKafkaConsumer<T> implements EventConsumerWithStatus,
         }
     }
 
-    public void createConsumer(ConsumerHandler consumerHandler) {
+    public void initConsumer(ConsumerHandler consumerHandler) {
         this.consumerHandler = (DroolsConsumerHandler) consumerHandler;
         this.snapShooter = this.consumerHandler.getSnapshooter();
         this.kafkaConsumer = new KafkaConsumer<>(Config.getConsumerConfig("PrimaryConsumer"));
@@ -256,10 +254,10 @@ public class DefaultKafkaConsumer<T> implements EventConsumerWithStatus,
 
     private void updateOnRunningConsumer(State state) {
         if (state.equals(State.LEADER) && !leader) {
-            DroolsExecutor.setAsMaster();
+            DroolsExecutor.setAsLeader();
             restart(state);
         } else if (state.equals(State.REPLICA) && leader) {
-            DroolsExecutor.setAsSlave();
+            DroolsExecutor.setAsReplica();
             restart(state);
         }
     }
@@ -273,19 +271,19 @@ public class DefaultKafkaConsumer<T> implements EventConsumerWithStatus,
     private void enableConsumeAndStartLoop(State state) {
         if (state.equals(State.LEADER) && !leader) {
             leader = true;
-            DroolsExecutor.setAsMaster();
+            DroolsExecutor.setAsLeader();
             stopLeaderProcessing();// we starts to processing only when the last key readed on bootstrap is reached
         } else if (state.equals(State.REPLICA) && leader) {
             leader = false;
             kafkaSecondaryConsumer = new KafkaConsumer<>(Config.getConsumerConfig("SecondaryConsumer"));
-            DroolsExecutor.setAsSlave();
+            DroolsExecutor.setAsReplica();
             startProcessingNotLeader();
             startPollingEvents();
             stopPollingControl();
         } else if (state.equals(State.REPLICA) && !leader) {
             leader = false;
             kafkaSecondaryConsumer = new KafkaConsumer<>(Config.getConsumerConfig("SecondaryConsumer"));
-            DroolsExecutor.setAsSlave();
+            DroolsExecutor.setAsReplica();
             startProcessingNotLeader();
             stopPollingEvents();
             startPollingControl();
@@ -319,20 +317,20 @@ public class DefaultKafkaConsumer<T> implements EventConsumerWithStatus,
         startConsume();
     }
 
-    private void consume(int size) {
+    private void consume(int millisTimeout) {
         if (started) {
             if (leader) {
-                defaultProcessAsLeader(size);
+                defaultProcessAsLeader(millisTimeout);
             } else {
-                defaultProcessAsAReplica(size);
+                defaultProcessAsAReplica(millisTimeout);
             }
         }
     }
 
-    private void defaultProcessAsLeader(int size) {
+    private void defaultProcessAsLeader(int millisTimeout) {
         startPollingEvents();
         startProcessingLeader();
-        ConsumerRecords<String, T> records = kafkaConsumer.poll(Duration.of(size,
+        ConsumerRecords<String, T> records = kafkaConsumer.poll(Duration.of(millisTimeout,
                                                                             ChronoUnit.MILLIS));
         for (ConsumerRecord<String, T> record : records) {
             processLeader(record,
@@ -374,12 +372,12 @@ public class DefaultKafkaConsumer<T> implements EventConsumerWithStatus,
         }
     }
 
-    private void defaultProcessAsAReplica(int size) {
+    private void defaultProcessAsAReplica(int millisTimeout) {
         if (pollingEvents) {
             if (eventsBuffer != null && eventsBuffer.size() > 0) { // events previously readed and not processed
                 consumeEventsFromBufferAsAReplica();
             }
-            ConsumerRecords<String, T> records = kafkaConsumer.poll(Duration.of(size,
+            ConsumerRecords<String, T> records = kafkaConsumer.poll(Duration.of(millisTimeout,
                                                                                 ChronoUnit.MILLIS));
             if (records.count() > 0) {
                 ConsumerRecord<String, T> first = records.iterator().next();
@@ -398,7 +396,7 @@ public class DefaultKafkaConsumer<T> implements EventConsumerWithStatus,
                 consumeControlFromBufferAsAReplica();
             }
 
-            ConsumerRecords<String, T> records = kafkaSecondaryConsumer.poll(Duration.of(size,
+            ConsumerRecords<String, T> records = kafkaSecondaryConsumer.poll(Duration.of(millisTimeout,
                                                                                          ChronoUnit.MILLIS));
             if (records.count() > 0) {
                 ConsumerRecord<String, T> first = records.iterator().next();

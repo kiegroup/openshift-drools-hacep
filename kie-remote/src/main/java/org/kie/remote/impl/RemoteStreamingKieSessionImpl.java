@@ -15,36 +15,41 @@
  */
 package org.kie.remote.impl;
 
-import java.io.Closeable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.kie.remote.RemoteStreamingEntryPoint;
 import org.kie.remote.RemoteStreamingKieSession;
 import org.kie.remote.TopicsConfig;
+import org.kie.remote.impl.consumer.Listener;
 import org.kie.remote.impl.producer.Sender;
 
-public class RemoteStreamingKieSessionImpl extends RemoteStreamingEntryPointImpl implements Closeable, RemoteStreamingKieSession {
+import static org.kie.remote.impl.RemoteKieSessionImpl.DEFAULT_ENTRY_POINT;
+
+public class RemoteStreamingKieSessionImpl extends RemoteStreamingEntryPointImpl implements RemoteStreamingKieSession {
 
     private final Map<String, RemoteStreamingEntryPoint> entryPoints = new HashMap<>();
 
+    public RemoteStreamingKieSessionImpl(Properties configuration) {
+        this(configuration, TopicsConfig.getDefaultTopicsConfig());
+    }
+
     public RemoteStreamingKieSessionImpl( Properties configuration, TopicsConfig envConfig) {
-        super(new Sender(configuration), RemoteKieSessionImpl.DEFAULT_ENTRY_POINT, envConfig, new ConcurrentHashMap<>());
+        super(new Sender(configuration), DEFAULT_ENTRY_POINT, envConfig, new Listener(configuration));
         sender.start();
     }
 
     @Override
     public void close() {
         sender.stop();
-        requestsStore.clear();
+        delegate.stop();
     }
 
     @Override
     public RemoteStreamingEntryPoint getEntryPoint( String name ) {
-        return entryPoints.computeIfAbsent( name, k -> new RemoteStreamingEntryPointImpl(sender, k, topicsConfig, requestsStore, delegate) );
+        return entryPoints.computeIfAbsent( name, k -> new RemoteStreamingEntryPointImpl(sender, k, topicsConfig, delegate) );
     }
 
     @Override

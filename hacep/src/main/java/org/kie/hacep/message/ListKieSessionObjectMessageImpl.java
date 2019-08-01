@@ -18,13 +18,9 @@ package org.kie.hacep.message;
 import java.io.Serializable;
 import java.util.Collection;
 
-import org.kie.remote.message.ListKieSessionObjectMessage;
-import org.kie.remote.message.VisitableMessage;
-import org.kie.remote.message.VisitorMessage;
+import org.kie.remote.message.ResultMessage;
 
-public class ListKieSessionObjectMessageImpl implements Serializable,
-                                                        VisitableMessage,
-                                                        ListKieSessionObjectMessage {
+public class ListKieSessionObjectMessageImpl implements Serializable, ResultMessage<Collection<? extends Object>> {
 
     private String key;
     private Collection<? extends Object> objects;
@@ -47,6 +43,10 @@ public class ListKieSessionObjectMessageImpl implements Serializable,
     }
 
     @Override
+    public Collection<? extends Object> getResult() {
+        return getObjects();
+    }
+
     public Collection<? extends Object> getObjects() {
         return objects;
     }
@@ -62,10 +62,5 @@ public class ListKieSessionObjectMessageImpl implements Serializable,
         sb.append(", objects=").append(objects);
         sb.append('}');
         return sb.toString();
-    }
-
-    @Override
-    public void accept(VisitorMessage visitor) {
-        visitor.visit(this, key);
     }
 }

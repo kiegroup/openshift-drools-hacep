@@ -16,7 +16,9 @@
 
 package org.kie.remote;
 
-public interface RemoteKieSession extends RemoteEntryPoint, RemoteStatefulSession {
+import java.io.Closeable;
+
+public interface RemoteKieSession extends Closeable, RemoteEntryPoint, RemoteStatefulSession {
 
     RemoteEntryPoint getEntryPoint(String name);
 }

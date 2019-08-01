@@ -27,32 +27,23 @@ import org.kie.remote.command.FactCountCommand;
 import org.kie.remote.command.ListObjectsCommand;
 import org.kie.remote.command.ListObjectsCommandClassType;
 import org.kie.remote.command.ListObjectsCommandNamedQuery;
-import org.kie.remote.impl.consumer.Listener;
 import org.kie.remote.impl.producer.Sender;
 
 public abstract class AbstractRemoteEntryPoint implements RemoteWorkingMemory {
 
     protected final Sender sender;
     protected final String entryPoint;
-    protected Map<String, CompletableFuture<Object>> requestsStore;
     protected TopicsConfig topicsConfig;
-    protected final Listener listener;
 
-    public AbstractRemoteEntryPoint( Sender sender, String entryPoint, TopicsConfig topicsConfig, Map requestsStore) {
+    public AbstractRemoteEntryPoint( Sender sender, String entryPoint, TopicsConfig topicsConfig) {
         this.sender = sender;
         this.entryPoint = entryPoint;
         this.topicsConfig = topicsConfig;
-        this.requestsStore = requestsStore;
-        listener = new Listener(requestsStore);
     }
 
     @Override
     public String getEntryPointId() {
         return entryPoint;
-    }
-
-    public void listen(){
-        listener.listen();
     }
 
     @Override
@@ -62,7 +53,7 @@ public abstract class AbstractRemoteEntryPoint implements RemoteWorkingMemory {
     }
 
     @Override
-    public CompletableFuture<Collection<? extends Object>> getObjects(Class clazztype) {
+    public <T> CompletableFuture<Collection<T>> getObjects(Class<T> clazztype) {
         ListObjectsCommand command = new ListObjectsCommandClassType(entryPoint, clazztype);
         return executeCommand( command );
     }
@@ -81,8 +72,10 @@ public abstract class AbstractRemoteEntryPoint implements RemoteWorkingMemory {
 
     protected <T> CompletableFuture<T> executeCommand( AbstractCommand command ) {
         CompletableFuture callback = new CompletableFuture<>();
-        requestsStore.put( command.getId(), callback );
+        getRequestsStore().put( command.getId(), callback );
         sender.sendCommand( command, topicsConfig.getEventsTopicName() );
         return callback;
     }
+
+    protected abstract Map<String, CompletableFuture<Object>> getRequestsStore();
 }

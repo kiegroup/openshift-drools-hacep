@@ -16,23 +16,25 @@
 package org.kie.remote.impl;
 
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 import org.kie.remote.RemoteStreamingEntryPoint;
 import org.kie.remote.TopicsConfig;
 import org.kie.remote.command.EventInsertCommand;
+import org.kie.remote.impl.consumer.Listener;
 import org.kie.remote.impl.producer.Sender;
 
 public class RemoteStreamingEntryPointImpl extends AbstractRemoteEntryPoint implements RemoteStreamingEntryPoint {
 
     protected final RemoteStatefulSessionImpl delegate;
 
-    public RemoteStreamingEntryPointImpl( Sender sender, String entryPoint, TopicsConfig topicsConfig, Map requestsStore) {
-        super(sender, entryPoint, topicsConfig, requestsStore);
-        delegate = new RemoteStatefulSessionImpl( sender, requestsStore, topicsConfig );
+    protected RemoteStreamingEntryPointImpl(Sender sender, String entryPoint, TopicsConfig topicsConfig, Listener listener) {
+        super(sender, entryPoint, topicsConfig);
+        delegate = new RemoteStatefulSessionImpl( sender, listener, topicsConfig );
     }
 
-    public RemoteStreamingEntryPointImpl( Sender sender, String entryPoint, TopicsConfig topicsConfig, Map requestsStore, RemoteStatefulSessionImpl delegate) {
-        super(sender, entryPoint, topicsConfig, requestsStore);
+    protected RemoteStreamingEntryPointImpl(Sender sender, String entryPoint, TopicsConfig topicsConfig, RemoteStatefulSessionImpl delegate) {
+        super(sender, entryPoint, topicsConfig);
         this.delegate = delegate;
     }
 
@@ -40,5 +42,9 @@ public class RemoteStreamingEntryPointImpl extends AbstractRemoteEntryPoint impl
     public void insert(Object object) {
         EventInsertCommand command = new EventInsertCommand(object, entryPoint);
         sender.sendCommand(command, topicsConfig.getEventsTopicName());
+    }
+
+    protected Map<String, CompletableFuture<Object>> getRequestsStore() {
+        return delegate.getRequestsStore();
     }
 }

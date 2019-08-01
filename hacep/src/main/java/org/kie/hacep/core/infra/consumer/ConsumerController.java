@@ -15,23 +15,23 @@
  */
 package org.kie.hacep.core.infra.consumer;
 
+import org.kie.remote.impl.producer.Producer;
 import org.kie.hacep.EnvConfig;
 import org.kie.hacep.consumer.DroolsConsumerHandler;
 import org.kie.hacep.core.infra.election.LeadershipCallback;
-import org.kie.remote.impl.producer.EventProducer;
 
 public class ConsumerController {
 
-    private DefaultKafkaConsumer consumer;
+    private EventConsumer consumer;
     private InfraCallback callback;
     private Thread thread;
     private EnvConfig envConfig;
 
-    public ConsumerController( EnvConfig envConfig, EventProducer<?> eventProducer) {
+    public ConsumerController( EnvConfig envConfig, Producer producer ) {
         this.callback = new InfraCallback();
-        this.consumer = new DefaultKafkaConsumer(envConfig);
+        this.consumer = EventConsumer.get(envConfig);
         this.callback.setConsumer(consumer);
-        this.consumer.createConsumer(new DroolsConsumerHandler(eventProducer, envConfig));
+        this.consumer.initConsumer(new DroolsConsumerHandler(producer, envConfig));
         this.envConfig = envConfig;
     }
 
@@ -44,7 +44,7 @@ public class ConsumerController {
         stopConsumeEvents();
     }
 
-    public DefaultKafkaConsumer getConsumer() {
+    public EventConsumer getConsumer() {
         return consumer;
     }
 

@@ -18,6 +18,11 @@
         </dependency>
         <dependency>
             <groupId>org.kie</groupId>
+            <artifactId>openshift-kie-hacep</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.kie</groupId>
             <artifactId>sample-hacep-project-kjar</artifactId>
         </dependency>
         <dependency>

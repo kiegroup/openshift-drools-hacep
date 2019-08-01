@@ -24,17 +24,18 @@ import org.kie.remote.TopicsConfig;
 import org.kie.remote.command.FireAllRulesCommand;
 import org.kie.remote.command.FireUntilHaltCommand;
 import org.kie.remote.command.HaltCommand;
+import org.kie.remote.impl.consumer.Listener;
 import org.kie.remote.impl.producer.Sender;
 
 public class RemoteStatefulSessionImpl implements RemoteStatefulSession {
 
     private final Sender sender;
-    private final Map<String, CompletableFuture<Object>> requestsStore;
+    private final Listener listener;
     private final TopicsConfig topicsConfig;
 
-    public RemoteStatefulSessionImpl( Sender sender, Map<String, CompletableFuture<Object>> requestsStore, TopicsConfig topicsConfig ) {
+    public RemoteStatefulSessionImpl( Sender sender, Listener listener, TopicsConfig topicsConfig ) {
         this.sender = sender;
-        this.requestsStore = requestsStore;
+        this.listener = listener;
         this.topicsConfig = topicsConfig;
     }
 
@@ -42,9 +43,13 @@ public class RemoteStatefulSessionImpl implements RemoteStatefulSession {
     public CompletableFuture<Integer> fireAllRules() {
         FireAllRulesCommand command = new FireAllRulesCommand();
         CompletableFuture callback = new CompletableFuture<>();
-        requestsStore.put( command.getId(), callback );
+        getRequestsStore().put( command.getId(), callback );
         sender.sendCommand( command, topicsConfig.getEventsTopicName() );
         return callback;
+    }
+
+    public Map<String, CompletableFuture<Object>> getRequestsStore() {
+        return listener.getRequestsStore();
     }
 
     @Override
@@ -55,5 +60,9 @@ public class RemoteStatefulSessionImpl implements RemoteStatefulSession {
     @Override
     public void halt() {
         sender.sendCommand(new HaltCommand(), topicsConfig.getEventsTopicName());
+    }
+
+    public void stop() {
+        listener.stopConsumeEvents();
     }
 }
