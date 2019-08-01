@@ -52,6 +52,7 @@ public class DroolsConsumerHandler implements ConsumerHandler {
     private KieSessionContext kieSessionContext;
     private CommandHandler commandHandler;
     private SnapshotInfos infos;
+    private boolean shutdown;
 
     public DroolsConsumerHandler(EventProducer producer, EnvConfig envConfig) {
         this.config = envConfig;
@@ -116,13 +117,14 @@ public class DroolsConsumerHandler implements ConsumerHandler {
     public void processWithSnapshot(ItemToProcess item, State currentState) {
         if (logger.isInfoEnabled()){ logger.info("SNAPSHOT"); }
         process(item, currentState);
-        if(((StatefulKnowledgeSessionImpl)kieSessionContext.getKieSession()).isAlive()) {
+        if(!shutdown) {
             snapshooter.serialize(kieSessionContext, item.getKey(), item.getOffset());
         }
     }
 
     @Override
     public void stop() {
+        shutdown = true;
         if(kieSessionContext != null) {
             kieSessionContext.getKieSession().dispose();
         }

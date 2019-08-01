@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Template
+labels:
+message: <Creation message>
+metadata:
+  name: openshift-kie-springboot-s2i
+objects:
+parameters:
+

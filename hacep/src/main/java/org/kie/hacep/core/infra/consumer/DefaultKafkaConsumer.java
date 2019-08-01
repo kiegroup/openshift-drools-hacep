@@ -132,7 +132,7 @@ public class DefaultKafkaConsumer<T> implements EventConsumerWithStatus,
                     askAndProcessSnapshotOnDemand();
                 }
             }
-            //State.BECOMING_LEADER state won't start the pod
+            //State.BECOMING_LEADER won't start the pod
             if (state.equals(State.LEADER) || state.equals(State.REPLICA)) {
                 enableConsumeAndStartLoop(state);
             }
