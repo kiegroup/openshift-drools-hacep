@@ -5,7 +5,7 @@ metadata:
 spec:
   containers:
     - name: main
-      image: "desmax74/openshift-kie-springboot:m.4.03"
+      image: "desmax74/openshift-kie-springboot:5.4"
       env:
         - name: JAVA_TOOL_OPTIONS
           value: -agentlib:jdwp=transport=dt_socket,server=y,address=8000,suspend=n
