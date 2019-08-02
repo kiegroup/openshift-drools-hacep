@@ -26,14 +26,14 @@ import org.kie.remote.message.ResultMessage;
 import org.slf4j.Logger;
 
 import static org.kie.remote.CommonConfig.LOCAL_MESSAGE_SYSTEM_CONF;
+import static org.kie.remote.util.ConfigurationUtil.readBoolean;
 
 public interface ListenerThread extends Runnable {
 
     void stop();
 
     static ListenerThread get(TopicsConfig topicsConfig, Map<String, CompletableFuture<Object>> requestsStore, Properties configuration) {
-        Boolean isLocal = (Boolean) configuration.get( LOCAL_MESSAGE_SYSTEM_CONF );
-        return get(topicsConfig, requestsStore, isLocal != null && isLocal);
+        return get(topicsConfig, requestsStore, readBoolean(configuration, LOCAL_MESSAGE_SYSTEM_CONF));
     }
 
     static ListenerThread get(TopicsConfig topicsConfig, Map<String, CompletableFuture<Object>> requestsStore, boolean isLocal) {

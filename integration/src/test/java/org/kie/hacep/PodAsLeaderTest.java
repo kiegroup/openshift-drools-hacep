@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Properties;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -30,7 +31,6 @@ import org.kie.hacep.core.Bootstrap;
 import org.kie.hacep.core.infra.election.State;
 import org.kie.hacep.message.ControlMessage;
 import org.kie.hacep.message.SnapshotMessage;
-import org.kie.remote.CommonConfig;
 import org.kie.remote.RemoteKieSession;
 import org.kie.remote.TopicsConfig;
 import org.kie.remote.command.FireUntilHaltCommand;
@@ -39,7 +39,11 @@ import org.kie.remote.command.RemoteCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.kie.remote.CommonConfig.SKIP_LISTENER_AUTOSTART;
 import static org.kie.remote.util.SerializationUtil.deserialize;
 
 public class PodAsLeaderTest {
@@ -85,9 +89,11 @@ public class PodAsLeaderTest {
         KafkaConsumer controlConsumer = kafkaServerTest.getConsumer("",
                                                                     config.getControlTopicName(),
                                                                     Config.getConsumerConfig("controlConsumerProcessOneSentMessageAsLeaderTest"));
-        kafkaServerTest.insertBatchStockTicketEvent(1,
-                                                    topicsConfig,
-                                                    RemoteKieSession.class);
+
+        Properties props = (Properties) Config.getProducerConfig( "InsertBactchStockTickets" ).clone();
+        props.put( SKIP_LISTENER_AUTOSTART, true );
+
+        kafkaServerTest.insertBatchStockTicketEvent(1, topicsConfig, RemoteKieSession.class, props);
         try {
             //EVENTS TOPIC
             ConsumerRecords eventsRecords = eventsConsumer.poll(5000);

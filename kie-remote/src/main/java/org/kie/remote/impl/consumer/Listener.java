@@ -22,6 +22,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.kie.remote.TopicsConfig;
 
+import static org.kie.remote.CommonConfig.SKIP_LISTENER_AUTOSTART;
+import static org.kie.remote.util.ConfigurationUtil.readBoolean;
+
 public class Listener {
 
     private final Map<String, CompletableFuture<Object>> requestsStore = new ConcurrentHashMap<>();
@@ -34,7 +37,9 @@ public class Listener {
     public Listener(Properties configuration) {
         this.configuration = configuration;
         listenerThread = ListenerThread.get( TopicsConfig.getDefaultTopicsConfig(), requestsStore, configuration );
-        start();
+        if (!readBoolean(configuration, SKIP_LISTENER_AUTOSTART)) {
+            start();
+        }
     }
 
     public Listener start() {

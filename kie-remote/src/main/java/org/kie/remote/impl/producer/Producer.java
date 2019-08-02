@@ -20,6 +20,7 @@ import java.util.Properties;
 import org.apache.kafka.clients.producer.Callback;
 
 import static org.kie.remote.CommonConfig.LOCAL_MESSAGE_SYSTEM_CONF;
+import static org.kie.remote.util.ConfigurationUtil.readBoolean;
 
 public interface Producer {
 
@@ -34,8 +35,7 @@ public interface Producer {
     void produceAsync(String topicName, String key, Object object, Callback callback);
 
     static Producer get(Properties configuration) {
-        Boolean isLocal = (Boolean) configuration.get( LOCAL_MESSAGE_SYSTEM_CONF );
-        return get(isLocal != null && isLocal);
+        return get(readBoolean(configuration, LOCAL_MESSAGE_SYSTEM_CONF));
     }
 
     static Producer get(boolean isLocal) {

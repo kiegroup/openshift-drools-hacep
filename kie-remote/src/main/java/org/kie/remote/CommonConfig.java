@@ -41,6 +41,8 @@ public class CommonConfig {
 
     public static final String LOCAL_MESSAGE_SYSTEM_CONF = "local.message.system";
 
+    public static final String SKIP_LISTENER_AUTOSTART = "skip.listener.autostart";
+
     private static Properties config;
 
     public static synchronized Properties getStatic() {
