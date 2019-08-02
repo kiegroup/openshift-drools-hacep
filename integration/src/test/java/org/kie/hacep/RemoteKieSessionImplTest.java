@@ -57,7 +57,7 @@ public class RemoteKieSessionImplTest {
         kafkaServerTest.shutdownServer();
     }
 
-    @Test
+    @Test(timeout = 30000) //DROOLS-4398
     public void getFactCountTest() {
         Bootstrap.startEngine(envConfig);
         Bootstrap.getConsumerController().getCallback().updateStatus(State.LEADER);
