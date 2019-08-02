@@ -66,6 +66,7 @@
 
   </dependencies>
 
+
   <build>
     <finalName>${project.artifactId}</finalName>
     <plugins>
@@ -94,6 +95,18 @@
             </manifest>
           </archive>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>io.fabric8</groupId>
+        <artifactId>fabric8-maven-plugin</artifactId>
+        <version>${version.fabric8.plugin}</version>
+        <dependencies>
+          <dependency>
+            <groupId>io.fabric8</groupId>
+            <artifactId>run-java-sh</artifactId>
+            <version>${version.fabric8.runjavash}</version>
+          </dependency>
+        </dependencies>
       </plugin>
     </plugins>
   </build>
