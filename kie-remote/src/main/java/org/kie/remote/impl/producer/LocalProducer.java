@@ -22,11 +22,11 @@ import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 
 import org.apache.kafka.clients.producer.Callback;
-import org.kie.remote.util.LocalMesssageSystem;
+import org.kie.remote.util.LocalMessageSystem;
 
 public class LocalProducer implements Producer {
 
-    private final LocalMesssageSystem queue = LocalMesssageSystem.get();
+    private final LocalMessageSystem queue = LocalMessageSystem.get();
 
     private final Map<String, CompletableFuture<Object>> results = new HashMap<>();
 

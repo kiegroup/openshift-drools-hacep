@@ -20,11 +20,11 @@ import org.kie.hacep.EnvConfig;
 import org.kie.hacep.core.infra.election.State;
 import org.kie.remote.DroolsExecutor;
 import org.kie.remote.command.RemoteCommand;
-import org.kie.remote.util.LocalMesssageSystem;
+import org.kie.remote.util.LocalMessageSystem;
 
 public class LocalConsumer implements EventConsumer {
 
-    private final LocalMesssageSystem queue = LocalMesssageSystem.get();
+    private final LocalMessageSystem queue = LocalMessageSystem.get();
 
     private final EnvConfig config;
 

@@ -22,11 +22,11 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-public class LocalMesssageSystem {
+public class LocalMessageSystem {
 
     private Map<String, BlockingQueue<Object>> queues = new HashMap<>();
 
-    private LocalMesssageSystem() { }
+    private LocalMessageSystem() { }
 
     private BlockingQueue<Object> queueForTopic(String topic) {
         return queues.computeIfAbsent( topic, k -> new LinkedBlockingQueue<>() );
@@ -52,14 +52,14 @@ public class LocalMesssageSystem {
         }
     }
 
-    public static LocalMesssageSystem get() {
+    public static LocalMessageSystem get() {
         return LazyHolder.get();
     }
 
     private static class LazyHolder {
-        private static final LocalMesssageSystem INSTANCE = new LocalMesssageSystem();
+        private static final LocalMessageSystem INSTANCE = new LocalMessageSystem();
 
-        public static LocalMesssageSystem get() {
+        public static LocalMessageSystem get() {
             return INSTANCE;
         }
     }

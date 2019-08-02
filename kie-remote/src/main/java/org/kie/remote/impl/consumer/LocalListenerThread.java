@@ -21,7 +21,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.kie.remote.TopicsConfig;
 import org.kie.remote.message.ResultMessage;
-import org.kie.remote.util.LocalMesssageSystem;
+import org.kie.remote.util.LocalMessageSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +29,7 @@ public class LocalListenerThread implements ListenerThread {
 
     private static Logger logger = LoggerFactory.getLogger( LocalListenerThread.class);
 
-    private final LocalMesssageSystem queue = LocalMesssageSystem.get();
+    private final LocalMessageSystem queue = LocalMessageSystem.get();
 
     private TopicsConfig topicsConfig;
     private Map<String, CompletableFuture<Object>> requestsStore;
