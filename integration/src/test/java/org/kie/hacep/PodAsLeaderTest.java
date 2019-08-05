@@ -40,7 +40,7 @@ import static org.kie.remote.util.SerializationUtil.deserialize;
 
 public class PodAsLeaderTest extends KafkaFullTopicsTests{
 
-    @Test(timeout = 20000)
+    @Test(timeout = 30000)
     public void processOneSentMessageAsLeaderTest() {
         Bootstrap.startEngine(envConfig);
         Bootstrap.getConsumerController().getCallback().updateStatus(State.LEADER);
