@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package org.kie.hacep.sample.client;
+package org.kie.hacep;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
 import org.junit.Test;
-import org.kie.hacep.EnvConfig;
 import org.kie.hacep.core.Bootstrap;
 import org.kie.hacep.core.infra.election.State;
 import org.kie.hacep.sample.kjar.Result;
@@ -30,7 +29,7 @@ import org.kie.remote.RemoteKieSession;
 import static org.junit.Assert.assertEquals;
 import static org.kie.remote.CommonConfig.getTestProperties;
 
-public class RemoteSessionTest {
+public class LocalMessagesSessionTest {
 
     @Test
     public void test() throws ExecutionException, InterruptedException, IOException {

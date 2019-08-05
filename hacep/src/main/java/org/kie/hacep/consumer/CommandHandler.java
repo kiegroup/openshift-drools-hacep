@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.drools.core.common.EventFactHandle;
 import org.kie.api.runtime.rule.FactHandle;
 import org.kie.hacep.EnvConfig;
 import org.kie.hacep.core.KieSessionContext;
@@ -43,7 +44,11 @@ import org.kie.remote.command.ListObjectsCommandNamedQuery;
 import org.kie.remote.command.SnapshotOnDemandCommand;
 import org.kie.remote.command.UpdateCommand;
 import org.kie.remote.command.VisitorCommand;
+import org.kie.remote.command.WorkingMemoryActionCommand;
 import org.kie.remote.impl.producer.Producer;
+
+import static org.kie.remote.util.ConfigurationUtil.hasTimestamp;
+import static org.kie.remote.util.ConfigurationUtil.isEvent;
 
 public class CommandHandler implements VisitorCommand {
 
@@ -84,20 +89,39 @@ public class CommandHandler implements VisitorCommand {
     @Override
     public void visit(InsertCommand command) {
         RemoteFactHandle remoteFH = command.getFactHandle();
-        FactHandle fh = kieSessionContext.getKieSession().getEntryPoint(command.getEntryPoint()).insert(remoteFH.getObject());
-        kieSessionContext.getFhManager().registerHandle(remoteFH,
-                                                        fh);
-        if (firingUntilHalt) {
-            kieSessionContext.getKieSession().fireAllRules();
-        }
+        FactHandle fh = internalInsert( command, remoteFH.getObject() );
+        kieSessionContext.getFhManager().registerHandle(remoteFH, fh);
     }
 
     @Override
     public void visit(EventInsertCommand command) {
-        FactHandle fh = kieSessionContext.getKieSession().getEntryPoint(command.getEntryPoint()).insert(command.getObject());
-        if (firingUntilHalt) {
+        internalInsert( command, command.getObject() );
+    }
+
+    private FactHandle internalInsert( WorkingMemoryActionCommand command, Object obj ) {
+        FactHandle fh = isEvent(obj) ? insertEvent( command, obj ) : insertFact( command, obj );
+        if ( firingUntilHalt ) {
             kieSessionContext.getKieSession().fireAllRules();
         }
+        return fh;
+    }
+
+    private FactHandle insertEvent( WorkingMemoryActionCommand command, Object obj ) {
+        FactHandle fh;
+        if ( hasTimestamp( obj ) ) {
+            fh = insertFact( command, obj );
+            kieSessionContext.setClockAt( (( EventFactHandle ) fh).getStartTimestamp() );
+        } else {
+            // if the event doesn't have an its own timestamp, it has to use the command's one and then
+            // advance the pseudo clock to the command timestamp before inserting the event
+            kieSessionContext.setClockAt( command.getTimestamp() );
+            fh = insertFact( command, obj );
+        }
+        return fh;
+    }
+
+    private FactHandle insertFact( WorkingMemoryActionCommand command, Object obj ) {
+        return kieSessionContext.getKieSession().getEntryPoint( command.getEntryPoint() ).insert( obj );
     }
 
     @Override

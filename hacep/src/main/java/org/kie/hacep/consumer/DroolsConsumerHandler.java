@@ -19,7 +19,6 @@ import java.util.Queue;
 
 import org.kie.api.KieServices;
 import org.kie.api.runtime.KieContainer;
-import org.kie.api.time.SessionPseudoClock;
 import org.kie.hacep.EnvConfig;
 import org.kie.hacep.core.KieSessionContext;
 import org.kie.hacep.core.infra.DeafultSessionSnapShooter;
@@ -43,7 +42,6 @@ public class DroolsConsumerHandler implements ConsumerHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(DroolsConsumerHandler.class);
     private Logger loggerForTest;
-    private SessionPseudoClock clock;
     private Producer producer;
     private DeafultSessionSnapShooter snapshooter;
     private EnvConfig config;
@@ -67,8 +65,6 @@ public class DroolsConsumerHandler implements ConsumerHandler {
         if(config.isSkipOnDemanSnapshot()) {// if true we reads the snapshots and waitn until the first leaderElectionUpdate
             this.infos = snapshooter.deserialize();
             this.kieSessionContext = createSessionHolder(infos);
-            clock = kieSessionContext.getKieSession().getSessionClock();//@TODO Mario
-            //clock.advanceTime(stock.getTimestamp() - clock.getCurrentTime(), TimeUnit.MILLISECONDS); //@TODO Mario
         } else{
             kieSessionContext = new KieSessionContext();
             createClasspathSession( kieSessionContext );
@@ -79,8 +75,6 @@ public class DroolsConsumerHandler implements ConsumerHandler {
         if(!config.isSkipOnDemanSnapshot()) {// if true we reads the snapshots and wait until the first leaderElectionUpdate
             this.infos = SnapshotOnDemandUtils.askASnapshotOnDemand(config, snapshooter);
             this.kieSessionContext = createSessionHolder(infos);
-            clock = kieSessionContext.getKieSession().getSessionClock();//@TODO Mario
-            //clock.advanceTime(stock.getTimestamp() - clock.getCurrentTime(), TimeUnit.MILLISECONDS); //@TODO Mario
             return true;
         }
         return false;

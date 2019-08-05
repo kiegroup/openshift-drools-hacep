@@ -58,7 +58,7 @@ public class LocalConsumer implements EventConsumer {
     public void stop() { }
 
     @Override
-    public void updateStatus( State state ) {
+    public synchronized void updateStatus( State state ) {
         this.currentState = state;
         if (state == State.REPLICA) {
             DroolsExecutor.setAsReplica();

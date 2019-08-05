@@ -15,13 +15,19 @@
  */
 package org.kie.hacep.core;
 
+import java.util.concurrent.TimeUnit;
+
 import org.kie.api.runtime.KieSession;
+import org.kie.api.time.SessionClock;
+import org.kie.api.time.SessionPseudoClock;
 import org.kie.hacep.consumer.FactHandlesManager;
 import org.kie.hacep.core.infra.SnapshotInfos;
 
 public class KieSessionContext {
 
     private KieSession kieSession;
+
+    private SessionPseudoClock clock;
 
     private FactHandlesManager fhManager;
 
@@ -30,16 +36,28 @@ public class KieSessionContext {
     }
 
     public void initFromSnapshot(SnapshotInfos infos) {
-        this.kieSession = infos.getKieSession();
+        setKieSession(infos.getKieSession());
         this.fhManager = infos.getFhManager();
     }
 
     public void init(KieSession newKiession) {
-        this.kieSession = newKiession;
+        setKieSession(newKiession);
         this.fhManager = new FactHandlesManager(newKiession);
+    }
+
+    private void setKieSession(KieSession kieSession) {
+        this.kieSession = kieSession;
+        SessionClock clock = kieSession.getSessionClock();
+        if (clock instanceof SessionPseudoClock) {
+            this.clock = (SessionPseudoClock) clock;
+        }
     }
 
     public FactHandlesManager getFhManager() {
         return fhManager;
+    }
+
+    public void setClockAt(long time) {
+        clock.advanceTime(time - clock.getCurrentTime(), TimeUnit.MILLISECONDS);
     }
 }

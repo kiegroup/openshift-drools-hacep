@@ -18,6 +18,9 @@ package org.kie.remote.util;
 
 import java.util.Properties;
 
+import org.kie.api.definition.type.Role;
+import org.kie.api.definition.type.Timestamp;
+
 public class ConfigurationUtil {
 
     public static boolean readBoolean( Properties configuration, String propName ) {
@@ -29,5 +32,14 @@ public class ConfigurationUtil {
             return Boolean.valueOf((String) value);
         }
         return false;
+    }
+
+    public static boolean isEvent( Object obj ) {
+        Role role = obj.getClass().getAnnotation( Role.class );
+        return role != null && role.value() == Role.Type.EVENT;
+    }
+
+    public static boolean hasTimestamp( Object obj ) {
+        return obj.getClass().getAnnotation( Timestamp.class ) != null;
     }
 }
