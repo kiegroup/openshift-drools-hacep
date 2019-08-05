@@ -30,7 +30,6 @@ import org.junit.Test;
 import org.kie.hacep.core.Bootstrap;
 import org.kie.hacep.core.infra.election.State;
 import org.kie.hacep.message.ControlMessage;
-import org.kie.hacep.message.SnapshotMessage;
 import org.kie.remote.RemoteKieSession;
 import org.kie.remote.TopicsConfig;
 import org.kie.remote.command.FireUntilHaltCommand;
@@ -40,7 +39,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.kie.remote.CommonConfig.SKIP_LISTENER_AUTOSTART;
@@ -51,7 +49,6 @@ public class PodAsLeaderTest {
     private final String TEST_KAFKA_LOGGER_TOPIC = "logs";
     private final String TEST_TOPIC = "test";
     private KafkaUtilTest kafkaServerTest;
-    private Logger logger = LoggerFactory.getLogger(PodAsLeaderTest.class);
     private EnvConfig config;
     private TopicsConfig topicsConfig;
 
