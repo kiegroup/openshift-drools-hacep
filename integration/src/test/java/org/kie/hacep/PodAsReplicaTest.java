@@ -53,11 +53,7 @@ public class PodAsReplicaTest {
 
     @After
     public void tearDown() {
-        try {
-            Bootstrap.stopEngine();
-        } catch (ConcurrentModificationException ex) {
-        }
-        kafkaServerTest.shutdownServer();
+        kafkaServerTest.tearDown();
     }
 
 

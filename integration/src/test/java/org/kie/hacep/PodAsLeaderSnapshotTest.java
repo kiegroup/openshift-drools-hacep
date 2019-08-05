@@ -39,12 +39,16 @@ import static org.junit.Assert.*;
 import static org.kie.remote.util.SerializationUtil.deserialize;
 
 public class PodAsLeaderSnapshotTest {
+
     private final String TEST_KAFKA_LOGGER_TOPIC = "logs";
     private final String TEST_TOPIC = "test";
     private KafkaUtilTest kafkaServerTest;
     private Logger logger = LoggerFactory.getLogger(PodAsLeaderTest.class);
     private EnvConfig config;
     private TopicsConfig topicsConfig;
+
+
+
 
     @Before
     public void setUp() throws Exception {
@@ -63,15 +67,11 @@ public class PodAsLeaderSnapshotTest {
 
     @After
     public void tearDown() {
-        try {
-            Bootstrap.stopEngine();
-        } catch (ConcurrentModificationException ex) {
-        }
-        kafkaServerTest.shutdownServer();
+        kafkaServerTest.tearDown();
     }
 
 
-    @Test(timeout = 30000)
+    @Test(timeout = 20000)
     public void processMessagesAsLeaderAndCreateSnapshotTest() {
         Bootstrap.startEngine(config);
         Bootstrap.getConsumerController().getCallback().updateStatus(State.LEADER);
@@ -94,6 +94,7 @@ public class PodAsLeaderSnapshotTest {
             while(messages.size()< 11) {
                 ConsumerRecords controlRecords = controlConsumer.poll(2000);
                 Iterator<ConsumerRecord<String, byte[]>> controlRecordIterator = controlRecords.iterator();
+                if(!controlRecordIterator.hasNext()){continue;}
                 ConsumerRecord<String, byte[]> controlRecord = controlRecordIterator.next();
                 ControlMessage controlMessage = deserialize(controlRecord.value());
                 messages.add(controlMessage);
@@ -116,7 +117,7 @@ public class PodAsLeaderSnapshotTest {
             assertEquals(9, snapshot.getFhMapKeys().size());
             assertNotNull(snapshot.getLastInsertedEventkey());
         } catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
+            throw new RuntimeException(ex.getMessage(), ex);
         } finally {
             eventsConsumer.close();
             snapshotConsumer.close();
