@@ -16,7 +16,6 @@
 package org.kie.hacep;
 
 import java.util.ArrayList;
-import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.List;
 
@@ -32,8 +31,6 @@ import org.kie.hacep.message.ControlMessage;
 import org.kie.hacep.message.SnapshotMessage;
 import org.kie.remote.RemoteKieSession;
 import org.kie.remote.TopicsConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static org.junit.Assert.*;
 import static org.kie.remote.util.SerializationUtil.deserialize;
@@ -43,11 +40,8 @@ public class PodAsLeaderSnapshotTest {
     private final String TEST_KAFKA_LOGGER_TOPIC = "logs";
     private final String TEST_TOPIC = "test";
     private KafkaUtilTest kafkaServerTest;
-    private Logger logger = LoggerFactory.getLogger(PodAsLeaderTest.class);
     private EnvConfig config;
     private TopicsConfig topicsConfig;
-
-
 
 
     @Before

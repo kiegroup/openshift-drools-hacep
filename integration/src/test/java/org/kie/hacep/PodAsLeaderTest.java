@@ -16,7 +16,6 @@
 package org.kie.hacep;
 
 import java.util.ArrayList;
-import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -24,19 +23,14 @@ import java.util.Properties;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.kie.hacep.core.Bootstrap;
 import org.kie.hacep.core.infra.election.State;
 import org.kie.hacep.message.ControlMessage;
 import org.kie.remote.RemoteKieSession;
-import org.kie.remote.TopicsConfig;
 import org.kie.remote.command.FireUntilHaltCommand;
 import org.kie.remote.command.InsertCommand;
 import org.kie.remote.command.RemoteCommand;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -44,43 +38,17 @@ import static org.junit.Assert.assertTrue;
 import static org.kie.remote.CommonConfig.SKIP_LISTENER_AUTOSTART;
 import static org.kie.remote.util.SerializationUtil.deserialize;
 
-public class PodAsLeaderTest {
+public class PodAsLeaderTest extends KafkaFullTopicsTests{
 
-    private final String TEST_KAFKA_LOGGER_TOPIC = "logs";
-    private final String TEST_TOPIC = "test";
-    private KafkaUtilTest kafkaServerTest;
-    private EnvConfig config;
-    private TopicsConfig topicsConfig;
-
-    @Before
-    public void setUp() throws Exception {
-        config = KafkaUtilTest.getEnvConfig();
-        topicsConfig = TopicsConfig.getDefaultTopicsConfig();
-        kafkaServerTest = new KafkaUtilTest();
-        kafkaServerTest.startServer();
-        kafkaServerTest.createTopics(TEST_KAFKA_LOGGER_TOPIC,
-                                     TEST_TOPIC,
-                                     config.getEventsTopicName(),
-                                     config.getControlTopicName(),
-                                     config.getSnapshotTopicName(),
-                                     config.getKieSessionInfosTopicName()
-        );
-    }
-
-    @After
-    public void tearDown() {
-        kafkaServerTest.tearDown();
-    }
-
-    @Test(timeout = 30000)
+    @Test(timeout = 20000)
     public void processOneSentMessageAsLeaderTest() {
-        Bootstrap.startEngine(config);
+        Bootstrap.startEngine(envConfig);
         Bootstrap.getConsumerController().getCallback().updateStatus(State.LEADER);
         KafkaConsumer eventsConsumer = kafkaServerTest.getConsumer("",
-                                                                   config.getEventsTopicName(),
+                                                                   envConfig.getEventsTopicName(),
                                                                    Config.getConsumerConfig("eventsConsumerProcessOneSentMessageAsLeaderTest"));
         KafkaConsumer controlConsumer = kafkaServerTest.getConsumer("",
-                                                                    config.getControlTopicName(),
+                                                                    envConfig.getControlTopicName(),
                                                                     Config.getConsumerConfig("controlConsumerProcessOneSentMessageAsLeaderTest"));
 
         Properties props = (Properties) Config.getProducerConfig( "InsertBactchStockTickets" ).clone();
@@ -93,7 +61,7 @@ public class PodAsLeaderTest {
             assertEquals(2, eventsRecords.count());
             Iterator<ConsumerRecord<String, byte[]>> eventsRecordIterator = eventsRecords.iterator();
             ConsumerRecord<String, byte[]> eventsRecord = eventsRecordIterator.next();
-            assertEquals(eventsRecord.topic(), config.getEventsTopicName());
+            assertEquals(eventsRecord.topic(), envConfig.getEventsTopicName());
             RemoteCommand remoteCommand = deserialize(eventsRecord.value());
 
             assertEquals(eventsRecord.offset(), 0);
@@ -101,7 +69,7 @@ public class PodAsLeaderTest {
             assertTrue(remoteCommand instanceof FireUntilHaltCommand);
 
             ConsumerRecord<String, byte[]> eventsRecordTwo = eventsRecordIterator.next();
-            assertEquals(eventsRecordTwo.topic(), config.getEventsTopicName());
+            assertEquals(eventsRecordTwo.topic(), envConfig.getEventsTopicName());
             remoteCommand = deserialize(eventsRecordTwo.value());
 
             assertEquals(eventsRecordTwo.offset(), 1);
