@@ -340,6 +340,7 @@ public class KafkaUtilTest implements AutoCloseable {
         try {
             Bootstrap.stopEngine();
         } catch (ConcurrentModificationException ex) {
+            throw new RuntimeException(ex.getMessage(), ex);
         }
         shutdownServer();
     }

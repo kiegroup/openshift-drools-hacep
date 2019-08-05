@@ -65,7 +65,7 @@ public class PodAsLeaderSnapshotTest {
     }
 
 
-    @Test(timeout = 20000)
+    @Test(timeout = 30000)
     public void processMessagesAsLeaderAndCreateSnapshotTest() {
         Bootstrap.startEngine(config);
         Bootstrap.getConsumerController().getCallback().updateStatus(State.LEADER);
@@ -86,7 +86,7 @@ public class PodAsLeaderSnapshotTest {
 
             List<ControlMessage> messages = new ArrayList<>();
             while(messages.size()< 11) {
-                ConsumerRecords controlRecords = controlConsumer.poll(2000);
+                ConsumerRecords controlRecords = controlConsumer.poll(5000);
                 Iterator<ConsumerRecord<String, byte[]>> controlRecordIterator = controlRecords.iterator();
                 if(!controlRecordIterator.hasNext()){continue;}
                 ConsumerRecord<String, byte[]> controlRecord = controlRecordIterator.next();
