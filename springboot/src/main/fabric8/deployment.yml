@@ -1,10 +1,3 @@
-apiVersion: extensions/v1beta1
-kind: Deployment
-metadata:
-  labels:
-    app: openshift-kie-springboot
-    version: v1
-  name: openshift-kie-springboot
 spec:
   replicas: 3
   selector:

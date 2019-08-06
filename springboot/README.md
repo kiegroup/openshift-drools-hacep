@@ -6,7 +6,7 @@ eval $(minishift docker-env)
 oc project my-kafka-project
 ```
 
-#### Build Container on docker
+#### Build Container and deploy
 In the springboot module
 ```sh
 docker build -t quickstarter/openshift-kie-springboot:latest .
@@ -30,6 +30,19 @@ oc expose service  openshift-kie-springboot
     
   Your address will be
   http://openshift-kie-springboot-my-kafka-project.192.168.99.109.nip.io/rest/env/all
+  
+  
+#### Build Container and deploy with fabric8
+In the springboot module
+##### Build docker image
+```sh
+mvn package docker:build
+```
+##### Deploy
+```sh
+mvn fabric8:resource fabric8:deploy
+```
+  
   
 ### Remote debug    
     
