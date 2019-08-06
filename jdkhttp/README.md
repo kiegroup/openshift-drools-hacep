@@ -1,3 +1,11 @@
+#### Login into Openshift cluster
+```sh
+oc login -u system:admin
+eval $(minishift oc-env) 
+eval $(minishift docker-env)
+oc project my-kafka-project
+```
+
 #### Build Container on docker
 In the jdkhttp module
 ```sh

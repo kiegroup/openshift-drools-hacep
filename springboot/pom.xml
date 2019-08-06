@@ -96,17 +96,22 @@
           </archive>
         </configuration>
       </plugin>
+      <!-- mvn package docker:build -->
       <plugin>
         <groupId>io.fabric8</groupId>
-        <artifactId>fabric8-maven-plugin</artifactId>
-        <version>${version.fabric8.plugin}</version>
-        <dependencies>
-          <dependency>
-            <groupId>io.fabric8</groupId>
-            <artifactId>run-java-sh</artifactId>
-            <version>${version.fabric8.runjavash}</version>
-          </dependency>
-        </dependencies>
+        <artifactId>docker-maven-plugin</artifactId>
+        <version>${version.fabric8.docker-plugin}</version>
+        <configuration>
+          <images>
+            <image>
+              <name>quickstarter/openshift-kie-springboot</name>
+              <build>
+                <contextDir>${project.basedir}</contextDir>
+                <tags>latest</tags>
+              </build>
+          </image>
+          </images>
+        </configuration>
       </plugin>
     </plugins>
   </build>
