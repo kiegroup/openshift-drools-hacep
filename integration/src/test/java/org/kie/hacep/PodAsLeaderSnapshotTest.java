@@ -50,12 +50,7 @@ public class PodAsLeaderSnapshotTest extends KafkaFullTopicsTests{
 
             //EVENTS TOPIC
             ConsumerRecords eventsRecords = eventsConsumer.poll(5000);
-            assertEquals(11,
-                         eventsRecords.count()); //1 fireUntilHalt + 10 stock ticket
-
-            ConsumerRecords controlRecords = controlConsumer.poll(5000);
-            assertEquals(11,
-                         controlRecords.count()); //1 fireUntilHalt + 10 stock ticket
+            assertEquals(11, eventsRecords.count()); //1 fireUntilHalt + 10 stock ticket
 
             //SNAPSHOT TOPIC
             ConsumerRecords snapshotRecords = snapshotConsumer.poll(5000);
@@ -68,6 +63,9 @@ public class PodAsLeaderSnapshotTest extends KafkaFullTopicsTests{
             assertNotNull(snapshot.getLastInsertedEventkey());
             assertEquals(9, snapshot.getFhMapKeys().size());
             assertNotNull(snapshot.getLastInsertedEventkey());
+
+            ConsumerRecords controlRecords = controlConsumer.poll(5000);
+            assertEquals(11, controlRecords.count()); //1 fireUntilHalt + 10 stock ticket
         } catch (Exception ex) {
             throw new RuntimeException(ex.getMessage(), ex);
         } finally {
