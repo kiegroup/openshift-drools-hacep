@@ -1,0 +1,8 @@
+spec:
+  port:
+    targetPort: http
+  to:
+    kind: Service
+    name: openshift-kie-springboot
+    weight: 100
+  wildcardPolicy: None

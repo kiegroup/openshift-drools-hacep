@@ -6,6 +6,11 @@ eval $(minishift docker-env)
 oc project my-kafka-project
 ```
 
+#### Relax RBAC for configmap
+```sh
+kubectl create clusterrolebinding permissive-binding --clusterrole=cluster-admin --group=system:serviceaccoun
+```
+
 #### Build Container on docker
 In the thorntail module
 ```sh
@@ -30,6 +35,17 @@ oc expose service  openshift-kie-thorntail
     
   Your address will be
   http://openshift-kie-thorntail-my-kafka-project.192.168.99.109.nip.io/rest/env/all
+  
+#### Build Container and deploy with fabric8
+In the thorntail module
+##### Build docker image
+```sh
+mvn package docker:build
+```
+##### Deploy
+```sh
+mvn fabric8:resource fabric8:deploy
+```  
   
 ### Remote debug    
     

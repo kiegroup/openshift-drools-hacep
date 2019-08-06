@@ -1,0 +1,6 @@
+spec:
+  ports:
+    - name: http
+      port: 8080
+  selector:
+    app: openshift-kie-springboot

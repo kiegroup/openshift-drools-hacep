@@ -5,7 +5,10 @@ eval $(minishift oc-env)
 eval $(minishift docker-env)
 oc project my-kafka-project
 ```
-
+#### Relax RBAC for configmap
+```sh
+kubectl create clusterrolebinding permissive-binding --clusterrole=cluster-admin --group=system:serviceaccoun
+```
 #### Build Container and deploy
 In the springboot module
 ```sh
@@ -82,8 +85,3 @@ Attach to process
 ```sh
  http://<address>/rest/env/all
 ```
-
-### Fabric8
-
-#### Build
-
