@@ -48,8 +48,12 @@ import org.kie.remote.command.UpdateCommand;
 import org.kie.remote.command.VisitorCommand;
 import org.kie.remote.command.WorkingMemoryActionCommand;
 import org.kie.remote.impl.producer.Producer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CommandHandler implements VisitorCommand {
+
+    private static final Logger logger = LoggerFactory.getLogger(CommandHandler.class);
 
     private KieSessionContext kieSessionContext;
     private EnvConfig envConfig;
@@ -113,6 +117,9 @@ public class CommandHandler implements VisitorCommand {
         } else {
             // if the event doesn't have an its own timestamp, it has to use the command's one and then
             // advance the pseudo clock to the command timestamp before inserting the event
+            if (logger.isDebugEnabled()) {
+                logger.debug("Event class " + obj.getClass().getName() + " doesn't have a timestamp property. Consider adding one.");
+            }
             kieSessionContext.setClockAt( command.getTimestamp() );
             fh = insertFact( command, obj );
         }

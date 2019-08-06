@@ -20,10 +20,15 @@ import java.util.concurrent.TimeUnit;
 import org.kie.api.runtime.KieSession;
 import org.kie.api.time.SessionClock;
 import org.kie.api.time.SessionPseudoClock;
+import org.kie.hacep.consumer.CommandHandler;
 import org.kie.hacep.consumer.FactHandlesManager;
 import org.kie.hacep.core.infra.SnapshotInfos;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class KieSessionContext {
+
+    private static final Logger logger = LoggerFactory.getLogger( CommandHandler.class);
 
     private KieSession kieSession;
 
@@ -58,6 +63,10 @@ public class KieSessionContext {
     }
 
     public void setClockAt(long time) {
+        if (clock == null) {
+            logger.error( "Drools HACEP is not running with a pseudo-clock" );
+            return;
+        }
         clock.advanceTime(time - clock.getCurrentTime(), TimeUnit.MILLISECONDS);
     }
 }
