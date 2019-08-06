@@ -8,7 +8,7 @@ oc project my-kafka-project
 
 #### Relax RBAC for configmap
 ```sh
-kubectl create clusterrolebinding permissive-binding --clusterrole=cluster-admin --group=system:serviceaccoun
+kubectl create clusterrolebinding permissive-binding --clusterrole=cluster-admin --group=system:serviceaccounts
 ```
 
 #### Build Container on docker
