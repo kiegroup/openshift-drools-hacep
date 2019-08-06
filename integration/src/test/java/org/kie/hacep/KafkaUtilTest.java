@@ -24,6 +24,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -47,6 +48,7 @@ import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.utils.SystemTime;
 import org.apache.kafka.common.utils.Time;
+import org.kie.hacep.core.Bootstrap;
 import org.kie.hacep.sample.kjar.StockTickEvent;
 import org.kie.remote.CommonConfig;
 import org.kie.remote.RemoteStreamingKieSession;
@@ -331,5 +333,15 @@ public class KafkaUtilTest implements AutoCloseable {
                 skipOnDemandSnapshot("true").
                 withMaxSnapshotAgeSeconds("60000").
                 underTest(true);
+    }
+
+
+    public void tearDown() {
+        try {
+            Bootstrap.stopEngine();
+        } catch (ConcurrentModificationException ex) {
+            throw new RuntimeException(ex.getMessage(), ex);
+        }
+        shutdownServer();
     }
 }

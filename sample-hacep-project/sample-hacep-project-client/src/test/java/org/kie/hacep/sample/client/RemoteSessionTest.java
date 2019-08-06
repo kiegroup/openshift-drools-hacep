@@ -26,7 +26,6 @@ import org.kie.hacep.core.infra.election.State;
 import org.kie.hacep.sample.kjar.Result;
 import org.kie.hacep.sample.kjar.StockTickEvent;
 import org.kie.remote.RemoteKieSession;
-import org.kie.remote.impl.RemoteKieSessionImpl;
 
 import static org.junit.Assert.assertEquals;
 import static org.kie.remote.CommonConfig.getTestProperties;
@@ -40,7 +39,7 @@ public class RemoteSessionTest {
         Bootstrap.startEngine( config );
         Bootstrap.getConsumerController().getCallback().updateStatus( State.LEADER );
 
-        RemoteKieSession session = new RemoteKieSessionImpl(getTestProperties());
+        RemoteKieSession session = RemoteKieSession.create(getTestProperties());
 
         session.insert( new Result("RHT") );
         session.insert( new StockTickEvent("RHT", 7.0) );

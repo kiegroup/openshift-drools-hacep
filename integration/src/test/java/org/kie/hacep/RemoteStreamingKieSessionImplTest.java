@@ -16,53 +16,24 @@
 package org.kie.hacep;
 
 import java.util.Collection;
-import java.util.ConcurrentModificationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.kie.hacep.core.Bootstrap;
 import org.kie.hacep.core.infra.election.State;
 import org.kie.hacep.sample.kjar.StockTickEvent;
 import org.kie.remote.CommonConfig;
 import org.kie.remote.RemoteStreamingKieSession;
-import org.kie.remote.TopicsConfig;
 import org.kie.remote.impl.RemoteStreamingKieSessionImpl;
 
 import static org.junit.Assert.*;
 
-public class RemoteStreamingKieSessionImplTest {
-
-    private KafkaUtilTest kafkaServerTest;
-    private EnvConfig config;
-    private TopicsConfig topicsConfig;
-
-    @Before
-    public void setUp() throws Exception {
-        config = KafkaUtilTest.getEnvConfig();
-        topicsConfig = TopicsConfig.getDefaultTopicsConfig();
-        kafkaServerTest = new KafkaUtilTest();
-        kafkaServerTest.startServer();
-        kafkaServerTest.createTopics(config.getEventsTopicName(),
-                                     config.getControlTopicName(),
-                                     config.getSnapshotTopicName(),
-                                     config.getKieSessionInfosTopicName());
-    }
-
-    @After
-    public void tearDown() {
-        try {
-            Bootstrap.stopEngine();
-        } catch (ConcurrentModificationException ex) {
-        }
-        kafkaServerTest.shutdownServer();
-    }
+public class RemoteStreamingKieSessionImplTest extends KafkaFullTopicsTests{
 
     @Test
     public void getFactCountTest() throws Exception {
-        Bootstrap.startEngine(config);
+        Bootstrap.startEngine(envConfig);
         Bootstrap.getConsumerController().getCallback().updateStatus(State.LEADER);
         kafkaServerTest.insertBatchStockTicketEvent(7,
                                                     topicsConfig,
@@ -80,7 +51,7 @@ public class RemoteStreamingKieSessionImplTest {
 
     @Test
     public void getListKieSessionObjectsTest() throws Exception {
-        Bootstrap.startEngine(config);
+        Bootstrap.startEngine(envConfig);
         Bootstrap.getConsumerController().getCallback().updateStatus(State.LEADER);
         kafkaServerTest.insertBatchStockTicketEvent(1,
                                                     topicsConfig,
@@ -103,7 +74,7 @@ public class RemoteStreamingKieSessionImplTest {
 
     @Test
     public void getListKieSessionObjectsWithClassTypeTest() throws Exception {
-        Bootstrap.startEngine(config);
+        Bootstrap.startEngine(envConfig);
         Bootstrap.getConsumerController().getCallback().updateStatus(State.LEADER);
         kafkaServerTest.insertBatchStockTicketEvent(1,
                                                     topicsConfig,
@@ -123,7 +94,7 @@ public class RemoteStreamingKieSessionImplTest {
 
     @Test
     public void getListKieSessionObjectsWithNamedQueryTest() throws Exception {
-        Bootstrap.startEngine(config);
+        Bootstrap.startEngine(envConfig);
         Bootstrap.getConsumerController().getCallback().updateStatus(State.LEADER);
         kafkaServerTest.insertBatchStockTicketEvent(1,
                                                     topicsConfig,

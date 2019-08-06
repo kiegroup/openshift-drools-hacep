@@ -15,47 +15,18 @@
  */
 package org.kie.hacep;
 
-import java.util.ConcurrentModificationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.kie.hacep.core.Bootstrap;
 import org.kie.hacep.core.infra.election.State;
 import org.kie.remote.RemoteKieSession;
-import org.kie.remote.TopicsConfig;
 import org.kie.remote.impl.RemoteKieSessionImpl;
 
 import static org.junit.Assert.assertEquals;
 
-public class RemoteKieSessionImplTest {
-
-    private KafkaUtilTest kafkaServerTest;
-    private TopicsConfig topicsConfig;
-    private EnvConfig envConfig;
-
-    @Before
-    public void setUp() throws Exception {
-        topicsConfig = TopicsConfig.getDefaultTopicsConfig();
-        envConfig = KafkaUtilTest.getEnvConfig();
-        kafkaServerTest = new KafkaUtilTest();
-        kafkaServerTest.startServer();
-        kafkaServerTest.createTopics(topicsConfig.getEventsTopicName(),
-                                     topicsConfig.getKieSessionInfosTopicName(),
-                                     envConfig.getControlTopicName(),
-                                     envConfig.getSnapshotTopicName());
-    }
-
-    @After
-    public void tearDown() {
-        try {
-            Bootstrap.stopEngine();
-        } catch (ConcurrentModificationException ex) {
-        }
-        kafkaServerTest.shutdownServer();
-    }
+public class RemoteKieSessionImplTest extends KafkaFullTopicsTests{
 
     @Test
     public void getFactCountTest() {
