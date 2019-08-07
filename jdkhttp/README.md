@@ -12,7 +12,11 @@ kubectl create clusterrolebinding permissive-binding --clusterrole=cluster-admin
 ```
 
 #### Build Container on docker
-In the jdkhttp module
+In the jdkhttp module.
+
+note:The name of the image "quickstarter/openshift-kie-jdkhttp"
+could be changed accordingly with the name used as image in the file kubernetes/deployment.yaml
+
 ```sh
 docker build -t quickstarter/openshift-kie-jdkhttp:latest .
 docker images | grep openshift-kie
@@ -24,7 +28,6 @@ kubectl create -f kubernetes/deployment.yaml
 kubectl create -f kubernetes/service.yaml 
 oc expose service  openshift-kie-jdkhttp
 ```
-@TODO add oc commands where available
 
  ```
  oc get route
@@ -58,13 +61,12 @@ docker push <user_username>/openshift-kie-jdkhttp:<tag>
 ```
 
 #### Deploy
-Change the image name with your in the following files before run the create command 
+Change the image name with your image name in the following files before run the create command 
 ```sh
 kubectl create -f kubernetes/debug_pod.yaml
 kubectl create -f kubernetes/deployment_registry.yaml
 ```
 
-@TODO add oc commands where available
 
 #### Port forward
 port forwarding 

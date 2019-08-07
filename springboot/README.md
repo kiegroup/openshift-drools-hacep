@@ -10,7 +10,10 @@ oc project my-kafka-project
 kubectl create clusterrolebinding permissive-binding --clusterrole=cluster-admin --group=system:serviceaccounts
 ```
 #### Build Container and deploy
-In the springboot module
+In the springboot module.
+
+note:The name of the image "quickstarter/openshift-kie-springboot"
+could be changed accordingly with the name used as image in the file kubernetes/deployment.yaml
 ```sh
 docker build -t quickstarter/openshift-kie-springboot:latest .
 docker images | grep openshift-kie
@@ -22,7 +25,6 @@ kubectl create -f kubernetes/deployment.yaml
 kubectl create -f kubernetes/service.yaml 
 oc expose service  openshift-kie-springboot
 ```
-@TODO add oc commands where available
 
  ```sh
  oc get route
@@ -46,7 +48,6 @@ mvn package docker:build
 mvn fabric8:resource fabric8:deploy
 ```
   
-  
 ### Remote debug    
     
 #### Using docker hub registry
@@ -57,13 +58,11 @@ docker push <user_username>/openshift-kie-springboot:<tag>
 ```
 
 #### Deploy
-Change the image name with your in the following files before run the create command
+Change the image name with your image name in the following files before run the create command
 ```sh
 kubectl create -f kubernetes/debug_pod.yaml
 kubectl create -f kubernetes/deployment_registry.yaml
 ```
-
-@TODO add oc commands where available
 
 #### Port forward
 port forwarding 
