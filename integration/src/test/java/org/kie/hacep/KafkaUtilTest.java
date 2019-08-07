@@ -203,21 +203,6 @@ public class KafkaUtilTest implements AutoCloseable {
         }
     }
 
-    public void deleteTopics(String... topics) {
-        try {
-            if (serverUp) {
-                for (String topic : topics) {
-                    if (AdminUtils.topicExists(zkUtils,
-                                               topic)) {
-                        AdminUtils.deleteTopic(zkUtils,
-                                               topic);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage(), e);
-        }
-    }
 
     public <K, V> KafkaConsumer<K, V> getStringConsumer(String topic) {
         Properties consumerProps = getConsumerConfig();

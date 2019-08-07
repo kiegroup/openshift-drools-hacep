@@ -112,6 +112,10 @@ public class DefaultKafkaConsumer<T> implements EventConsumer {
         return currentState;
     }
 
+    public DroolsConsumerHandler getConsumerHandler(){
+        return consumerHandler;
+    }
+
     @Override
     public void stop() {
         stopConsume();
@@ -130,16 +134,14 @@ public class DefaultKafkaConsumer<T> implements EventConsumer {
             currentState = state;
             updateOnRunningConsumer(state);
         } else {
-
+            //State.BECOMING_LEADER won't start the pod
             if (state.equals(State.REPLICA)) {
                 currentState = state;
                 //ask and wait a snapshot before start
                 if (!config.isSkipOnDemanSnapshot() && !askedSnapshotOnDemand) {
                     askAndProcessSnapshotOnDemand(this);
                 }
-            }
-            //State.BECOMING_LEADER won't start the pod
-            if (state.equals(State.LEADER) || state.equals(State.REPLICA)) {
+            }else if (state.equals(State.LEADER) || state.equals(State.REPLICA)) {
                 currentState = state;
                 enableConsumeAndStartLoop(state);
             }

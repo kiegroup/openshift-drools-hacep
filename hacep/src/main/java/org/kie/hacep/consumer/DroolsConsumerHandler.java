@@ -63,6 +63,11 @@ public class DroolsConsumerHandler implements ConsumerHandler {
         }
     }
 
+    //for test purpose
+    public KieSessionContext getKieSessionContext(){
+        return kieSessionContext;
+    }
+
     private void initializeKieSessionFromSnapshot(EnvConfig config) {
         if(config.isSkipOnDemanSnapshot()) {// if true we reads the snapshots and waitn until the first leaderElectionUpdate
             this.infos = snapshooter.deserialize();

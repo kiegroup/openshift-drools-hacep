@@ -77,8 +77,7 @@ public class SnapshotOnDemandUtils {
                                                           EventConsumer eventConsumer) {
         SnapshotMessage snapshotMsg = askAndReadSnapshotOnDemand(config,
                                                                  limitAge, eventConsumer);
-        if(snapshotMsg == null)
-        {
+        if(snapshotMsg == null) {
             return null;
         }
         KieSession kSession = null;
