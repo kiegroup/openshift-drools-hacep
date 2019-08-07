@@ -108,6 +108,11 @@ public class DefaultKafkaConsumer<T> implements EventConsumer {
     }
 
     @Override
+    public State getCurrentState() {
+        return currentState;
+    }
+
+    @Override
     public void stop() {
         stopConsume();
         stopPollingControl();
@@ -122,26 +127,30 @@ public class DefaultKafkaConsumer<T> implements EventConsumer {
     @Override
     public void updateStatus(State state) {
         if (started) {
+            currentState = state;
             updateOnRunningConsumer(state);
         } else {
+
             if (state.equals(State.REPLICA)) {
+                currentState = state;
                 //ask and wait a snapshot before start
                 if (!config.isSkipOnDemanSnapshot() && !askedSnapshotOnDemand) {
-                    askAndProcessSnapshotOnDemand();
+                    askAndProcessSnapshotOnDemand(this);
                 }
             }
             //State.BECOMING_LEADER won't start the pod
             if (state.equals(State.LEADER) || state.equals(State.REPLICA)) {
+                currentState = state;
                 enableConsumeAndStartLoop(state);
             }
         }
-        currentState = state;
     }
 
-    private void askAndProcessSnapshotOnDemand() {
+    private void askAndProcessSnapshotOnDemand(EventConsumer eventConsumer) {
+        DroolsExecutor.setAsReplica();
         askedSnapshotOnDemand = true;
-        boolean completed = consumerHandler.initializeKieSessionFromSnapshotOnDemand(config);
-        if (!completed) {
+        boolean completed = consumerHandler.initializeKieSessionFromSnapshotOnDemand(config, eventConsumer);
+        if (!completed && eventConsumer.getCurrentState().equals(State.REPLICA)) {
             throw new RuntimeException("Can't obtain a snapshot on demand");
         }
     }

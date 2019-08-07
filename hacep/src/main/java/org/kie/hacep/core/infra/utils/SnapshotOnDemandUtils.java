@@ -39,6 +39,8 @@ import org.kie.hacep.Config;
 import org.kie.hacep.EnvConfig;
 import org.kie.hacep.core.infra.SessionSnapshooter;
 import org.kie.hacep.core.infra.SnapshotInfos;
+import org.kie.hacep.core.infra.consumer.EventConsumer;
+import org.kie.hacep.core.infra.election.State;
 import org.kie.hacep.message.SnapshotMessage;
 import org.kie.remote.TopicsConfig;
 import org.kie.remote.command.SnapshotOnDemandCommand;
@@ -52,7 +54,8 @@ public class SnapshotOnDemandUtils {
     private final static Logger logger = LoggerFactory.getLogger(SnapshotOnDemandUtils.class);
 
     public static SnapshotInfos askASnapshotOnDemand(EnvConfig config,
-                                                     SessionSnapshooter snapshooter) {
+                                                     SessionSnapshooter snapshooter,
+                                                     EventConsumer eventConsumer) {
         LocalDateTime infosTime = snapshooter.getLastSnapshotTime();
 
         LocalDateTime limitAge = LocalDateTime.now().minusSeconds(config.getMaxSnapshotAge());
@@ -65,14 +68,19 @@ public class SnapshotOnDemandUtils {
             if (logger.isInfoEnabled()) {
                 logger.info("Build NewSnapshotOnDemand ");
             }
-            return buildNewSnapshotOnDemand(config, limitAge);
+            return buildNewSnapshotOnDemand(config, limitAge, eventConsumer);
         }
     }
 
     private static SnapshotInfos buildNewSnapshotOnDemand(EnvConfig config,
-                                                          LocalDateTime limitAge) {
+                                                          LocalDateTime limitAge,
+                                                          EventConsumer eventConsumer) {
         SnapshotMessage snapshotMsg = askAndReadSnapshotOnDemand(config,
-                                                                 limitAge);
+                                                                 limitAge, eventConsumer);
+        if(snapshotMsg == null)
+        {
+            return null;
+        }
         KieSession kSession = null;
         try (ByteArrayInputStream in = new ByteArrayInputStream(snapshotMsg.getSerializedSession())) {
             KieSessionConfiguration conf = KieServices.get().newKieSessionConfiguration();
@@ -101,7 +109,8 @@ public class SnapshotOnDemandUtils {
     }
 
     private static SnapshotMessage askAndReadSnapshotOnDemand(EnvConfig envConfig,
-                                                              LocalDateTime limitAge) {
+                                                              LocalDateTime limitAge,
+                                                              EventConsumer eventConsumer) {
         Properties props = Config.getProducerConfig("SnapshotOnDemandUtils.askASnapshotOnDemand");
         Sender sender = new Sender(props);
         sender.start();
@@ -112,7 +121,7 @@ public class SnapshotOnDemandUtils {
         boolean snapshotReady = false;
         SnapshotMessage msg = null;
         try {
-            while (!snapshotReady) {
+            while (!snapshotReady && eventConsumer.getCurrentState().equals(State.REPLICA)) {
                 ConsumerRecords<String, byte[]> records = consumer.poll(Duration.of(Integer.valueOf(Config.DEFAULT_POLL_TIMEOUT_MS),
                                                                                     ChronoUnit.MILLIS));
                 byte[] bytes = null;

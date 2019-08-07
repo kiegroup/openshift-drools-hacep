@@ -16,7 +16,6 @@
 package org.kie.hacep;
 
 import java.util.ArrayList;
-import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.List;
 
@@ -34,7 +33,7 @@ import org.kie.remote.CommonConfig;
 import static org.junit.Assert.*;
 import static org.kie.remote.util.SerializationUtil.deserialize;
 
-public class SnapshotOnDemandTest {
+public class SnapshotOnDemandAsALeaderTest {
 
     private KafkaUtilTest kafkaServerTest;
     private EnvConfig config;
@@ -76,14 +75,14 @@ public class SnapshotOnDemandTest {
 
         KafkaConsumer eventsConsumer = kafkaServerTest.getConsumer("",
                                                                    config.getEventsTopicName(),
-                                                                   Config.getConsumerConfig("SnapshotOnDemandTest.createSnapshotOnDemandTest"));
+                                                                   Config.getConsumerConfig("SnapshotOnDemandAsALeaderTest.createSnapshotOnDemandTest"));
         KafkaConsumer controlConsumer = kafkaServerTest.getConsumer("",
                                                                     config.getControlTopicName(),
-                                                                    Config.getConsumerConfig("SnapshotOnDemandTest.createSnapshotOnDemandTest"));
+                                                                    Config.getConsumerConfig("SnapshotOnDemandAsALeaderTest.createSnapshotOnDemandTest"));
 
         KafkaConsumer snapshotConsumer = kafkaServerTest.getConsumer("",
                                                                      config.getSnapshotTopicName(),
-                                                                     Config.getConsumerConfig("SnapshotOnDemandTest.createSnapshotOnDemandTest"));
+                                                                     Config.getConsumerConfig("SnapshotOnDemandAsALeaderTest.createSnapshotOnDemandTest"));
 
         try {
             ConsumerRecords eventsRecords = eventsConsumer.poll(1000);
@@ -129,4 +128,6 @@ public class SnapshotOnDemandTest {
             snapshotConsumer.close();
         }
     }
+
+
 }

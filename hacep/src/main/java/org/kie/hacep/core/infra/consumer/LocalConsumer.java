@@ -32,7 +32,12 @@ public class LocalConsumer implements EventConsumer {
 
     private State currentState;
 
-    public LocalConsumer( EnvConfig config ) {
+    @Override
+    public State getCurrentState() {
+        return currentState;
+    }
+
+    public LocalConsumer(EnvConfig config ) {
         this.config = config;
     }
 

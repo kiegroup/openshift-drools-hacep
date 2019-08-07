@@ -19,11 +19,13 @@ import java.util.Queue;
 
 import org.kie.api.KieServices;
 import org.kie.api.runtime.KieContainer;
+import org.kie.api.time.SessionPseudoClock;
 import org.kie.hacep.EnvConfig;
 import org.kie.hacep.core.KieSessionContext;
 import org.kie.hacep.core.infra.DeafultSessionSnapShooter;
 import org.kie.hacep.core.infra.SnapshotInfos;
 import org.kie.hacep.core.infra.consumer.ConsumerHandler;
+import org.kie.hacep.core.infra.consumer.EventConsumer;
 import org.kie.hacep.core.infra.consumer.ItemToProcess;
 import org.kie.hacep.core.infra.election.State;
 import org.kie.hacep.core.infra.utils.SnapshotOnDemandUtils;
@@ -71,9 +73,11 @@ public class DroolsConsumerHandler implements ConsumerHandler {
         }
     }
 
-    public boolean initializeKieSessionFromSnapshotOnDemand(EnvConfig config) {
+    public boolean initializeKieSessionFromSnapshotOnDemand(EnvConfig config, EventConsumer eventConsumer) {
         if(!config.isSkipOnDemanSnapshot()) {// if true we reads the snapshots and wait until the first leaderElectionUpdate
-            this.infos = SnapshotOnDemandUtils.askASnapshotOnDemand(config, snapshooter);
+            SnapshotInfos infos = SnapshotOnDemandUtils.askASnapshotOnDemand(config, snapshooter, eventConsumer);
+            if(infos == null) return false;
+            this.infos = infos;
             this.kieSessionContext = createSessionHolder(infos);
             return true;
         }
@@ -128,7 +132,7 @@ public class DroolsConsumerHandler implements ConsumerHandler {
 
     private void processCommand( RemoteCommand command, State state ) {
         boolean execute = state.equals(State.LEADER) || command.isPermittedForReplicas();
-        if (execute) {
+        if (execute && !shutdown) {
             VisitableCommand visitable = (VisitableCommand) command;
             visitable.accept(commandHandler);
         }

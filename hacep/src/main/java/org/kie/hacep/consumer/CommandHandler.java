@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.drools.core.common.EventFactHandle;
+import org.drools.core.impl.StatefulKnowledgeSessionImpl;
 import org.kie.api.definition.type.Role;
 import org.kie.api.definition.type.Timestamp;
 import org.kie.api.runtime.rule.FactHandle;
@@ -220,7 +221,11 @@ public class CommandHandler implements VisitorCommand {
 
         //if the lastSnapshot time is after the the age we perform a snapshot
         if (lastSnapshotTime == null) {
-            sessionSnapshooter.serialize(kieSessionContext, command.getId(), 0l);
+            if(((StatefulKnowledgeSessionImpl) kieSessionContext.getKieSession()).isAlive()) {
+                sessionSnapshooter.serialize(kieSessionContext,
+                                             command.getId(),
+                                             0l);
+            }
         } else if (LocalDateTime.now().minusSeconds(envConfig.getMaxSnapshotAge()).isAfter(lastSnapshotTime)) {
 
             ControlMessage lastControlMessage = ConsumerUtils.getLastEvent(envConfig.getControlTopicName(), envConfig.getPollTimeout());
