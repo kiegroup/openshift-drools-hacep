@@ -69,6 +69,12 @@
 
   <build>
     <finalName>${project.artifactId}</finalName>
+    <resources>
+      <resource>
+        <directory>src/main/fabric8</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
     <plugins>
       <plugin>
         <groupId>org.springframework.boot</groupId>
@@ -103,7 +109,7 @@
         <configuration>
           <images>
             <image>
-              <name>quickstarter/openshift-kie-springboot</name>
+              <name>${dockerImageName}</name>
               <build>
                 <contextDir>${project.basedir}</contextDir>
                 <tags>latest</tags>
@@ -119,5 +125,4 @@
       </plugin>
     </plugins>
   </build>
-
 </project>

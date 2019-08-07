@@ -13,7 +13,7 @@ spec:
       containers:
         - env:
           name: openshift-kie-springboot
-          image: quickstarter/openshift-kie-springboot:latest
+          image: ${dockerImageName}:latest
           imagePullPolicy: IfNotPresent
           livenessProbe:
             exec:

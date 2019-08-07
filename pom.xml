@@ -14,6 +14,7 @@
 
   <properties>
     <alphanetworkCompilerEnabled>false</alphanetworkCompilerEnabled>
+    <dockerImageName>quickstarter/openshift-kie-springboot</dockerImageName>
     <failOnMissingWebXml>false</failOnMissingWebXml>
     <generateModel>YES</generateModel>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
