@@ -37,13 +37,6 @@ Checks the topics
 oc exec -it my-cluster-kafka-<number> -- bin/kafka-topics.sh --zookeeper localhost:2181 --describe
 ```
 
-### Pre deploy on Openshift
-Relax Role based access control (RBAC https://kubernetes.io/docs/reference/access-authn-authz/rbac/) for configmap
-@TODO change with one less powerful or with a different strategy
-```sh
-kubectl create clusterrolebinding permissive-binding --clusterrole=cluster-admin --group=system:serviceaccounts
-```
-
 ### Build the pods
 ```sh
 mvn clean install -DskipTests
