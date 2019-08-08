@@ -16,10 +16,10 @@ When a new replica joins the cluster it asks a snapshot of the current drools se
 ## Installation Guide
 ### Prerequisites
 
-- Openshift 3.11 or Minishift
+- Openshift 3.11, 4.1 or Minishift
 
 - A Kafka Cluster on Openshift 3.11 with Strimzi https://strimzi.io/
-(tested on Openshift 3.11 and strimzi 0.11.1 and 0.12.1)
+(tested on Openshift 3.11, 4.1 and strimzi 0.11.1, 0.12.1)
 
 ### Creation of Kafka's topics
 Create the kafka topics using the files in the kafka-topics folder, 
@@ -73,7 +73,6 @@ spec:
       external:
         type: route
 ```
-
 
 ### Client module
 - sample-hacep-project-client 
