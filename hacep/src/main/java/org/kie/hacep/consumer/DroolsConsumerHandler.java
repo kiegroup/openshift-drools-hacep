@@ -20,6 +20,7 @@ import java.util.Queue;
 import org.kie.api.KieServices;
 import org.kie.api.runtime.KieContainer;
 import org.kie.hacep.EnvConfig;
+import org.kie.hacep.core.GlobalStatus;
 import org.kie.hacep.core.KieSessionContext;
 import org.kie.hacep.core.infra.DeafultSessionSnapShooter;
 import org.kie.hacep.core.infra.SnapshotInfos;
@@ -130,7 +131,12 @@ public class DroolsConsumerHandler implements ConsumerHandler {
         boolean execute = state.equals(State.LEADER) || command.isPermittedForReplicas();
         if (execute) {
             VisitableCommand visitable = (VisitableCommand) command;
-            visitable.accept(commandHandler);
+            try {
+                visitable.accept(commandHandler);
+            } catch (Throwable e) {
+                GlobalStatus.nodeLive.set(false);
+                throw e;
+            }
         }
     }
 

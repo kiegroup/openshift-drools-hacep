@@ -31,7 +31,6 @@ import org.slf4j.LoggerFactory;
  */
 public class Bootstrap {
 
-    public static AtomicBoolean readyToGo = new AtomicBoolean(false);
     private static final Logger logger = LoggerFactory.getLogger(Bootstrap.class);
     private static Producer eventProducer;
     private static ConsumerController consumerController;
@@ -45,6 +44,7 @@ public class Bootstrap {
         if(!envConfig.isUnderTest()) {
             leaderElection();
         }
+        GlobalStatus.nodeReady.set(true);
         logger.info("CONFIGURE on start engine:{}", envConfig);
     }
 

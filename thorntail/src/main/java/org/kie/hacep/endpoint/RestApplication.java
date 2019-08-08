@@ -24,6 +24,8 @@ import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
+import org.kie.hacep.core.GlobalStatus;
+
 public class RestApplication extends Application {
 
     @Context
@@ -44,9 +46,24 @@ public class RestApplication extends Application {
 
     @GET
     @Produces("text/plain")
-    @Path("/health")
-    public Response getHealth() {
-        return Response.ok().build();
+    @Path("/readiness")
+    public Response getReadiness() {
+        if(GlobalStatus.nodeReady.get()) {
+            return Response.ok().build();
+        } else {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+    }
+
+    @GET
+    @Produces("text/plain")
+    @Path("/liveness")
+    public Response getLiveness() {
+        if(GlobalStatus.nodeLive.get()) {
+            return Response.ok().build();
+        } else {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
     }
 }
 

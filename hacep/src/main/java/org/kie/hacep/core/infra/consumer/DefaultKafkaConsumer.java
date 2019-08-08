@@ -145,7 +145,6 @@ public class DefaultKafkaConsumer<T> implements EventConsumer {
         if (!completed) {
             throw new RuntimeException("Can't obtain a snapshot on demand");
         }
-        Bootstrap.readyToGo.set(true);
     }
 
     private void assign(List partitions) {

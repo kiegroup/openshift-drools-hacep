@@ -17,6 +17,7 @@ package org.kie.hacep.endpoint;
 
 import java.util.Map;
 
+import org.kie.hacep.core.GlobalStatus;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,8 +36,21 @@ public class Endpoints {
         return ResponseEntity.status(HttpStatus.OK).body(sb.toString());
     }
 
-    @GetMapping("/health")
-    public ResponseEntity<Void> check() {
-        return ResponseEntity.status(HttpStatus.OK).build();
+    @GetMapping("/readiness")
+    public ResponseEntity<Void> getReadiness() {
+        if(GlobalStatus.nodeReady.get()) {
+            return ResponseEntity.status(HttpStatus.OK).build();
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+    }
+
+    @GetMapping("/liveness")
+    public ResponseEntity<Void> getLiveness() {
+        if(GlobalStatus.nodeLive.get()) {
+            return ResponseEntity.status(HttpStatus.OK).build();
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
     }
 }

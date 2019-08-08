@@ -37,6 +37,7 @@ import org.kie.api.runtime.KieSessionConfiguration;
 import org.kie.api.runtime.conf.ClockTypeOption;
 import org.kie.hacep.Config;
 import org.kie.hacep.EnvConfig;
+import org.kie.hacep.core.GlobalStatus;
 import org.kie.hacep.core.infra.SessionSnapshooter;
 import org.kie.hacep.core.infra.SnapshotInfos;
 import org.kie.hacep.message.SnapshotMessage;
@@ -112,6 +113,7 @@ public class SnapshotOnDemandUtils {
         boolean snapshotReady = false;
         SnapshotMessage msg = null;
         try {
+            GlobalStatus.canBecomeLeader.set(false);
             while (!snapshotReady) {
                 ConsumerRecords<String, byte[]> records = consumer.poll(Duration.of(Integer.valueOf(Config.DEFAULT_POLL_TIMEOUT_MS),
                                                                                     ChronoUnit.MILLIS));
@@ -127,6 +129,7 @@ public class SnapshotOnDemandUtils {
             }
         } finally {
             consumer.close();
+            GlobalStatus.canBecomeLeader.set(true);
         }
         return msg;
     }

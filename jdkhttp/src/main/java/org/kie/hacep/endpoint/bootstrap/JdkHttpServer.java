@@ -25,34 +25,52 @@ import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import org.kie.hacep.EnvConfig;
 import org.kie.hacep.core.Bootstrap;
+import org.kie.hacep.core.GlobalStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class JdkHttpServer {
 
     private final static String OK = "OK";
+    private final static String KO = "KO";
     private static Logger logger = LoggerFactory.getLogger(JdkHttpServer.class);
 
     public static void main(String[] args) throws Exception {
 
         HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);
-        server.createContext("/health", new HealthHandler());
+        server.createContext("/readiness", new ReadinessHandler());
+        server.createContext("/liveness", new LivenessHandler());
         server.createContext("/env/all", new EnvHandler());
         server.start();
         Bootstrap.startEngine(EnvConfig.getDefaultEnvConfig());
         logger.info("Core system started");
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> Bootstrap.stopEngine()));
+        Runtime.getRuntime().addShutdownHook(new Thread(Bootstrap::stopEngine));
     }
 
-    static class HealthHandler implements HttpHandler {
+    static class ReadinessHandler implements HttpHandler {
 
         @Override
         public void handle(HttpExchange httpExchange) throws IOException {
-            httpExchange.sendResponseHeaders(200, OK.length());
-            OutputStream os = httpExchange.getResponseBody();
-            os.write(OK.getBytes());
-            os.close();
+            initResponse(httpExchange, GlobalStatus.nodeReady.get());
         }
+    }
+
+    static class LivenessHandler implements HttpHandler {
+
+        @Override
+        public void handle(HttpExchange httpExchange) throws IOException {
+            initResponse(httpExchange, GlobalStatus.nodeLive.get());
+        }
+    }
+
+    private static void initResponse(HttpExchange httpExchange, boolean isOk) throws IOException {
+        int returnCode = isOk ? 200 : 400;
+        int returnLength = isOk ? OK.length() : KO.length();
+        byte[] returnBytes = isOk ? OK.getBytes() : KO.getBytes();
+        httpExchange.sendResponseHeaders(returnCode, returnLength);
+        OutputStream os = httpExchange.getResponseBody();
+        os.write(returnBytes);
+        os.close();
     }
 
     private static class EnvHandler implements HttpHandler {
