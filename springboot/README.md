@@ -7,7 +7,12 @@ oc project my-kafka-project
 ```
 #### Relax RBAC for configmap
 ```sh
-kubectl create clusterrolebinding permissive-binding --clusterrole=cluster-admin --group=system:serviceaccounts
+oc create -f kubernetes/service-account.yaml
+oc create -f kubernetes/role-openshift.yaml
+oc create -f kubernetes/role-binding.yaml
+
+note the following is too wide
+kubectl create clusterrolebinding permissive-binding --clusterrole=cluster-reader --group=system:serviceaccounts
 ```
 #### Build Container and deploy
 In the springboot module.
