@@ -76,6 +76,10 @@
     <finalName>${project.artifactId}</finalName>
     <resources>
       <resource>
+        <directory>src/main/resources</directory>
+        <filtering>false</filtering>
+      </resource>
+      <resource>
         <directory>src/main/fabric8</directory>
         <filtering>true</filtering>
       </resource>

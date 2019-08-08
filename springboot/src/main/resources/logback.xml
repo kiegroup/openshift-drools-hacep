@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
   <include resource="org/springframework/boot/logging/logback/base.xml"/>
+  <root level="INFO">
+    <appender-ref ref="CONSOLE" />
+  </root>
   <logger name="org.springframework.web" level="ERROR"/>
   <logger name="org.kie.hacep" level="INFO"/>
   <logger name="org.apache.kafka" level="WARN"/>
