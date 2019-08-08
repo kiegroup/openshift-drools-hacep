@@ -51,6 +51,25 @@ mvn package docker:build
 ```sh
 mvn fabric8:resource fabric8:deploy
 ```
+
+##### Deploy on Openshift 4
+After installed AMQ Streams/Strimzi with operator, 
+
+create the topics with the yaml in the kafka-topics
+
+from th UI (Kafka Topic) or from cli
+
+then build the docker image and push into docker hub  
+```sh
+docker login --username=<user username>
+docker build -t <user_username>/openshift-kie-springboot:<tag> .  
+docker push <user_username>/openshift-kie-springboot:<tag>
+```
+then create a yaml from the UI using the content 
+
+of kubernetes/deployment_registry.yaml
+
+changing the image with the name of your docker image.
   
 ### Remote debug    
     
