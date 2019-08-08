@@ -16,6 +16,7 @@
 package org.kie.hacep.core;
 
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.kie.hacep.Config;
 import org.kie.hacep.EnvConfig;
@@ -30,6 +31,7 @@ import org.slf4j.LoggerFactory;
  */
 public class Bootstrap {
 
+    public static AtomicBoolean readyToGo = new AtomicBoolean(false);
     private static final Logger logger = LoggerFactory.getLogger(Bootstrap.class);
     private static Producer eventProducer;
     private static ConsumerController consumerController;
