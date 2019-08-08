@@ -17,6 +17,7 @@ spec:
         app: openshift-kie-thorntail
         version: v1
     spec:
+      serviceAccountName: openshift-kie-thorntail
       containers:
         - env:
           name: openshift-kie-thorntail

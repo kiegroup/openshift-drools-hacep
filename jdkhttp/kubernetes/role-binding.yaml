@@ -1,0 +1,13 @@
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: openshift-kie-jdkhttp
+  labels:
+    app: openshift-kie-jdkhttp
+subjects:
+  - kind: ServiceAccount
+    name: openshift-kie-jdkhttp
+roleRef:
+  kind: Role
+  name: openshift-kie-jdkhttp
+  apiGroup: rbac.authorization.k8s.io

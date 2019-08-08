@@ -17,6 +17,7 @@ spec:
         app: openshift-kie-jdkhttp
         version: v1
     spec:
+      serviceAccountName: openshift-kie-jdkhttp
       containers:
         - env:
           name: openshift-kie-jdkhttp

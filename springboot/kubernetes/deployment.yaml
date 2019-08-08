@@ -17,6 +17,7 @@ spec:
         app: openshift-kie-springboot
         version: v1
     spec:
+      serviceAccountName: openshift-kie-springboot
       containers:
         - env:
           name: openshift-kie-springboot

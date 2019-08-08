@@ -6,9 +6,11 @@ eval $(minishift docker-env)
 oc project my-kafka-project
 ```
 
-#### Relax RBAC for configmap
+#### RBAC for configmap
 ```sh
-kubectl create clusterrolebinding permissive-binding --clusterrole=cluster-admin --group=system:serviceaccounts
+oc create -f kubernetes/service-account.yaml
+oc create -f kubernetes/role.yaml
+oc create -f kubernetes/role-binding.yaml
 ```
 
 #### Build Container on docker
@@ -17,6 +19,7 @@ In the jdkhttp module.
 note:The name of the image "quickstarter/openshift-kie-jdkhttp"
 could be changed accordingly with the name used as image in the file kubernetes/deployment.yaml
 
+Feel free to change base image in the Dockerfile if you need
 ```sh
 docker build -t quickstarter/openshift-kie-jdkhttp:latest .
 docker images | grep openshift-kie

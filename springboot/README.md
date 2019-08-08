@@ -5,20 +5,19 @@ eval $(minishift oc-env)
 eval $(minishift docker-env)
 oc project my-kafka-project
 ```
-#### Relax RBAC for configmap
+#### RBAC for configmap
 ```sh
 oc create -f kubernetes/service-account.yaml
-oc create -f kubernetes/role-openshift.yaml
+oc create -f kubernetes/role.yaml
 oc create -f kubernetes/role-binding.yaml
-
-note the following is too wide
-kubectl create clusterrolebinding permissive-binding --clusterrole=cluster-reader --group=system:serviceaccounts
 ```
 #### Build Container and deploy
 In the springboot module.
 
 note:The name of the image "quickstarter/openshift-kie-springboot"
 could be changed accordingly with the name used as image in the file kubernetes/deployment.yaml
+
+Feel free to change base image in the Dockerfile if you need
 ```sh
 docker build -t quickstarter/openshift-kie-springboot:latest .
 docker images | grep openshift-kie
