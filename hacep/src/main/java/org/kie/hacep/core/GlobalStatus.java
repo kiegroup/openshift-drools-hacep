@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class GlobalStatus {
 
-    public static AtomicBoolean nodeReady = new AtomicBoolean(false);
-    public static AtomicBoolean nodeLive = new AtomicBoolean(true);
-    public static AtomicBoolean canBecomeLeader = new AtomicBoolean(true);
+    public static final AtomicBoolean nodeReady = new AtomicBoolean(false);
+    public static final AtomicBoolean nodeLive = new AtomicBoolean(true);
+    public static final AtomicBoolean canBecomeLeader = new AtomicBoolean(true);
 }
