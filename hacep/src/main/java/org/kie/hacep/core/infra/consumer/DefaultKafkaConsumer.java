@@ -463,8 +463,8 @@ public class DefaultKafkaConsumer<T> implements EventConsumer {
                                     currentState);
             saveOffset(record,
                        kafkaConsumer);
-            if (logger.isInfoEnabled()) {
-                logger.info("change topic, switch to consume control");
+            if (logger.isDebugEnabled()) {
+                logger.debug("change topic, switch to consume control");
             }
         } else if (processingReplica) {
             consumerHandler.process(ItemToProcess.getItemToProcess(record),
