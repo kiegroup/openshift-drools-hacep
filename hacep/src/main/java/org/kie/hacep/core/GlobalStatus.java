@@ -15,14 +15,12 @@
  */
 package org.kie.hacep.core;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 /**
  * Shared global status
  */
 public class GlobalStatus {
 
-    public static final AtomicBoolean nodeReady = new AtomicBoolean(false);
-    public static final AtomicBoolean nodeLive = new AtomicBoolean(true);
-    public static final AtomicBoolean canBecomeLeader = new AtomicBoolean(true);
+    public static volatile boolean nodeReady = false;
+    public static volatile boolean nodeLive = true;
+    public static volatile boolean canBecomeLeader = true;
 }

@@ -48,7 +48,7 @@ public class RestApplication extends Application {
     @Produces("text/plain")
     @Path("/readiness")
     public Response getReadiness() {
-        if(GlobalStatus.nodeReady.get()) {
+        if(GlobalStatus.nodeReady) {
             return Response.ok().build();
         } else {
             return Response.status(Response.Status.BAD_REQUEST).build();
@@ -59,7 +59,7 @@ public class RestApplication extends Application {
     @Produces("text/plain")
     @Path("/liveness")
     public Response getLiveness() {
-        if(GlobalStatus.nodeLive.get()) {
+        if(GlobalStatus.nodeLive) {
             return Response.ok().build();
         } else {
             return Response.status(Response.Status.BAD_REQUEST).build();

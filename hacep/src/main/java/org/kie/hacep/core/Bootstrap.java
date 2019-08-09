@@ -44,7 +44,7 @@ public class Bootstrap {
         if(!envConfig.isUnderTest()) {
             leaderElection();
         }
-        GlobalStatus.nodeReady.set(true);
+        GlobalStatus.nodeReady = true;
         logger.info("CONFIGURE on start engine:{}", envConfig);
     }
 
