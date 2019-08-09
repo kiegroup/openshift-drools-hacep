@@ -114,6 +114,7 @@ public class SnapshotOnDemandUtils {
         SnapshotMessage msg = null;
         try {
             GlobalStatus.canBecomeLeader.set(false);
+            int counter = 0;
             while (!snapshotReady) {
                 ConsumerRecords<String, byte[]> records = consumer.poll(Duration.of(Integer.valueOf(Config.DEFAULT_POLL_TIMEOUT_MS),
                                                                                     ChronoUnit.MILLIS));
@@ -125,6 +126,16 @@ public class SnapshotOnDemandUtils {
                 if (snapshotMsg != null && limitAge.isBefore(snapshotMsg.getTime())) {
                     snapshotReady = true;
                     msg = snapshotMsg;
+                }
+                else {
+                    // use a counter to avoid infinite attempts
+                    counter += 1;
+                    if(counter > envConfig.getMaxSnapshotRequestAttempts()) {
+                        GlobalStatus.nodeLive.set(false);
+                        String errorMessage = "Impossible to retrieve a snapshot and start after " + counter + " attempts";
+                        logger.error(errorMessage);
+                        throw new IllegalStateException(errorMessage);
+                    }
                 }
             }
         } finally {

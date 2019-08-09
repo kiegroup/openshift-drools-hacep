@@ -30,6 +30,7 @@ public final class EnvConfig {
     private String printerType;
     private int iterationBetweenSnapshot = Config.DEFAULT_ITERATION_BETWEEN_SNAPSHOT;
     private int pollTimeout = 1000;
+    private int maxSnapshotRequestAttempts = 10;
     private boolean skipOnDemanSnapshot;
     private long maxSnapshotAge;
     private boolean test;
@@ -50,6 +51,7 @@ public final class EnvConfig {
                 skipOnDemandSnapshot(Optional.ofNullable(System.getenv(Config.SKIP_ON_DEMAND_SNAPSHOT)).orElse(Boolean.FALSE.toString())).
                 withIterationBetweenSnapshot(Optional.ofNullable(System.getenv(Config.ITERATION_BETWEEN_SNAPSHOT)).orElse(String.valueOf(Config.DEFAULT_ITERATION_BETWEEN_SNAPSHOT))).
                 withMaxSnapshotAgeSeconds(Optional.ofNullable(System.getenv(Config.MAX_SNAPSHOT_AGE)).orElse(Config.DEFAULT_MAX_SNAPSHOT_AGE_SEC)).
+                withMaxSnapshotRequestAttempts(Optional.ofNullable(System.getenv(Config.MAX_SNAPSHOT_REQUEST_ATTEMPTS)).orElse(Config.DEFAULT_MAX_SNAPSHOT_REQUEST_ATTEMPTS)).
                 underTest(Optional.ofNullable(System.getenv(Config.UNDER_TEST)).orElse(Config.TEST));
     }
 
@@ -121,6 +123,11 @@ public final class EnvConfig {
         return this;
     }
 
+    public EnvConfig withMaxSnapshotRequestAttempts(String maxSnapshotRequestAttempts) {
+        this.maxSnapshotRequestAttempts = Integer.parseInt(maxSnapshotRequestAttempts);
+        return this;
+    }
+
     public EnvConfig clone() {
         EnvConfig envConfig = new EnvConfig();
         envConfig.eventsTopicName = this.eventsTopicName;
@@ -135,6 +142,7 @@ public final class EnvConfig {
         envConfig.iterationBetweenSnapshot = this.iterationBetweenSnapshot;
         envConfig.skipOnDemanSnapshot = this.skipOnDemanSnapshot;
         envConfig.maxSnapshotAge = this.maxSnapshotAge;
+        envConfig.maxSnapshotRequestAttempts = this.maxSnapshotRequestAttempts;
         return envConfig;
     }
 
@@ -186,6 +194,10 @@ public final class EnvConfig {
         return local;
     }
 
+    public int getMaxSnapshotRequestAttempts() {
+        return maxSnapshotRequestAttempts;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("EnvConfig{");
@@ -199,6 +211,7 @@ public final class EnvConfig {
         sb.append(", iterationBetweenSnapshot='").append(iterationBetweenSnapshot).append('\'');
         sb.append(", skipOnDemanSnapshot='").append(skipOnDemanSnapshot).append('\'');
         sb.append(", maxSnapshotAge='").append(maxSnapshotAge).append('\'');
+        sb.append(", maxSnapshotRequestAttempts='").append(maxSnapshotRequestAttempts).append('\'');
         sb.append(", underTest='").append(test).append('\'');
         sb.append('}');
         return sb.toString();
