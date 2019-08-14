@@ -28,6 +28,7 @@ public class StockTickEvent implements Serializable {
     private String company;
     private double price;
     private long timestamp;
+    private boolean processed = false;
 
     public StockTickEvent( String company, double price) {
         this(company, price, System.currentTimeMillis());
@@ -66,6 +67,14 @@ public class StockTickEvent implements Serializable {
         if (this.timestamp == 0) {
             this.timestamp = timestamp;
         }
+    }
+
+    public boolean isProcessed() {
+        return processed;
+    }
+
+    public void setProcessed(boolean processed) {
+        this.processed = processed;
     }
 
     @Override

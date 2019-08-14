@@ -13,35 +13,41 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.kie.remote.command;
+package org.kie.hacep.message;
 
 import java.io.Serializable;
-import java.util.UUID;
 
-public class ListObjectsCommand extends AbstractCommand implements VisitableCommand,
-                                                                   Serializable {
+import org.kie.remote.message.Message;
 
-    protected String entryPoint;
+public abstract class AbstractMessage implements Serializable,
+                                                 Message {
 
-    public ListObjectsCommand() {
+    protected String id;
+    protected long timestamp;
+
+    /* Empty constructor for serialization */
+    public AbstractMessage() {
     }
 
-    public ListObjectsCommand(String entryPoint) {
-        super(UUID.randomUUID().toString());
-        this.entryPoint = entryPoint;
-    }
-
-    public String getEntryPoint() {
-        return entryPoint;
-    }
-
-    @Override
-    public void accept(VisitorCommand visitor) {
-        visitor.visit(this);
+    public AbstractMessage(String id) {
+        this.id = id;
     }
 
     @Override
-    public boolean isPermittedForReplicas() {
-        return false;
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    @Override
+    public String getId() {
+        return id;
     }
 }

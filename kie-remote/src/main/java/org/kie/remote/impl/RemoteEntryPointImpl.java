@@ -42,7 +42,7 @@ public class RemoteEntryPointImpl extends AbstractRemoteEntryPoint implements Re
     }
 
     @Override
-    public RemoteFactHandle insert(Object obj) {
+    public <T> RemoteFactHandle<T> insert(T obj) {
         RemoteFactHandle factHandle = new RemoteFactHandleImpl( obj );
         InsertCommand command = new InsertCommand( factHandle, entryPoint );
         sender.sendCommand(command, topicsConfig.getEventsTopicName());
@@ -50,13 +50,13 @@ public class RemoteEntryPointImpl extends AbstractRemoteEntryPoint implements Re
     }
 
     @Override
-    public void delete( RemoteFactHandle handle ) {
+    public <T> void delete( RemoteFactHandle<T> handle ) {
         DeleteCommand command = new DeleteCommand( handle, entryPoint );
         sender.sendCommand(command, topicsConfig.getEventsTopicName());
     }
 
     @Override
-    public void update( RemoteFactHandle handle, Object object ) {
+    public <T> void update( RemoteFactHandle<T> handle, T object ) {
         UpdateCommand command = new UpdateCommand( handle, object, entryPoint );
         sender.sendCommand(command, topicsConfig.getEventsTopicName());
     }

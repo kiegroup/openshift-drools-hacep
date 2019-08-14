@@ -16,41 +16,35 @@
 package org.kie.hacep.message;
 
 import java.io.Serializable;
-import java.util.Queue;
 
-import org.kie.remote.message.Message;
+import org.kie.remote.message.ResultMessage;
 
-public class ControlMessage extends AbstractMessage implements Serializable, Message {
+public class FactCountMessage extends AbstractMessage implements Serializable, ResultMessage<Long> {
 
-    protected long offset;
-    protected Queue<Object> sideEffects;
+    private long factCount;
 
     /* Empty constructor for serialization */
-    public ControlMessage() {}
+    public FactCountMessage(){}
 
-    public ControlMessage( String id,
-                           Queue<Object> sideEffects) {
+    public FactCountMessage(String id,
+                            long factCount) {
         super(id);
-        this.sideEffects = sideEffects;
+        this.factCount = factCount;
     }
 
-    public long getOffset() {
-        return offset;
+    @Override
+    public Long getResult() {
+        return getFactCount();
     }
 
-    public void setOffset(long offset) {
-        this.offset = offset;
-    }
-
-    public Queue<Object> getSideEffects() {
-        return sideEffects;
+    public long getFactCount() {
+        return factCount;
     }
 
     @Override
     public String toString() {
-        return "ControlMessage{" +
-                "offset=" + offset +
-                ", sideEffects=" + sideEffects +
+        return "FactCountMessage{" +
+                "factCount=" + factCount +
                 ", id='" + id + '\'' +
                 ", timestamp=" + timestamp +
                 '}';

@@ -92,10 +92,10 @@ public class PodAsLeaderTest extends KafkaFullTopicsTests{
             ControlMessage fireUntilHalt = messagesIter.next();
             ControlMessage insert = messagesIter.next();
 
-            assertEquals(fireUntilHalt.getKey(),eventsRecord.key());
+            assertEquals(fireUntilHalt.getId(),eventsRecord.key());
             assertTrue(fireUntilHalt.getSideEffects().isEmpty());
 
-            assertEquals(insert.getKey(),eventsRecordTwo.key());
+            assertEquals(insert.getId(),eventsRecordTwo.key());
             assertTrue(!insert.getSideEffects().isEmpty());
         } catch (Exception ex) {
             throw new RuntimeException(ex.getMessage(), ex);

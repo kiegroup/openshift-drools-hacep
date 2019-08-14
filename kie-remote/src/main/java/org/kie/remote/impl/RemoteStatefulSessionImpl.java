@@ -39,11 +39,12 @@ public class RemoteStatefulSessionImpl implements RemoteStatefulSession {
         this.topicsConfig = topicsConfig;
     }
 
+    @SuppressWarnings("unchecked conversion")
     @Override
-    public CompletableFuture<Integer> fireAllRules() {
+    public CompletableFuture<Long> fireAllRules() {
         FireAllRulesCommand command = new FireAllRulesCommand();
-        CompletableFuture callback = new CompletableFuture<>();
-        getRequestsStore().put( command.getId(), callback );
+        CompletableFuture<Long> callback = new CompletableFuture<>();
+        ((Map) getRequestsStore()).put( command.getId(), callback );
         sender.sendCommand( command, topicsConfig.getEventsTopicName() );
         return callback;
     }

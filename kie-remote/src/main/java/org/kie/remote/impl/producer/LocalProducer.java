@@ -16,38 +16,31 @@
 
 package org.kie.remote.impl.producer;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.CompletableFuture;
 
-import org.apache.kafka.clients.producer.Callback;
+import org.kie.remote.message.Message;
+import org.kie.remote.message.ResultMessage;
 import org.kie.remote.util.LocalMessageSystem;
 
 public class LocalProducer implements Producer {
 
     private final LocalMessageSystem queue = LocalMessageSystem.get();
 
-    private final Map<String, CompletableFuture<Object>> results = new HashMap<>();
-
     @Override
-    public void start( Properties properties ) { }
-
-    @Override
-    public void stop() { }
-
-    @Override
-    public void produceFireAndForget( String topicName, String key, Object object ) {
-        queue.put( topicName, object );
+    public void start(Properties properties) {
     }
 
     @Override
-    public void produceSync( String topicName, String key, Object object ) {
-        queue.put( topicName, object );
+    public void stop() {
     }
 
     @Override
-    public void produceAsync( String topicName, String key, Object object, Callback callback ) {
-        queue.put( topicName, object );
+    public <T> void produceSync(String topicName, String key, ResultMessage<T> object) {
+        queue.put(topicName, object);
+    }
+
+    @Override
+    public void produceSync(String topicName, String key, Message object) {
+        queue.put(topicName, object);
     }
 }

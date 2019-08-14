@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
 
 public class KafkaListenerThread implements ListenerThread {
 
-    private static Logger logger = LoggerFactory.getLogger( KafkaListenerThread.class);
+    private static Logger logger = LoggerFactory.getLogger(KafkaListenerThread.class);
     private Properties configuration;
     private TopicsConfig topicsConfig;
     private Map<String, CompletableFuture<Object>> requestsStore;
@@ -46,7 +46,7 @@ public class KafkaListenerThread implements ListenerThread {
 
     private volatile boolean running = true;
 
-    public KafkaListenerThread( Properties configuration, TopicsConfig config, Map<String, CompletableFuture<Object>> requestsStore){
+    public KafkaListenerThread(Properties configuration, TopicsConfig config, Map<String, CompletableFuture<Object>> requestsStore) {
         this.configuration = configuration;
         this.topicsConfig = config;
         this.requestsStore = requestsStore;
@@ -69,7 +69,7 @@ public class KafkaListenerThread implements ListenerThread {
         for (Map.Entry<TopicPartition, Long> entry : offsets.entrySet()) {
             lastOffset = entry.getValue();
         }
-        if(lastOffset == 0){
+        if (lastOffset == 0) {
             lastOffset = 1l;// this is to start the seek with offset -1 on empty topic
         }
         Set<TopicPartition> assignments = consumer.assignment();
@@ -81,13 +81,18 @@ public class KafkaListenerThread implements ListenerThread {
     @Override
     public void run() {
         try {
-            while(running){
+            while (running) {
                 ConsumerRecords records = consumer.poll(Duration.of(CommonConfig.DEFAULT_POLL_TIMEOUT_MS, ChronoUnit.MILLIS));
                 for (Object item : records) {
                     ConsumerRecord<String, byte[]> record = (ConsumerRecord<String, byte[]>) item;
                     Object msg = SerializationUtil.deserialize(record.value());
                     if (msg instanceof ResultMessage) {
-                        complete( requestsStore, (ResultMessage) msg, logger );
+                        complete(requestsStore, (ResultMessage) msg, logger);
+                    } else if (msg != null) {
+                        throw new IllegalStateException("Wrong type of response message: found " +
+                                                                msg.getClass().getCanonicalName() +
+                                                                " instead of " +
+                                                                ResultMessage.class.getCanonicalName());
                     }
                 }
             }

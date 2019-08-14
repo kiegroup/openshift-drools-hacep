@@ -20,10 +20,12 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
+import org.kie.remote.RemoteFactHandle;
 import org.kie.remote.RemoteWorkingMemory;
 import org.kie.remote.TopicsConfig;
 import org.kie.remote.command.AbstractCommand;
 import org.kie.remote.command.FactCountCommand;
+import org.kie.remote.command.GetObjectCommand;
 import org.kie.remote.command.ListObjectsCommand;
 import org.kie.remote.command.ListObjectsCommandClassType;
 import org.kie.remote.command.ListObjectsCommandNamedQuery;
@@ -70,7 +72,13 @@ public abstract class AbstractRemoteEntryPoint implements RemoteWorkingMemory {
         return executeCommand( command );
     }
 
-    protected <T> CompletableFuture<T> executeCommand( AbstractCommand command ) {
+    @Override
+    public <T> CompletableFuture<T> getObject(RemoteFactHandle<T> remoteFactHandle) {
+        GetObjectCommand command = new GetObjectCommand(remoteFactHandle);
+        return executeCommand(command);
+    }
+
+    protected <T> CompletableFuture<T> executeCommand(AbstractCommand command ) {
         CompletableFuture callback = new CompletableFuture<>();
         getRequestsStore().put( command.getId(), callback );
         sender.sendCommand( command, topicsConfig.getEventsTopicName() );

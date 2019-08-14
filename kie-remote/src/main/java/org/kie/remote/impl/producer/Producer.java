@@ -18,6 +18,8 @@ package org.kie.remote.impl.producer;
 import java.util.Properties;
 
 import org.apache.kafka.clients.producer.Callback;
+import org.kie.remote.message.Message;
+import org.kie.remote.message.ResultMessage;
 
 import static org.kie.remote.CommonConfig.LOCAL_MESSAGE_SYSTEM_CONF;
 import static org.kie.remote.util.ConfigurationUtil.readBoolean;
@@ -28,11 +30,9 @@ public interface Producer {
 
     void stop();
 
-    void produceFireAndForget(String topicName, String key, Object object);
+    <T> void produceSync(String topicName, String key, ResultMessage<T> object);
 
-    void produceSync(String topicName, String key, Object object);
-
-    void produceAsync(String topicName, String key, Object object, Callback callback);
+    void produceSync(String topicName, String key, Message object);
 
     static Producer get(Properties configuration) {
         return get(readBoolean(configuration, LOCAL_MESSAGE_SYSTEM_CONF));

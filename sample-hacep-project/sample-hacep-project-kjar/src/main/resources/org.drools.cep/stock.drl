@@ -16,6 +16,7 @@ end
 rule StockLog when
   $stock:StockTickEvent()
 then
+    $stock.setProcessed(true);
     DroolsExecutor.getInstance().execute( () -> {
         String id = UUID.randomUUID().toString();
         System.out.println("Price for " + $stock.getCompany() + " is " + $stock.getPrice() + " id:" + id);

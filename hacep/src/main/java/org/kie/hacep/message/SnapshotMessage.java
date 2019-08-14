@@ -18,13 +18,14 @@ package org.kie.hacep.message;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.util.Arrays;
 import java.util.Set;
 
 import org.kie.hacep.consumer.FactHandlesManager;
 import org.kie.remote.RemoteFactHandle;
 
-public class SnapshotMessage implements Serializable {
+public class SnapshotMessage extends AbstractMessage implements Serializable {
+
     private byte[] serializedSession;
     private FactHandlesManager fhManager;
     private String lastInsertedEventkey;
@@ -32,9 +33,16 @@ public class SnapshotMessage implements Serializable {
     private LocalDateTime time;
 
     /* Empty constructor for serialization */
-    public SnapshotMessage() { }
+    public SnapshotMessage() {
+    }
 
-    public SnapshotMessage( byte[] serializedSession, FactHandlesManager fhManager, String lastInsertedEventkey, long lastInsertedEventOffset, LocalDateTime time ) {
+    public SnapshotMessage(String id,
+                           byte[] serializedSession,
+                           FactHandlesManager fhManager,
+                           String lastInsertedEventkey,
+                           long lastInsertedEventOffset,
+                           LocalDateTime time) {
+        super(id);
         this.serializedSession = serializedSession;
         this.fhManager = fhManager;
         this.lastInsertedEventkey = lastInsertedEventkey;
@@ -46,7 +54,7 @@ public class SnapshotMessage implements Serializable {
         return serializedSession;
     }
 
-    public void setSerializedSession( byte[] serializedSession ) {
+    public void setSerializedSession(byte[] serializedSession) {
         this.serializedSession = serializedSession;
     }
 
@@ -62,7 +70,7 @@ public class SnapshotMessage implements Serializable {
         return lastInsertedEventkey;
     }
 
-    public void setLastInsertedEventkey( String lastInsertedEventkey ) {
+    public void setLastInsertedEventkey(String lastInsertedEventkey) {
         this.lastInsertedEventkey = lastInsertedEventkey;
     }
 
@@ -70,7 +78,7 @@ public class SnapshotMessage implements Serializable {
         return lastInsertedEventOffset;
     }
 
-    public void setLastInsertedEventOffset( long lastInsertedEventOffset ) {
+    public void setLastInsertedEventOffset(long lastInsertedEventOffset) {
         this.lastInsertedEventOffset = lastInsertedEventOffset;
     }
 
@@ -80,13 +88,14 @@ public class SnapshotMessage implements Serializable {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("SnapshotMessage{");
-        sb.append("serializedSession=bytes[]");
-        sb.append(", fhMapKeys=").append(fhManager);
-        sb.append(", lastInsertedEventkey='").append(lastInsertedEventkey).append('\'');
-        sb.append(", lastInsertedEventOffset=").append(lastInsertedEventOffset);
-        sb.append(", time=").append(time);
-        sb.append('}');
-        return sb.toString();
+        return "SnapshotMessage{" +
+                "serializedSession=" + Arrays.toString(serializedSession) +
+                ", fhManager=" + fhManager +
+                ", lastInsertedEventkey='" + lastInsertedEventkey + '\'' +
+                ", lastInsertedEventOffset=" + lastInsertedEventOffset +
+                ", time=" + time +
+                ", id='" + id + '\'' +
+                ", timestamp=" + timestamp +
+                '}';
     }
 }

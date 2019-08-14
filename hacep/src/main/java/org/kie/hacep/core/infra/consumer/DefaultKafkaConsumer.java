@@ -297,12 +297,12 @@ public class DefaultKafkaConsumer<T> implements EventConsumer {
         ControlMessage lastControlMessage = ConsumerUtils.getLastEvent(config.getControlTopicName(),
                                                                        config.getPollTimeout());
         settingsOnAEmptyControlTopic(lastControlMessage);
-        processingKey = lastControlMessage.getKey();
+        processingKey = lastControlMessage.getId();
         processingKeyOffset = lastControlMessage.getOffset();
     }
 
     private void settingsOnAEmptyControlTopic(ControlMessage lastWrapper) {
-        if (lastWrapper.getKey() == null) {// completely empty or restart of ephemeral already used
+        if (lastWrapper.getId() == null) {// completely empty or restart of ephemeral already used
             if (leader) {
                 startProcessingLeader();
             } else {

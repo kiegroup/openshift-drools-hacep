@@ -40,4 +40,6 @@ public interface VisitorCommand {
     void visit(FactCountCommand command);
 
     void visit(SnapshotOnDemandCommand command);
+
+    void visit(GetObjectCommand command);
 }

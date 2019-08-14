@@ -53,7 +53,7 @@ public class RemoteKieSessionImpl extends RemoteEntryPointImpl implements Remote
     }
 
     @Override
-    public CompletableFuture<Integer> fireAllRules() {
+    public CompletableFuture<Long> fireAllRules() {
         return delegate.fireAllRules();
     }
 
@@ -64,6 +64,6 @@ public class RemoteKieSessionImpl extends RemoteEntryPointImpl implements Remote
 
     @Override
     public void halt() {
-        delegate.fireUntilHalt();
+        delegate.halt();
     }
 }

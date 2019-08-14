@@ -26,7 +26,7 @@ public interface RemoteEntryPoint extends RemoteWorkingMemory {
      *
      * @return the fact handle created for the given fact
      */
-    RemoteFactHandle insert(Object object);
+    <T> RemoteFactHandle<T> insert(T object);
 
     /**
      * Retracts the fact for which the given FactHandle was assigned
@@ -34,7 +34,7 @@ public interface RemoteEntryPoint extends RemoteWorkingMemory {
      *
      * @param handle the handle whose fact is to be retracted.
      */
-    void delete(RemoteFactHandle handle);
+    <T> void delete(RemoteFactHandle<T> handle);
 
     /**
      * Updates the fact for which the given FactHandle was assigned with the new
@@ -43,5 +43,5 @@ public interface RemoteEntryPoint extends RemoteWorkingMemory {
      * @param handle the FactHandle for the fact to be updated.
      * @param object the new value for the fact being updated.
      */
-    void update(RemoteFactHandle handle, Object object);
+    <T> void update(RemoteFactHandle<T> handle, T object);
 }

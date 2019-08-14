@@ -19,40 +19,36 @@ import java.io.Serializable;
 
 import org.kie.remote.message.ResultMessage;
 
-public class FactCountMessageImpl implements Serializable, ResultMessage<Long> {
+public class GetObjectMessage extends AbstractMessage
+        implements Serializable,
+                   ResultMessage<Object> {
 
-    private String key;
-    private long factCount;
+    private Object object;
 
     /* Empty constructor for serialization */
-    public FactCountMessageImpl(){}
+    public GetObjectMessage() {
+    }
 
-    public FactCountMessageImpl(String key,
-                                long factCount) {
-        this.key = key;
-        this.factCount = factCount;
+    public GetObjectMessage(String id, Object object) {
+        super(id);
+        this.object = object;
     }
 
     @Override
-    public String getKey() {
-        return key;
+    public Object getResult() {
+        return getObject();
     }
 
-    @Override
-    public Long getResult() {
-        return getFactCount();
-    }
-
-    public long getFactCount() {
-        return factCount;
+    public Object getObject() {
+        return object;
     }
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("FactCountMessage{");
-        sb.append("key='").append(key).append('\'');
-        sb.append(", factCount=").append(factCount);
-        sb.append('}');
-        return sb.toString();
+        return "GetObjectMessage{" +
+                "object=" + object +
+                ", id='" + id + '\'' +
+                ", timestamp=" + timestamp +
+                '}';
     }
 }

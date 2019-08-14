@@ -25,26 +25,22 @@ public class Sender {
     private Producer producer;
     private Properties configuration;
 
-    public Sender( Properties configuration ) {
+    public Sender(Properties configuration) {
         this.configuration = configuration != null && !configuration.isEmpty() ?
                 configuration :
-                ClientUtils.getConfiguration( ClientUtils.PRODUCER_CONF );
+                ClientUtils.getConfiguration(ClientUtils.PRODUCER_CONF);
         this.producer = Producer.get(configuration);
     }
 
     public void start() {
-        producer.start( configuration );
+        producer.start(configuration);
     }
 
     public void stop() {
         producer.stop();
     }
 
-    public void sendCommand(RemoteCommand command, String topicName ) {
-        producer.produceSync( topicName, command.getId(), command );
-    }
-
-    public void insertFireAndForget( RemoteCommand command, String topicName ) {
-        producer.produceFireAndForget( topicName, command.getId(), command );
+    public void sendCommand(RemoteCommand command, String topicName) {
+        producer.produceSync(topicName, command.getId(), command);
     }
 }

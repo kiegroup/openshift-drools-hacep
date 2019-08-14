@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 
 public class LocalListenerThread implements ListenerThread {
 
-    private static Logger logger = LoggerFactory.getLogger( LocalListenerThread.class);
+    private static Logger logger = LoggerFactory.getLogger(LocalListenerThread.class);
 
     private final LocalMessageSystem queue = LocalMessageSystem.get();
 
@@ -44,14 +44,14 @@ public class LocalListenerThread implements ListenerThread {
     @Override
     public void run() {
         while (running) {
-            Object msg = queue.poll( topicsConfig.getKieSessionInfosTopicName() );
-            if (msg instanceof ResultMessage ) {
-                complete( requestsStore, (ResultMessage) msg, logger );
-            }
-            try {
-                Thread.sleep( 100L );
-            } catch (InterruptedException e) {
-                throw new RuntimeException( e );
+            Object msg = queue.poll(topicsConfig.getKieSessionInfosTopicName());
+            if (msg instanceof ResultMessage) {
+                complete(requestsStore, (ResultMessage) msg, logger);
+            } else if (msg != null) {
+                throw new IllegalStateException("Wrong type of response message: found " +
+                                                        msg.getClass().getCanonicalName() +
+                                                        " instead of " +
+                                                        ResultMessage.class.getCanonicalName());
             }
         }
     }

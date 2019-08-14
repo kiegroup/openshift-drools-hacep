@@ -23,7 +23,7 @@ import java.util.function.Supplier;
 
 public abstract class DroolsExecutor {
 
-    private static boolean isLeader;
+    private static boolean isLeader = false;
 
     protected Queue<Object> executionResults = new ArrayDeque<>();
 
@@ -38,6 +38,8 @@ public abstract class DroolsExecutor {
     public static void setAsReplica() {
         isLeader = false;
     }
+
+    public abstract boolean isLeader();
 
     public abstract void execute( Runnable f );
 
@@ -54,6 +56,11 @@ public abstract class DroolsExecutor {
     public static class Leader extends DroolsExecutor {
 
         private static final Leader INSTANCE = new Leader();
+
+        @Override
+        public boolean isLeader() {
+            return true;
+        }
 
         @Override
         public void execute( Runnable f ) {
@@ -79,6 +86,11 @@ public abstract class DroolsExecutor {
     public static class Slave extends DroolsExecutor {
 
         private static final Slave INSTANCE = new Slave();
+
+        @Override
+        public boolean isLeader() {
+            return false;
+        }
 
         @Override
         public void execute( Runnable f ) {

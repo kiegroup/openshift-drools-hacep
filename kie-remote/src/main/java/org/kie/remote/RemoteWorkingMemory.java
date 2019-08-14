@@ -60,4 +60,10 @@ public interface RemoteWorkingMemory {
      * @return a completable future with Long to read the total number of facts currently in this entry point
      */
     CompletableFuture<Long> getFactCount();
+
+    /**
+     * @param <code>RemoteFactHandle</code> to retrieve.
+     * @@return CompletableFuture of <? extends Object> to read related RemoteFactHandle.
+     */
+    <T> CompletableFuture<T> getObject(RemoteFactHandle<T> remoteFactHandle);
 }

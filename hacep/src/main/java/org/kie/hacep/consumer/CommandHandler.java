@@ -30,14 +30,18 @@ import org.kie.hacep.core.KieSessionContext;
 import org.kie.hacep.core.infra.SessionSnapshooter;
 import org.kie.hacep.core.infra.utils.ConsumerUtils;
 import org.kie.hacep.message.ControlMessage;
-import org.kie.hacep.message.FactCountMessageImpl;
-import org.kie.hacep.message.ListKieSessionObjectMessageImpl;
+import org.kie.hacep.message.FactCountMessage;
+import org.kie.hacep.message.FireAllRuleMessage;
+import org.kie.hacep.message.GetObjectMessage;
+import org.kie.hacep.message.ListKieSessionObjectMessage;
+import org.kie.remote.DroolsExecutor;
 import org.kie.remote.RemoteFactHandle;
 import org.kie.remote.command.DeleteCommand;
 import org.kie.remote.command.EventInsertCommand;
 import org.kie.remote.command.FactCountCommand;
 import org.kie.remote.command.FireAllRulesCommand;
 import org.kie.remote.command.FireUntilHaltCommand;
+import org.kie.remote.command.GetObjectCommand;
 import org.kie.remote.command.HaltCommand;
 import org.kie.remote.command.InsertCommand;
 import org.kie.remote.command.ListObjectsCommand;
@@ -74,9 +78,14 @@ public class CommandHandler implements VisitorCommand {
     @Override
     public void visit(FireAllRulesCommand command) {
         int fires = kieSessionContext.getKieSession().fireAllRules();
-        producer.produceSync(envConfig.getKieSessionInfosTopicName(),
-                             command.getId(),
-                             fires);
+        FireAllRuleMessage msg = new FireAllRuleMessage(command.getId(), fires);
+
+        // command.isPermittedForReplicas() is true but only Leader should produce a message
+        if (DroolsExecutor.getInstance().isLeader()) {
+            producer.produceSync(envConfig.getKieSessionInfosTopicName(),
+                                 command.getId(),
+                                 msg);
+        }
     }
 
     @Override
@@ -92,42 +101,42 @@ public class CommandHandler implements VisitorCommand {
     @Override
     public void visit(InsertCommand command) {
         RemoteFactHandle remoteFH = command.getFactHandle();
-        FactHandle fh = internalInsert( command, remoteFH.getObject() );
+        FactHandle fh = internalInsert(command, remoteFH.getObject());
         kieSessionContext.getFhManager().registerHandle(remoteFH, fh);
     }
 
     @Override
     public void visit(EventInsertCommand command) {
-        internalInsert( command, command.getObject() );
+        internalInsert(command, command.getObject());
     }
 
-    private FactHandle internalInsert( WorkingMemoryActionCommand command, Object obj ) {
-        FactHandle fh = isEvent(obj) ? insertEvent( command, obj ) : insertFact( command, obj );
-        if ( firingUntilHalt ) {
+    private FactHandle internalInsert(WorkingMemoryActionCommand command, Object obj) {
+        FactHandle fh = isEvent(obj) ? insertEvent(command, obj) : insertFact(command, obj);
+        if (firingUntilHalt) {
             kieSessionContext.getKieSession().fireAllRules();
         }
         return fh;
     }
 
-    private FactHandle insertEvent( WorkingMemoryActionCommand command, Object obj ) {
+    private FactHandle insertEvent(WorkingMemoryActionCommand command, Object obj) {
         FactHandle fh;
-        if ( hasTimestamp( obj ) ) {
-            fh = insertFact( command, obj );
-            kieSessionContext.setClockAt( (( EventFactHandle ) fh).getStartTimestamp() );
+        if (hasTimestamp(obj)) {
+            fh = insertFact(command, obj);
+            kieSessionContext.setClockAt(((EventFactHandle) fh).getStartTimestamp());
         } else {
             // if the event doesn't have an its own timestamp, it has to use the command's one and then
             // advance the pseudo clock to the command timestamp before inserting the event
             if (logger.isDebugEnabled()) {
                 logger.debug("Event class " + obj.getClass().getName() + " doesn't have a timestamp property. Consider adding one.");
             }
-            kieSessionContext.setClockAt( command.getTimestamp() );
-            fh = insertFact( command, obj );
+            kieSessionContext.setClockAt(command.getTimestamp());
+            fh = insertFact(command, obj);
         }
         return fh;
     }
 
-    private FactHandle insertFact( WorkingMemoryActionCommand command, Object obj ) {
-        return kieSessionContext.getKieSession().getEntryPoint( command.getEntryPoint() ).insert( obj );
+    private FactHandle insertFact(WorkingMemoryActionCommand command, Object obj) {
+        return kieSessionContext.getKieSession().getEntryPoint(command.getEntryPoint()).insert(obj);
     }
 
     @Override
@@ -152,8 +161,8 @@ public class CommandHandler implements VisitorCommand {
     @Override
     public void visit(ListObjectsCommand command) {
         List serializableItems = getObjectList(command);
-        ListKieSessionObjectMessageImpl msg = new ListKieSessionObjectMessageImpl(command.getId(),
-                                                                                  serializableItems);
+        ListKieSessionObjectMessage msg = new ListKieSessionObjectMessage(command.getId(),
+                                                                          serializableItems);
         producer.produceSync(envConfig.getKieSessionInfosTopicName(),
                              command.getId(),
                              msg);
@@ -167,11 +176,19 @@ public class CommandHandler implements VisitorCommand {
     @Override
     public void visit(ListObjectsCommandClassType command) {
         List serializableItems = getSerializableItemsByClassType(command);
-        ListKieSessionObjectMessageImpl msg = new ListKieSessionObjectMessageImpl(command.getId(),
-                                                                                  serializableItems);
+        ListKieSessionObjectMessage msg = new ListKieSessionObjectMessage(command.getId(),
+                                                                          serializableItems);
         producer.produceSync(envConfig.getKieSessionInfosTopicName(),
                              command.getId(),
                              msg);
+    }
+
+    @Override
+    public void visit(GetObjectCommand command) {
+        FactHandle factHandle = kieSessionContext.getFhManager().mapRemoteFactHandle(command.getRemoteFactHandle());
+        Object object = kieSessionContext.getKieSession().getObject(factHandle);
+        GetObjectMessage msg = new GetObjectMessage(command.getId(), object);
+        producer.produceSync(envConfig.getKieSessionInfosTopicName(), command.getId(), msg);
     }
 
     private List getSerializableItemsByClassType(ListObjectsCommandClassType command) {
@@ -193,8 +210,8 @@ public class CommandHandler implements VisitorCommand {
     @Override
     public void visit(ListObjectsCommandNamedQuery command) {
         List serializableItems = getSerializableItemsByNamedQuery(command);
-        ListKieSessionObjectMessageImpl msg = new ListKieSessionObjectMessageImpl(command.getId(),
-                                                                                  serializableItems);
+        ListKieSessionObjectMessage msg = new ListKieSessionObjectMessage(command.getId(),
+                                                                          serializableItems);
         producer.produceSync(envConfig.getKieSessionInfosTopicName(),
                              command.getId(),
                              msg);
@@ -210,7 +227,7 @@ public class CommandHandler implements VisitorCommand {
 
     @Override
     public void visit(FactCountCommand command) {
-        FactCountMessageImpl msg = new FactCountMessageImpl(command.getId(), kieSessionContext.getKieSession().getFactCount());
+        FactCountMessage msg = new FactCountMessage(command.getId(), kieSessionContext.getKieSession().getFactCount());
         producer.produceSync(envConfig.getKieSessionInfosTopicName(), command.getId(), msg);
     }
 
@@ -225,19 +242,23 @@ public class CommandHandler implements VisitorCommand {
 
             ControlMessage lastControlMessage = ConsumerUtils.getLastEvent(envConfig.getControlTopicName(), envConfig.getPollTimeout());
             if (lastControlMessage != null) {
-                sessionSnapshooter.serialize(kieSessionContext, lastControlMessage.getKey(), lastControlMessage.getOffset());
+                sessionSnapshooter.serialize(kieSessionContext, lastControlMessage.getId(), lastControlMessage.getOffset());
             } else {
                 sessionSnapshooter.serialize(kieSessionContext, command.getId(), 0l);
             }
         }
     }
 
-    public static boolean isEvent( Object obj ) {
-        Role role = obj.getClass().getAnnotation( Role.class );
+    public static boolean isEvent(Object obj) {
+        Role role = obj.getClass().getAnnotation(Role.class);
         return role != null && role.value() == Role.Type.EVENT;
     }
 
-    public static boolean hasTimestamp( Object obj ) {
-        return obj.getClass().getAnnotation( Timestamp.class ) != null;
+    public static boolean hasTimestamp(Object obj) {
+        return obj.getClass().getAnnotation(Timestamp.class) != null;
+    }
+
+    public boolean isFiringUntilHalt() {
+        return firingUntilHalt;
     }
 }

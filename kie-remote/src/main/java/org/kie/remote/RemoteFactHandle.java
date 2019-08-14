@@ -18,9 +18,9 @@ package org.kie.remote;
 
 import java.io.Serializable;
 
-public interface RemoteFactHandle extends Serializable {
+public interface RemoteFactHandle<T> extends Serializable {
 
     String getId();
 
-    Object getObject();
+    T getObject();
 }

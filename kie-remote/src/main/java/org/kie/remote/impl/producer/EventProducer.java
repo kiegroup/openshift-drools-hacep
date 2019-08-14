@@ -18,9 +18,10 @@ package org.kie.remote.impl.producer;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 
-import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.kie.remote.message.Message;
+import org.kie.remote.message.ResultMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,10 +32,12 @@ public class EventProducer<T> implements Producer {
     private Logger logger = LoggerFactory.getLogger(EventProducer.class);
     protected org.apache.kafka.clients.producer.Producer<String, T> producer;
 
+    @Override
     public void start(Properties properties) {
         producer = new KafkaProducer(properties);
     }
 
+    @Override
     public void stop() {
         if (producer != null) {
             producer.flush();
@@ -42,12 +45,17 @@ public class EventProducer<T> implements Producer {
         }
     }
 
-    public void produceFireAndForget(String topicName, String key, Object object) {
-        producer.send(getFreshProducerRecord(topicName, key, object));
+    @Override
+    public <T> void produceSync(String topicName, String key, ResultMessage<T> object) {
+        internalProduceSync(topicName, key, object);
     }
 
+    @Override
+    public void produceSync(String topicName, String key, Message object) {
+        internalProduceSync(topicName, key, object);
+    }
 
-    public void produceSync(String topicName, String key, Object object) {
+    protected void internalProduceSync(String topicName, String key, Object object) {
         try {
             producer.send(getFreshProducerRecord(topicName, key, object)).get();
         } catch (InterruptedException | ExecutionException e) {
@@ -55,12 +63,7 @@ public class EventProducer<T> implements Producer {
         }
     }
 
-    public void produceAsync(String topicName, String key, Object object, Callback callback) {
-        producer.send(getFreshProducerRecord(topicName, key, object), callback);
-    }
-
-
-    private ProducerRecord<String, T> getFreshProducerRecord(String topicName, String key, Object object){
+    private ProducerRecord<String, T> getFreshProducerRecord(String topicName, String key, Object object) {
         return new ProducerRecord<>(topicName, key, (T) serialize(object));
     }
 }

@@ -16,23 +16,32 @@
 package org.kie.remote.command;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.UUID;
 
-public class ListObjectsCommand extends AbstractCommand implements VisitableCommand,
-                                                                   Serializable {
+import org.kie.remote.RemoteFactHandle;
 
-    protected String entryPoint;
+public class GetObjectCommand extends AbstractCommand implements VisitableCommand,
+                                                                 Serializable {
 
-    public ListObjectsCommand() {
-    }
+    private RemoteFactHandle remoteFactHandle;
 
-    public ListObjectsCommand(String entryPoint) {
+    public GetObjectCommand() {
         super(UUID.randomUUID().toString());
-        this.entryPoint = entryPoint;
     }
 
-    public String getEntryPoint() {
-        return entryPoint;
+    public GetObjectCommand(RemoteFactHandle remoteFactHandle) {
+        super( UUID.randomUUID().toString() );
+        this.remoteFactHandle = remoteFactHandle;
+    }
+
+    public RemoteFactHandle getRemoteFactHandle() {
+        return remoteFactHandle;
+    }
+
+    @Override
+    public boolean isPermittedForReplicas() {
+        return false;
     }
 
     @Override
@@ -41,7 +50,9 @@ public class ListObjectsCommand extends AbstractCommand implements VisitableComm
     }
 
     @Override
-    public boolean isPermittedForReplicas() {
-        return false;
+    public String toString() {
+        return "GetObjectCommand{" +
+                "remoteFactHandle=" + remoteFactHandle +
+                '}';
     }
 }

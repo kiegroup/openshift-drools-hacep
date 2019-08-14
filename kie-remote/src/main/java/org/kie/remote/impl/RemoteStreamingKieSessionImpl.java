@@ -39,6 +39,8 @@ public class RemoteStreamingKieSessionImpl extends RemoteStreamingEntryPointImpl
     public RemoteStreamingKieSessionImpl( Properties configuration, TopicsConfig envConfig) {
         super(new Sender(configuration), DEFAULT_ENTRY_POINT, envConfig, new Listener(configuration));
         sender.start();
+        // a streaming session is fireUntilHalt by default
+        fireUntilHalt();
     }
 
     @Override
@@ -53,7 +55,7 @@ public class RemoteStreamingKieSessionImpl extends RemoteStreamingEntryPointImpl
     }
 
     @Override
-    public CompletableFuture<Integer> fireAllRules() {
+    public CompletableFuture<Long> fireAllRules() {
         return delegate.fireAllRules();
     }
 
@@ -64,6 +66,6 @@ public class RemoteStreamingKieSessionImpl extends RemoteStreamingEntryPointImpl
 
     @Override
     public void halt() {
-        delegate.fireUntilHalt();
+        delegate.halt();
     }
 }

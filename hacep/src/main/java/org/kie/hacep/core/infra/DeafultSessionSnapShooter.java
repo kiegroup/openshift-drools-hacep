@@ -24,6 +24,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -73,7 +74,8 @@ public class DeafultSessionSnapShooter implements SessionSnapshooter {
                                                                                                kieSessionContext.getKieSession());
             /* We are storing the last inserted key and offset together with the session's bytes */
             byte[] bytes = out.toByteArray();
-            SnapshotMessage message = new SnapshotMessage(bytes,
+            SnapshotMessage message = new SnapshotMessage(UUID.randomUUID().toString(),
+                                                          bytes,
                                                           kieSessionContext.getFhManager(),
                                                           lastInsertedEventkey,
                                                           lastInsertedEventOffset,

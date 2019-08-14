@@ -43,11 +43,11 @@ public interface ListenerThread extends Runnable {
     }
 
     default void complete(Map<String, CompletableFuture<Object>> requestsStore, ResultMessage message, Logger logger) {
-        CompletableFuture<Object> completableFuture = requestsStore.get(message.getKey());
+        CompletableFuture<Object> completableFuture = requestsStore.get(message.getId());
         if(completableFuture!= null) {
             completableFuture.complete(message.getResult());
             if(logger.isDebugEnabled()){
-                logger.debug("completed msg with key {}",message.getKey());
+                logger.debug("completed msg with key {}",message.getId());
             }
         }
     }

@@ -33,7 +33,7 @@ import org.kie.remote.RemoteFactHandle;
 import org.kie.hacep.Config;
 import org.kie.hacep.EnvConfig;
 import org.kie.hacep.message.ControlMessage;
-import org.kie.hacep.message.FactCountMessageImpl;
+import org.kie.hacep.message.FactCountMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -100,7 +100,7 @@ public class ConsumerUtils {
         return lastMessage;
     }
 
-    public static FactCountMessageImpl getFactCount(RemoteFactHandle factHandle, EnvConfig config, Properties properties) {
+    public static FactCountMessage getFactCount(RemoteFactHandle factHandle, EnvConfig config, Properties properties) {
         KafkaConsumer consumer = new KafkaConsumer(properties);
         List<PartitionInfo> infos = consumer.partitionsFor(config.getKieSessionInfosTopicName());
         List<TopicPartition> partitions = new ArrayList<>();
@@ -124,7 +124,7 @@ public class ConsumerUtils {
             consumer.seek(part, lastOffset - 1);
         }
 
-        FactCountMessageImpl lastMessage = new FactCountMessageImpl();
+        FactCountMessage lastMessage = new FactCountMessage();
         try {
             ConsumerRecords records = consumer.poll(Duration.of(Config.DEFAULT_POLL_TIMEOUT_MS, ChronoUnit.MILLIS));
             for (Object item : records) {
