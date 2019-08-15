@@ -57,7 +57,7 @@ public class LocalStorageKieSessionTest {
         Bootstrap.stopEngine();
     }
 
-    @Test
+    @Test(timeout = 10000)
     public void insertTest() throws ExecutionException, InterruptedException {
 
         assertEquals((Long) 0L, session.getFactCount().get());
@@ -79,7 +79,7 @@ public class LocalStorageKieSessionTest {
         assertEquals(11.5, session.getObject(resultRFH).get().getValue());
     }
 
-    @Test
+    @Test(timeout = 10000)
     public void updateTest() throws ExecutionException, InterruptedException {
 
         assertEquals((Long) 0L, session.getFactCount().get());
@@ -100,7 +100,7 @@ public class LocalStorageKieSessionTest {
         assertEquals(stock.getPrice(), session.getObject(stockRFH).get().getPrice(), 0.1);
     }
 
-    @Test
+    @Test(timeout = 10000)
     public void deleteTest() throws ExecutionException, InterruptedException {
 
         assertEquals((Long) 0L, session.getFactCount().get());
@@ -120,7 +120,7 @@ public class LocalStorageKieSessionTest {
         assertEquals((Long) 0L, session.getFactCount().get());
     }
 
-    @Test
+    @Test(timeout = 10000)
     public void fireUntilHaltTest() throws ExecutionException, InterruptedException {
 
         assertEquals((Long) 0L, session.getFactCount().get());
@@ -147,7 +147,7 @@ public class LocalStorageKieSessionTest {
         assertTrue(session.getObject(stock2RFH).get().isProcessed());
     }
 
-    @Test
+    @Test(timeout = 10000)
     public void getCommandsTest() throws ExecutionException, InterruptedException {
 
         RemoteFactHandle<StockTickEvent> stock1FH = session.insert(new StockTickEvent("RHT", 9.0));

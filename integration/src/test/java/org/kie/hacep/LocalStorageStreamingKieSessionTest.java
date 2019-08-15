@@ -56,7 +56,7 @@ public class LocalStorageStreamingKieSessionTest {
         Bootstrap.stopEngine();
     }
 
-    @Test
+    @Test(timeout = 10000)
     public void insertTest() throws ExecutionException, InterruptedException {
 
         assertEquals((Long) 0L, session.getFactCount().get());
@@ -72,7 +72,7 @@ public class LocalStorageStreamingKieSessionTest {
         assertEquals(11.5, session.getObjects(Result.class).get().iterator().next().getValue());
     }
 
-    @Test
+    @Test(timeout = 10000)
     public void fireUntilHaltTest() throws ExecutionException, InterruptedException {
 
         assertEquals((Long) 0L, session.getFactCount().get());
@@ -100,7 +100,7 @@ public class LocalStorageStreamingKieSessionTest {
                 .stream().filter(stock -> !stock.isProcessed()).count());
     }
 
-    @Test
+    @Test(timeout = 10000)
     public void getCommandsTest() throws ExecutionException, InterruptedException {
 
         session.insert(new StockTickEvent("RHT", 9.0));
