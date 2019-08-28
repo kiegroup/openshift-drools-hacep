@@ -38,16 +38,6 @@
       <artifactId>jaxrs</artifactId>
     </dependency>
     <dependency>
-      <groupId>io.thorntail</groupId>
-      <artifactId>undertow</artifactId>
-      <exclusions>
-        <exclusion>
-          <groupId>io.thorntail.jdk-specific</groupId>
-          <artifactId>thorntail-jdk-specific</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
       <groupId>io.fabric8</groupId>
       <artifactId>kubernetes-client</artifactId>
       <exclusions>
@@ -65,10 +55,6 @@
       <groupId>org.hibernate.validator</groupId>
       <artifactId>hibernate-validator</artifactId>
     </dependency>
-    <!--<dependency>
-      <groupId>javax.ws.rs</groupId>
-      <artifactId>javax.ws.rs-api</artifactId>
-    </dependency>-->
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>javax.servlet-api</artifactId>
