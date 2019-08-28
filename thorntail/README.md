@@ -41,7 +41,7 @@ oc expose service  openshift-kie-thorntail
   ```
     
   Your address will be
-  http://openshift-kie-thorntail-my-kafka-project.192.168.99.109.nip.io/rest/env/all
+  http://openshift-kie-thorntail-my-kafka-project.192.168.99.109.nip.io/env
   
 #### Build Container and deploy with fabric8
 In the thorntail module
@@ -106,5 +106,5 @@ Attach to process
 
 ### REST API
 ```sh
- http://<address>/rest/env/all
+ http://<address>/env
 ```

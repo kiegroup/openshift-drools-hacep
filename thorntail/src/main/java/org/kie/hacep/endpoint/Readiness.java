@@ -15,10 +15,23 @@
  */
 package org.kie.hacep.endpoint;
 
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Response;
 
-@ApplicationPath("/")
-public class RestApplication extends Application {
+import org.kie.hacep.core.GlobalStatus;
 
+@Path("/readiness")
+public class Readiness {
+
+    @GET
+    @Produces("text/plain")
+    public Response getReadiness() {
+        if(GlobalStatus.nodeReady) {
+            return Response.ok().build();
+        } else {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+    }
 }

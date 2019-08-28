@@ -15,10 +15,23 @@
  */
 package org.kie.hacep.endpoint;
 
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
+import java.util.Map;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Response;
 
-@ApplicationPath("/")
-public class RestApplication extends Application {
+@Path("/env")
+public class Env {
 
+    @GET
+    @Produces("text/plain")
+    public Response getEnv() {
+        StringBuilder sb = new StringBuilder();
+        Map<String, String> env = System.getenv();
+        for (Map.Entry<String, String> entry : env.entrySet()) {
+            sb.append(entry.getKey()).append(":").append(entry.getValue()).append("\n");
+        }
+        return Response.ok(sb.toString()).build();
+    }
 }
