@@ -36,6 +36,16 @@
     <dependency>
       <groupId>io.thorntail</groupId>
       <artifactId>jaxrs</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>io.thorntail.jdk-specific</groupId>
+          <artifactId>thorntail-jdk-specific</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>javax.ws.rs</groupId>
+          <artifactId>javax.ws.rs-api</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>io.fabric8</groupId>
