@@ -27,7 +27,7 @@ spec:
             exec:
               command:
                 - curl
-                - localhost:8080/liveness
+                - localhost:8080/rest/liveness
             initialDelaySeconds: 20
             periodSeconds: 10
             timeoutSeconds: 1
@@ -39,7 +39,7 @@ spec:
             exec:
               command:
                 - curl
-                - localhost:8080/readiness
+                - localhost:8080/rest/readiness
             initialDelaySeconds: 10
             periodSeconds: 5
             timeoutSeconds: 1
