@@ -100,7 +100,7 @@ public class DefaultKafkaConsumer<T> implements EventConsumer {
         logger.info("Restart Consumers");
         snapshotInfos = snapShooter.deserialize();
         kafkaConsumer = new KafkaConsumer<>(Config.getConsumerConfig("PrimaryConsumer"));
-        assign(null);
+        assign();
         if (!leader) {
             kafkaSecondaryConsumer = new KafkaConsumer<>(Config.getConsumerConfig("SecondaryConsumer"));
         } else {
@@ -147,41 +147,34 @@ public class DefaultKafkaConsumer<T> implements EventConsumer {
         }
     }
 
-    private void assign(List partitions) {
+    private void assign() {
         if (leader) {
-            assignAsALeader(partitions);
+            assignAsALeader();
         } else {
-            assignNotLeader(partitions);
+            assignNotLeader();
         }
     }
 
-    private void assignAsALeader(List partitions) {
+    private void assignAsALeader() {
         assignConsumer(kafkaConsumer,
-                       config.getEventsTopicName(),
-                       partitions);
+                       config.getEventsTopicName());
     }
 
-    private void assignNotLeader(List partitions) {
+    private void assignNotLeader() {
         assignConsumer(kafkaConsumer,
-                       config.getEventsTopicName(),
-                       partitions);
+                       config.getEventsTopicName());
         assignConsumer(kafkaSecondaryConsumer,
-                       config.getControlTopicName(),
-                       partitions);
+                       config.getControlTopicName());
     }
 
-    private void assignConsumer(Consumer<String, T> kafkaConsumer,
-                                String topic,
-                                List partitions) {
+    private void assignConsumer(Consumer<String, T> kafkaConsumer, String topic) {
+
         List<PartitionInfo> partitionsInfo = kafkaConsumer.partitionsFor(topic);
         Collection<TopicPartition> partitionCollection = new ArrayList<>();
 
         if (partitionsInfo != null) {
             for (PartitionInfo partition : partitionsInfo) {
-                if (partitions == null || partitions.contains(partition.partition())) {
-                    partitionCollection.add(new TopicPartition(partition.topic(),
-                                                               partition.partition()));
-                }
+                    partitionCollection.add(new TopicPartition(partition.topic(), partition.partition()));
             }
 
             if (!partitionCollection.isEmpty()) {
@@ -314,7 +307,7 @@ public class DefaultKafkaConsumer<T> implements EventConsumer {
     }
 
     private void assignAndStartConsume() {
-        assign(null);
+        assign();
         startConsume();
     }
 
