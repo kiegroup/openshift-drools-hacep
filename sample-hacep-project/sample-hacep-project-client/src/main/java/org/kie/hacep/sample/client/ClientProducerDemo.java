@@ -28,25 +28,22 @@ import org.kie.remote.impl.RemoteKieSessionImpl;
 public class ClientProducerDemo {
 
     public static void main(String[] args) {
-        insertBatchEvent(1);
+        try {
+            insertBatchEvent(1);
+        }catch (Exception e){
+            throw new RuntimeException(e.getMessage(), e);
+        }
     }
 
-    private static void insertBatchEvent(int items) {
+    private static void insertBatchEvent(int items) throws IOException {
         TopicsConfig envConfig = TopicsConfig.getDefaultTopicsConfig();
         Properties props = getProperties();
-        RemoteStreamingKieSession producer = RemoteStreamingKieSession.create(props, envConfig);
-        try {
+        try (RemoteStreamingKieSession producer = RemoteStreamingKieSession.create(props, envConfig)){
             for (int i = 0; i < items; i++) {
                 StockTickEvent eventA = new StockTickEvent("RHT",
                                                            ThreadLocalRandom.current().nextLong(80,
                                                                                                 100));
                 producer.insert(eventA);
-            }
-        }finally {
-            try {
-                producer.close();
-            }catch (IOException ex){
-                throw new RuntimeException(ex.getMessage(), ex);
             }
         }
     }
