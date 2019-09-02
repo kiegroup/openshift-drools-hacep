@@ -39,7 +39,13 @@ public interface ListenerThread extends Runnable {
     static ListenerThread get(TopicsConfig topicsConfig, Map<String, CompletableFuture<Object>> requestsStore, boolean isLocal, Properties configuration) {
         return isLocal ?
                 new LocalListenerThread(topicsConfig, requestsStore) :
-                new KafkaListenerThread(configuration, topicsConfig, requestsStore);
+                new KafkaListenerThread(getMergedConf(configuration), topicsConfig, requestsStore);
+    }
+
+    static Properties getMergedConf(Properties configuration){
+        Properties conf = ClientUtils.getConfiguration(ClientUtils.CONSUMER_CONF);
+        conf.putAll(configuration);
+        return conf;
     }
 
     default void complete(Map<String, CompletableFuture<Object>> requestsStore, ResultMessage message, Logger logger) {
