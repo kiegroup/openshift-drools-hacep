@@ -33,13 +33,13 @@ public interface ListenerThread extends Runnable {
     void stop();
 
     static ListenerThread get(TopicsConfig topicsConfig, Map<String, CompletableFuture<Object>> requestsStore, Properties configuration) {
-        return get(topicsConfig, requestsStore, readBoolean(configuration, LOCAL_MESSAGE_SYSTEM_CONF));
+        return get(topicsConfig, requestsStore, readBoolean(configuration, LOCAL_MESSAGE_SYSTEM_CONF), configuration);
     }
 
-    static ListenerThread get(TopicsConfig topicsConfig, Map<String, CompletableFuture<Object>> requestsStore, boolean isLocal) {
+    static ListenerThread get(TopicsConfig topicsConfig, Map<String, CompletableFuture<Object>> requestsStore, boolean isLocal, Properties configuration) {
         return isLocal ?
                 new LocalListenerThread(topicsConfig, requestsStore) :
-                new KafkaListenerThread( ClientUtils.getConfiguration(ClientUtils.CONSUMER_CONF), topicsConfig, requestsStore);
+                new KafkaListenerThread(configuration, topicsConfig, requestsStore);
     }
 
     default void complete(Map<String, CompletableFuture<Object>> requestsStore, ResultMessage message, Logger logger) {
