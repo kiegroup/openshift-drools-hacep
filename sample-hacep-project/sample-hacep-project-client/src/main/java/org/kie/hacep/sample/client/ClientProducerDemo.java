@@ -15,34 +15,36 @@
  */
 package org.kie.hacep.sample.client;
 
+import java.io.IOException;
 import java.util.Properties;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.kie.hacep.sample.kjar.StockTickEvent;
 import org.kie.remote.CommonConfig;
+import org.kie.remote.RemoteStreamingKieSession;
 import org.kie.remote.TopicsConfig;
 import org.kie.remote.impl.RemoteKieSessionImpl;
 
 public class ClientProducerDemo {
 
     public static void main(String[] args) {
-        insertBatchEvent(1);
+        try {
+            insertBatchEvent(1);
+        }catch (Exception e){
+            throw new RuntimeException(e.getMessage(), e);
+        }
     }
 
-    private static void insertBatchEvent(int items) {
+    private static void insertBatchEvent(int items) throws IOException {
         TopicsConfig envConfig = TopicsConfig.getDefaultTopicsConfig();
         Properties props = getProperties();
-        RemoteKieSessionImpl producer = new RemoteKieSessionImpl(props, envConfig);
-        producer.fireUntilHalt();
-        try {
+        try (RemoteStreamingKieSession producer = RemoteStreamingKieSession.create(props, envConfig)){
             for (int i = 0; i < items; i++) {
                 StockTickEvent eventA = new StockTickEvent("RHT",
                                                            ThreadLocalRandom.current().nextLong(80,
                                                                                                 100));
                 producer.insert(eventA);
             }
-        }finally {
-            producer.close();
         }
     }
 
