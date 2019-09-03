@@ -57,11 +57,6 @@ public class SnapshotOnDemandTest {
         config = getEnvConfig();
         kafkaServerTest = new KafkaUtilTest();
         kafkaServerTest.startServer();
-        kafkaServerTest.createTopics(config.getEventsTopicName(),
-                                     config.getControlTopicName(),
-                                     config.getSnapshotTopicName(),
-                                     config.getKieSessionInfosTopicName()
-        );
     }
 
     @After

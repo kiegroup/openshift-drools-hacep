@@ -37,7 +37,9 @@ public class PodAsReplicaTest extends KafkaFullTopicsTests {
                                                                     Config.getConsumerConfig("controlConsumerProcessOneSentMessageAsLeaderTest"));
 
         KafkaConsumer<byte[], java.lang.String> kafkaLogConsumer = kafkaServerTest.getStringConsumer(TEST_KAFKA_LOGGER_TOPIC);
-        kafkaServerTest.insertBatchStockTicketEvent(1, topicsConfig, RemoteKieSession.class);
+        kafkaServerTest.insertBatchStockTicketEvent(1,
+                                                    topicsConfig,
+                                                    RemoteKieSession.class);
 
         try {
             //EVENTS TOPIC
@@ -124,7 +126,8 @@ public class PodAsReplicaTest extends KafkaFullTopicsTests {
             assertEquals(sideEffectOnLeader, sideEffectOnReplica);
             KafkaUtilTest.insertPoisonPillCommand();
         } catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
+            logger.error(ex.getMessage(),
+                         ex);
         } finally {
             eventsConsumer.close();
             controlConsumer.close();

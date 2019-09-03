@@ -65,7 +65,7 @@ public class PodAsLeaderSnapshotTest extends KafkaFullTopicsTests{
 
             int items = controlConsumer.poll(Duration.ofMillis(5000)).count();
             while(items < 11){
-                items = controlConsumer.poll(Duration.ofMillis(1000)).count();
+                items = items + controlConsumer.poll(Duration.ofMillis(1000)).count();
             }
             assertEquals(11, items); //1 fireUntilHalt + 10 stock ticket
         } catch (Exception ex) {

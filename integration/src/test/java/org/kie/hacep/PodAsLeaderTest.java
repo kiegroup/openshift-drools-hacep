@@ -49,13 +49,9 @@ public class PodAsLeaderTest extends KafkaFullTopicsTests {
                                                                     Config.getConsumerConfig("controlConsumerProcessOneSentMessageAsLeaderTest"));
 
         Properties props = (Properties) Config.getProducerConfig("InsertBactchStockTickets").clone();
-        props.put(SKIP_LISTENER_AUTOSTART,
-                  true);
+        props.put(SKIP_LISTENER_AUTOSTART, true);
 
-        kafkaServerTest.insertBatchStockTicketEvent(1,
-                                                    topicsConfig,
-                                                    RemoteKieSession.class,
-                                                    props);
+        kafkaServerTest.insertBatchStockTicketEvent(1, topicsConfig, RemoteKieSession.class, props);
         try {
             //EVENTS TOPIC
             ConsumerRecords eventsRecords = eventsConsumer.poll(Duration.ofMillis(5000));

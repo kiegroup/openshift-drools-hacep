@@ -49,15 +49,13 @@ public class PrinterKafkaImpl implements Printer {
     public Map<TopicPartition, Long> getOffsets(String topic) {
         KafkaConsumer consumer = new KafkaConsumer(Config.getConsumerConfig("OffsetConsumer"));
         consumer.subscribe(Arrays.asList(topic));
-        List<org.apache.kafka.common.PartitionInfo>
-                infos = consumer.partitionsFor(topic);
+        List<org.apache.kafka.common.PartitionInfo> infos = consumer.partitionsFor(topic);
         List<org.apache.kafka.common.TopicPartition> tps = new ArrayList<>();
         for (PartitionInfo info : infos) {
             tps.add(new TopicPartition(topic,
                                        info.partition()));
         }
-        Map<org.apache.kafka.common.TopicPartition,java.lang.Long>
-                offsets = consumer.endOffsets(tps);
+        Map<org.apache.kafka.common.TopicPartition,java.lang.Long> offsets = consumer.endOffsets(tps);
         consumer.close();
         return offsets;
     }
