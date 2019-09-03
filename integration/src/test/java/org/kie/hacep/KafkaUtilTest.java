@@ -33,13 +33,13 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadLocalRandom;
 
+import org.apache.kafka.clients.admin.AdminClient;
+import org.apache.kafka.clients.admin.KafkaAdminClient;
 import kafka.server.KafkaConfig;
 import kafka.server.KafkaServer;
 import kafka.server.NotRunning;
 import kafka.utils.TestUtils;
 import kafka.zk.EmbeddedZookeeper;
-import org.apache.kafka.clients.admin.AdminClient;
-import org.apache.kafka.clients.admin.KafkaAdminClient;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -198,19 +198,6 @@ public class KafkaUtilTest implements AutoCloseable {
         }
     }
 
-    public void deleteTopics(String... topics) {
-        try {
-            if (serverUp) {
-                for (String topic : topics) {
-                    if(adminClient.listTopics().listings().get().contains(topic)){
-                        deleteTopicIfExists(topic);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage(), e);
-        }
-    }
 
     public <K, V> KafkaConsumer<K, V> getStringConsumer(String topic) {
         Properties consumerProps = getConsumerConfig();
