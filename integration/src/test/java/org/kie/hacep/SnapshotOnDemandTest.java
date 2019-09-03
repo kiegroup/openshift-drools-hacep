@@ -92,7 +92,7 @@ public class SnapshotOnDemandTest {
             List<SnapshotMessage> messages = new ArrayList<>();
             while (messages.size() < 1) {
                 snapshotRecords = snapshotConsumer.poll(Duration.ofMillis(5000));
-                Iterator<ConsumerRecord<String,byte[]>> snapshotRecordIterator = snapshotRecords.iterator();
+                Iterator<ConsumerRecord<String, byte[]>> snapshotRecordIterator = snapshotRecords.iterator();
 
                 if (snapshotRecordIterator.hasNext()) {
                     ConsumerRecord<String, byte[]> controlRecord = snapshotRecordIterator.next();

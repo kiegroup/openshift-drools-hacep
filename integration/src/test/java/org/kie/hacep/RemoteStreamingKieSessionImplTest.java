@@ -100,7 +100,7 @@ public class RemoteStreamingKieSessionImplTest extends KafkaFullTopicsTests{
                                                     topicsConfig,
                                                     RemoteStreamingKieSession.class);
         RemoteStreamingKieSessionImpl client = new RemoteStreamingKieSessionImpl(Config.getProducerConfig("ListKieSessionObjectsWithNamedQueryTest"),
-                                                                                 topicsConfig);
+                                                                     topicsConfig);
         try{
 
             doQuery( client, "IBM", 0 );
