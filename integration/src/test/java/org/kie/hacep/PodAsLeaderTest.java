@@ -15,6 +15,7 @@
  */
 package org.kie.hacep;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -57,11 +58,11 @@ public class PodAsLeaderTest extends KafkaFullTopicsTests {
                                                     props);
         try {
             //EVENTS TOPIC
-            ConsumerRecords eventsRecords = eventsConsumer.poll(5000);
+            ConsumerRecords eventsRecords = eventsConsumer.poll(Duration.ofMillis(5000));
             assertEquals(2, eventsRecords.count());
-            Iterator<ConsumerRecord<String, byte[]>> eventsRecordIterator = eventsRecords.iterator();
-            ConsumerRecord<String, byte[]> eventsRecord = null;
-            ConsumerRecord<String, byte[]> eventsRecordTwo = null;
+            Iterator<ConsumerRecord<String,byte[]>> eventsRecordIterator = eventsRecords.iterator();
+            ConsumerRecord<java.lang.String,byte[]> eventsRecord = null;
+            ConsumerRecord<java.lang.String,byte[]> eventsRecordTwo = null;
             RemoteCommand remoteCommand ;
 
             if (eventsRecordIterator.hasNext()) {
@@ -86,10 +87,10 @@ public class PodAsLeaderTest extends KafkaFullTopicsTests {
             //CONTROL TOPIC
             List<ControlMessage> messages = new ArrayList<>();
             while (messages.size() < 2) {
-                ConsumerRecords controlRecords = controlConsumer.poll(2000);
-                Iterator<ConsumerRecord<String, byte[]>> controlRecordIterator = controlRecords.iterator();
+                ConsumerRecords controlRecords = controlConsumer.poll(Duration.ofMillis(2000));
+                Iterator<ConsumerRecord<String,byte[]>> controlRecordIterator = controlRecords.iterator();
                 if(controlRecordIterator.hasNext()) {
-                    ConsumerRecord<String, byte[]> controlRecord = controlRecordIterator.next();
+                    ConsumerRecord<java.lang.String,byte[]> controlRecord = controlRecordIterator.next();
                     ControlMessage controlMessage = deserialize(controlRecord.value());
                     messages.add(controlMessage);
                 }
@@ -109,12 +110,13 @@ public class PodAsLeaderTest extends KafkaFullTopicsTests {
             assertTrue(fireUntilHalt.getSideEffects().isEmpty());
             assertEquals(insert.getId(), eventsRecordTwo.key());
             assertTrue(!insert.getSideEffects().isEmpty());
+
+            KafkaUtilTest.insertPoisonPillCommand();
         } catch (Exception ex) {
             throw new RuntimeException(ex.getMessage(), ex);
         } finally {
             eventsConsumer.close();
             controlConsumer.close();
-            Bootstrap.stopEngine();
         }
     }
 }

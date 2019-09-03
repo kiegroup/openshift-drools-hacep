@@ -46,7 +46,6 @@ public class RemoteStreamingKieSessionImplTest extends KafkaFullTopicsTests{
             assertTrue(factCount == 7);
         }finally {
             client.close();
-            Bootstrap.stopEngine();
         }
     }
 
@@ -69,7 +68,6 @@ public class RemoteStreamingKieSessionImplTest extends KafkaFullTopicsTests{
             assertTrue(event.getCompany().equals("RHT"));
         }finally {
             client.close();
-            Bootstrap.stopEngine();
         }
 
     }
@@ -91,7 +89,6 @@ public class RemoteStreamingKieSessionImplTest extends KafkaFullTopicsTests{
             assertTrue(event.getCompany().equals("RHT"));
         }finally {
             client.close();
-            Bootstrap.stopEngine();
         }
     }
 

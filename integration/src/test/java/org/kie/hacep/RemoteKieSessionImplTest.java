@@ -46,7 +46,6 @@ public class RemoteKieSessionImplTest extends KafkaFullTopicsTests{
             throw new RuntimeException(e.getMessage(), e);
         } finally {
             client.close();
-            Bootstrap.stopEngine();
         }
     }
 }

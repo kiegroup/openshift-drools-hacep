@@ -54,6 +54,7 @@ import org.kie.remote.CommonConfig;
 import org.kie.remote.RemoteStreamingKieSession;
 import org.kie.remote.RemoteKieSession;
 import org.kie.remote.TopicsConfig;
+import org.kie.remote.command.PoisonPillCommand;
 import org.kie.remote.command.SnapshotOnDemandCommand;
 import org.kie.remote.impl.RemoteStreamingKieSessionImpl;
 import org.kie.remote.impl.RemoteKieSessionImpl;
@@ -143,8 +144,7 @@ public class KafkaUtilTest implements AutoCloseable {
                 }
             }
         } catch (IOException e) {
-            logger.error(e.getMessage(),
-                         e);
+            logger.error(e.getMessage(), e);
         }
         serverUp = false;
     }
@@ -154,24 +154,18 @@ public class KafkaUtilTest implements AutoCloseable {
         shutdownServer();
     }
 
-    public <K, V> void sendSingleMsg(KafkaProducer<K, V> producer,
-                                     ProducerRecord<K, V> data) {
+    public <K, V> void sendSingleMsg(KafkaProducer<K, V> producer, ProducerRecord<K, V> data) {
         producer.send(data);
         producer.close();
     }
 
     private Properties getConsumerConfig() {
         Properties consumerProps = new Properties();
-        consumerProps.setProperty("bootstrap.servers",
-                                  BROKER_HOST + ":" + BROKER_PORT);
-        consumerProps.setProperty("group.id",
-                                  "group0");
-        consumerProps.setProperty("client.id",
-                                  "consumer0");
-        consumerProps.put("auto.offset.reset",
-                          "earliest");
-        consumerProps.setProperty("key.deserializer",
-                                  "org.apache.kafka.common.serialization.StringDeserializer");
+        consumerProps.setProperty("bootstrap.servers", BROKER_HOST + ":" + BROKER_PORT);
+        consumerProps.setProperty("group.id", "group0");
+        consumerProps.setProperty("client.id", "consumer0");
+        consumerProps.put("auto.offset.reset", "earliest");
+        consumerProps.setProperty("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         return consumerProps;
     }
 
@@ -206,26 +200,10 @@ public class KafkaUtilTest implements AutoCloseable {
         }
     }
 
-    public void deleteTopics(String... topics) {
-        try {
-            if (serverUp) {
-                for (String topic : topics) {
-                    if (AdminUtils.topicExists(zkUtils,
-                                               topic)) {
-                        AdminUtils.deleteTopic(zkUtils,
-                                               topic);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage(), e);
-        }
-    }
 
     public <K, V> KafkaConsumer<K, V> getStringConsumer(String topic) {
         Properties consumerProps = getConsumerConfig();
-        consumerProps.setProperty("value.deserializer",
-                                  "org.apache.kafka.common.serialization.StringDeserializer");
+        consumerProps.setProperty("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         KafkaConsumer<K, V> consumer = new KafkaConsumer<>(consumerProps);
         consumer.subscribe(Arrays.asList(topic));
         return consumer;
@@ -233,8 +211,7 @@ public class KafkaUtilTest implements AutoCloseable {
 
     public <K, V> KafkaConsumer<K, V> getByteArrayConsumer(String topic) {
         Properties consumerProps = getConsumerConfig();
-        consumerProps.setProperty("value.deserializer",
-                                  "org.apache.kafka.common.serialization.ByteArrayDeserializer");
+        consumerProps.setProperty("value.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer");
         KafkaConsumer<K, V> consumer = new KafkaConsumer<>(consumerProps);
         consumer.subscribe(Arrays.asList(topic));
         return consumer;
@@ -311,6 +288,15 @@ public class KafkaUtilTest implements AutoCloseable {
         Sender sender = new Sender(props);
         sender.start();
         SnapshotOnDemandCommand command = new SnapshotOnDemandCommand();
+        sender.sendCommand(command, TopicsConfig.getDefaultTopicsConfig().getEventsTopicName());
+        sender.stop();
+    }
+
+    public static void insertPoisonPillCommand() {
+        Properties props = Config.getProducerConfig("insertPoisonPillCommand");
+        Sender sender = new Sender(props);
+        sender.start();
+        PoisonPillCommand command = new PoisonPillCommand();
         sender.sendCommand(command, TopicsConfig.getDefaultTopicsConfig().getEventsTopicName());
         sender.stop();
     }

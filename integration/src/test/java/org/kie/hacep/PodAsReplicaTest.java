@@ -1,8 +1,8 @@
 package org.kie.hacep;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -36,17 +36,17 @@ public class PodAsReplicaTest extends KafkaFullTopicsTests {
         KafkaConsumer controlConsumer = kafkaServerTest.getConsumer(envConfig.getControlTopicName(),
                                                                     Config.getConsumerConfig("controlConsumerProcessOneSentMessageAsLeaderTest"));
 
-        KafkaConsumer<byte[], String> kafkaLogConsumer = kafkaServerTest.getStringConsumer(TEST_KAFKA_LOGGER_TOPIC);
+        KafkaConsumer<byte[], java.lang.String> kafkaLogConsumer = kafkaServerTest.getStringConsumer(TEST_KAFKA_LOGGER_TOPIC);
         kafkaServerTest.insertBatchStockTicketEvent(1, topicsConfig, RemoteKieSession.class);
 
         try {
             //EVENTS TOPIC
-            ConsumerRecords eventsRecords = eventsConsumer.poll(5000);
+            ConsumerRecords eventsRecords = eventsConsumer.poll(Duration.ofMillis(5000));
             assertEquals(2, eventsRecords.count());
-            Iterator<ConsumerRecord<String, byte[]>> eventsRecordIterator = eventsRecords.iterator();
-            ConsumerRecord<String, byte[]> eventsRecord = null;
+            Iterator<ConsumerRecord<String,byte[]>> eventsRecordIterator = eventsRecords.iterator();
+            ConsumerRecord<java.lang.String, byte[]> eventsRecord = null;
             RemoteCommand remoteCommand;
-            if(eventsRecordIterator.hasNext()) {
+            if (eventsRecordIterator.hasNext()) {
                 eventsRecord = eventsRecordIterator.next();
                 assertEquals(eventsRecord.topic(),
                              envConfig.getEventsTopicName());
@@ -89,16 +89,17 @@ public class PodAsReplicaTest extends KafkaFullTopicsTests {
             }
 
             //no more msg to consume as a leader
-            eventsRecords = eventsConsumer.poll(5000);
+            eventsRecords = eventsConsumer.poll(Duration.ofMillis(5000));
             assertEquals(0, eventsRecords.count());
-            controlRecords = controlConsumer.poll(5000);
+            controlRecords = controlConsumer.poll(Duration.ofMillis(5000));
             assertEquals(0, controlRecords.count());
 
             // SWITCH AS a REPLICA
             Bootstrap.getConsumerController().getCallback().updateStatus(State.REPLICA);
-            ConsumerRecords<byte[], String> recordsLog = kafkaLogConsumer.poll(20000);
+            ConsumerRecords<byte[], String> recordsLog = kafkaLogConsumer.poll(Duration.ofMillis(20000));
             Iterator<ConsumerRecord<byte[], String>> recordIterator = recordsLog.iterator();
-            List<String> kafkaLoggerMsgs = new ArrayList();
+            java.util.List<java.lang.String> kafkaLoggerMsgs = new ArrayList<>();
+
             while (recordIterator.hasNext()) {
                 ConsumerRecord<byte[], String> record = recordIterator.next();
                 kafkaLoggerMsgs.add(record.value());
@@ -110,10 +111,10 @@ public class PodAsReplicaTest extends KafkaFullTopicsTests {
                     if (item.endsWith(":null")) {
                         fail("SideEffects null");
                     }
-                    if(item.startsWith("sideEffectOnReplica:")){
+                    if (item.startsWith("sideEffectOnReplica:")) {
                         sideEffectOnReplica = item.substring(item.indexOf("["));
                     }
-                    if(item.startsWith("sideEffectOnLeader:")){
+                    if (item.startsWith("sideEffectOnLeader:")) {
                         sideEffectOnLeader = item.substring(item.indexOf("["));
                     }
                 }
@@ -121,26 +122,26 @@ public class PodAsReplicaTest extends KafkaFullTopicsTests {
             assertNotNull(sideEffectOnLeader);
             assertNotNull(sideEffectOnReplica);
             assertEquals(sideEffectOnLeader, sideEffectOnReplica);
+            KafkaUtilTest.insertPoisonPillCommand();
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
         } finally {
             eventsConsumer.close();
             controlConsumer.close();
             kafkaLogConsumer.close();
-            Bootstrap.stopEngine();
         }
     }
 
     private ConsumerRecords waitForControlMessage( KafkaConsumer controlConsumer ) throws InterruptedException {
         ConsumerRecords controlRecords = controlConsumer.poll(5000);
         while (controlRecords.count() == 0) {
-            Thread.sleep( 10 );
-            controlRecords = controlConsumer.poll( 5000 );
+            Thread.sleep(10);
+            controlRecords = controlConsumer.poll(Duration.ofMillis(5000));
         }
         return controlRecords;
     }
 
-    private void checkFireSideEffects( ConsumerRecord<String, byte[]> controlRecord ) {
+    private void checkFireSideEffects(ConsumerRecord<String, byte[]> controlRecord) {
         // FireUntilHalt command has no side effects
         assertEquals(controlRecord.topic(), envConfig.getControlTopicName());
         ControlMessage controlMessage = deserialize(controlRecord.value());

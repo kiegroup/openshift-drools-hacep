@@ -15,6 +15,8 @@
  */
 package org.kie.hacep;
 
+import java.time.Duration;
+
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -46,11 +48,11 @@ public class PodAsLeaderSnapshotTest extends KafkaFullTopicsTests{
         try {
 
             //EVENTS TOPIC
-            ConsumerRecords eventsRecords = eventsConsumer.poll(5000);
+            ConsumerRecords eventsRecords = eventsConsumer.poll(Duration.ofMillis(5000));
             assertEquals(11, eventsRecords.count()); //1 fireUntilHalt + 10 stock ticket
 
             //SNAPSHOT TOPIC
-            ConsumerRecords snapshotRecords = snapshotConsumer.poll(5000);
+            ConsumerRecords snapshotRecords = snapshotConsumer.poll(Duration.ofMillis(5000));
             assertEquals(1, snapshotRecords.count());
             ConsumerRecord record = (ConsumerRecord) snapshotRecords.iterator().next();
             SnapshotMessage snapshot = deserialize((byte[]) record.value());
@@ -61,9 +63,9 @@ public class PodAsLeaderSnapshotTest extends KafkaFullTopicsTests{
             assertEquals(9, snapshot.getFhMapKeys().size());
             assertNotNull(snapshot.getLastInsertedEventkey());
 
-            int items = controlConsumer.poll(5000).count();
+            int items = controlConsumer.poll(Duration.ofMillis(5000)).count();
             while(items < 11){
-                items = controlConsumer.poll(100).count();
+                items = controlConsumer.poll(Duration.ofMillis(1000)).count();
             }
             assertEquals(11, items); //1 fireUntilHalt + 10 stock ticket
         } catch (Exception ex) {
@@ -71,7 +73,6 @@ public class PodAsLeaderSnapshotTest extends KafkaFullTopicsTests{
         } finally {
             eventsConsumer.close();
             snapshotConsumer.close();
-            Bootstrap.stopEngine();
         }
     }
 }
