@@ -50,7 +50,6 @@ import org.kie.remote.command.InsertCommand;
 import org.kie.remote.command.ListObjectsCommand;
 import org.kie.remote.command.ListObjectsCommandClassType;
 import org.kie.remote.command.ListObjectsCommandNamedQuery;
-import org.kie.remote.command.PoisonPillCommand;
 import org.kie.remote.command.RemoteCommand;
 import org.kie.remote.command.SnapshotOnDemandCommand;
 import org.kie.remote.command.UpdateCommand;
