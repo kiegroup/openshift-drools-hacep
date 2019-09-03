@@ -92,7 +92,7 @@ public class DefaultKafkaConsumer<T> implements EventConsumer {
         }
     }
 
-    public void restartConsumer() {
+    private void restartConsumer() {
         logger.info("Restart Consumers");
         snapshotInfos = snapShooter.deserialize();
         kafkaConsumer = new KafkaConsumer<>(Config.getConsumerConfig("PrimaryConsumer"));
@@ -134,7 +134,7 @@ public class DefaultKafkaConsumer<T> implements EventConsumer {
         currentState = state;
     }
 
-    public void askAndProcessSnapshotOnDemand() {
+    private void askAndProcessSnapshotOnDemand() {
         askedSnapshotOnDemand = true;
         boolean completed = consumerHandler.initializeKieSessionFromSnapshotOnDemand(config);
         if (!completed) {
@@ -367,10 +367,12 @@ public class DefaultKafkaConsumer<T> implements EventConsumer {
                 consumeControlFromBufferAsAReplica();
             }
 
-            ConsumerRecords<String, T> records = kafkaSecondaryConsumer.poll(Duration.of(millisTimeout, ChronoUnit.MILLIS));
+            ConsumerRecords<String, T> records = kafkaSecondaryConsumer.poll(Duration.of(millisTimeout,
+                                                                                         ChronoUnit.MILLIS));
             if (records.count() > 0) {
                 ConsumerRecord<String, T> first = records.iterator().next();
-                controlBuffer = records.records(new TopicPartition(first.topic(), first.partition()));
+                controlBuffer = records.records(new TopicPartition(first.topic(),
+                                                                   first.partition()));
                 consumeControlFromBufferAsAReplica();
             }
         }
@@ -384,7 +386,8 @@ public class DefaultKafkaConsumer<T> implements EventConsumer {
             index++;
             if (polledTopic.equals(PolledTopic.CONTROL)) {
                 if (end > index) {
-                    eventsBuffer = eventsBuffer.subList(index, end);
+                    eventsBuffer = eventsBuffer.subList(index,
+                                                        end);
                 }
                 break;
             }
@@ -396,7 +399,8 @@ public class DefaultKafkaConsumer<T> implements EventConsumer {
 
     private void consumeControlFromBufferAsAReplica() {
         if (config.isUnderTest()) {
-            loggerForTest.warn("consumeControlFromBufferAsAReplica:{}", controlBuffer.size());
+            loggerForTest.warn("consumeControlFromBufferAsAReplica:{}",
+                               controlBuffer.size());
         }
         int index = 0;
         int end = controlBuffer.size();
