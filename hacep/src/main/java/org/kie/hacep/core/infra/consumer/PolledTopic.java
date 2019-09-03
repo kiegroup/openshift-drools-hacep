@@ -15,16 +15,6 @@
  */
 package org.kie.hacep.core.infra.consumer;
 
-import org.kie.hacep.core.infra.election.State;
-import org.kie.remote.command.RemoteCommand;
-
-public interface ConsumerHandler {
-
-    void process(ItemToProcess item, State currentState);
-
-    void process( RemoteCommand command, State state );
-
-    void processWithSnapshot(ItemToProcess item, State currentState);
-
-    void stop();
+public enum PolledTopic {
+    EVENTS, CONTROL, NONE;
 }

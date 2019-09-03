@@ -39,7 +39,7 @@ public class RemoteStreamingKieSessionImplTest extends KafkaFullTopicsTests{
                                                     topicsConfig,
                                                     RemoteStreamingKieSession.class);
         RemoteStreamingKieSessionImpl client = new RemoteStreamingKieSessionImpl(Config.getProducerConfig("FactCountConsumerTest"),
-                                                                     topicsConfig);
+                                                                                 topicsConfig);
         try {
             CompletableFuture<Long> factCountFuture = client.getFactCount();
             Long factCount = factCountFuture.get(5, TimeUnit.SECONDS);
@@ -58,7 +58,7 @@ public class RemoteStreamingKieSessionImplTest extends KafkaFullTopicsTests{
                                                     RemoteStreamingKieSession.class);
 
         RemoteStreamingKieSessionImpl client = new RemoteStreamingKieSessionImpl(CommonConfig.getProducerConfig("ListKieSessionObjectsConsumerTest"),
-                                                                     topicsConfig);
+                                                                                 topicsConfig);
         try {
             CompletableFuture<Collection<? extends Object>> listKieObjectsFuture = client.getObjects();
             Collection<? extends Object> listKieObjects = listKieObjectsFuture.get(5,
@@ -80,7 +80,7 @@ public class RemoteStreamingKieSessionImplTest extends KafkaFullTopicsTests{
                                                     topicsConfig,
                                                     RemoteStreamingKieSession.class);
         RemoteStreamingKieSessionImpl client = new RemoteStreamingKieSessionImpl(Config.getProducerConfig("ListKieSessionObjectsWithClassTypeTest"),
-                                                                     topicsConfig);
+                                                                                 topicsConfig);
         try {
             CompletableFuture<Collection<StockTickEvent>> listKieObjectsFuture = client.getObjects(StockTickEvent.class);
             Collection<? extends Object> listKieObjects = listKieObjectsFuture.get(5, TimeUnit.SECONDS);
@@ -100,7 +100,7 @@ public class RemoteStreamingKieSessionImplTest extends KafkaFullTopicsTests{
                                                     topicsConfig,
                                                     RemoteStreamingKieSession.class);
         RemoteStreamingKieSessionImpl client = new RemoteStreamingKieSessionImpl(Config.getProducerConfig("ListKieSessionObjectsWithNamedQueryTest"),
-                                                                     topicsConfig);
+                                                                                 topicsConfig);
         try{
 
             doQuery( client, "IBM", 0 );

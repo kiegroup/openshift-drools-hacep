@@ -24,6 +24,7 @@ import org.kie.hacep.core.GlobalStatus;
 import org.kie.hacep.core.KieSessionContext;
 import org.kie.hacep.core.infra.DeafultSessionSnapShooter;
 import org.kie.hacep.core.infra.SnapshotInfos;
+import org.kie.hacep.core.infra.consumer.ConsumerController;
 import org.kie.hacep.core.infra.consumer.ConsumerHandler;
 import org.kie.hacep.core.infra.consumer.ItemToProcess;
 import org.kie.hacep.core.infra.election.State;
@@ -50,16 +51,18 @@ public class DroolsConsumerHandler implements ConsumerHandler {
     private CommandHandler commandHandler;
     private SnapshotInfos infos;
     private boolean shutdown;
+    private ConsumerController container;
 
-    public DroolsConsumerHandler(Producer producer, EnvConfig envConfig) {
+    public DroolsConsumerHandler(Producer producer, EnvConfig envConfig, ConsumerController container) {
         this.config = envConfig;
         this.snapshooter = new DeafultSessionSnapShooter(config);
         initializeKieSessionFromSnapshot(config);
         this.producer = producer;
-        commandHandler = new CommandHandler(kieSessionContext, config, producer, snapshooter);
+        commandHandler = new CommandHandler(kieSessionContext, config, producer, snapshooter, container);
         if (config.isUnderTest()) {
             loggerForTest = PrinterUtil.getKafkaLoggerForTest(envConfig);
         }
+        this.container = container;
     }
 
     private void initializeKieSessionFromSnapshot(EnvConfig config) {

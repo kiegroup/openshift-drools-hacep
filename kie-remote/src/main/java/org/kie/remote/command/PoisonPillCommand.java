@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Red Hat, Inc. and/or its affiliates.
+ * Copyright 2019 Red Hat
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,18 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.kie.hacep.core.infra.consumer;
+package org.kie.remote.command;
 
-import org.kie.hacep.core.infra.election.State;
-import org.kie.remote.command.RemoteCommand;
+import java.io.Serializable;
+import java.util.UUID;
 
-public interface ConsumerHandler {
+public class PoisonPillCommand extends AbstractCommand implements VisitableCommand, Serializable {
 
-    void process(ItemToProcess item, State currentState);
+    public PoisonPillCommand() {
+        super(UUID.randomUUID().toString());
+    }
 
-    void process( RemoteCommand command, State state );
+    @Override
+    public void accept(VisitorCommand visitor) { visitor.visit(this); }
 
-    void processWithSnapshot(ItemToProcess item, State currentState);
+    @Override
+    public boolean isPermittedForReplicas() { return false; }
 
-    void stop();
+    @Override
+    public String toString() {
+        return "PoisonPill of " + getId();
+    }
 }

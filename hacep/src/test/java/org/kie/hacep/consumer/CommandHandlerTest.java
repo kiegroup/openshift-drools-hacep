@@ -31,6 +31,7 @@ import org.kie.api.runtime.rule.QueryResults;
 import org.kie.hacep.EnvConfig;
 import org.kie.hacep.core.KieSessionContext;
 import org.kie.hacep.core.infra.SessionSnapshooter;
+import org.kie.hacep.core.infra.consumer.ConsumerController;
 import org.kie.hacep.message.FactCountMessage;
 import org.kie.hacep.message.FireAllRuleMessage;
 import org.kie.hacep.message.GetObjectMessage;
@@ -49,6 +50,7 @@ import org.kie.remote.command.InsertCommand;
 import org.kie.remote.command.ListObjectsCommand;
 import org.kie.remote.command.ListObjectsCommandClassType;
 import org.kie.remote.command.ListObjectsCommandNamedQuery;
+import org.kie.remote.command.PoisonPillCommand;
 import org.kie.remote.command.RemoteCommand;
 import org.kie.remote.command.SnapshotOnDemandCommand;
 import org.kie.remote.command.UpdateCommand;
@@ -115,6 +117,8 @@ public class CommandHandlerTest {
 
     protected CommandHandler commandHandler;
 
+    protected ConsumerController consumerController;
+
     @Before
     public void initTest() {
         when(kieSessionContextMock.getKieSession()).thenReturn(kieSessionMock);
@@ -131,7 +135,8 @@ public class CommandHandlerTest {
         commandHandler = new CommandHandler(kieSessionContextMock,
                                             envConfig,
                                             producerMock,
-                                            sessionSnapshooterMock);
+                                            sessionSnapshooterMock,
+                                            consumerController);
         DroolsExecutor.setAsLeader();
     }
 
@@ -261,6 +266,7 @@ public class CommandHandlerTest {
                                                 anyLong());
                          });
     }
+
 
     private <T extends RemoteCommand> void executeAndVerify(T command,
                                                             Consumer<T> consumer,
