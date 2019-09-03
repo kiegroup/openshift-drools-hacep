@@ -33,8 +33,7 @@ public class PrinterLogImpl implements Printer {
     private static Logger logger = LoggerFactory.getLogger(PrinterLogImpl.class);
 
     @Override
-    public void prettyPrinter(String caller, ConsumerRecord consumerRecord,
-                              boolean processed) {
+    public void prettyPrinter(String caller, ConsumerRecord consumerRecord, boolean processed) {
         if (consumerRecord != null) {
             logger.info("Caller:{} - Processed:{} - Topic: {} - Partition: {} - Offset: {} - Value: {}\n",
                         caller,

@@ -50,7 +50,7 @@ public class Bootstrap {
 
     public static void stopEngine() {
         logger.info("Stop engine");
-        if(coreKube != null) {
+        if(coreKube != null && coreKube.getLeaderElection() != null) {
             LeaderElection leadership = coreKube.getLeaderElection();
             try {
                 leadership.stop();
