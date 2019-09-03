@@ -23,15 +23,11 @@ import org.kie.hacep.core.Bootstrap;
 import org.kie.hacep.core.infra.election.State;
 import org.kie.hacep.message.SnapshotMessage;
 import org.kie.remote.RemoteKieSession;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static org.junit.Assert.*;
 import static org.kie.remote.util.SerializationUtil.deserialize;
 
 public class PodAsLeaderSnapshotTest extends KafkaFullTopicsTests{
-
-    private final static Logger logger = LoggerFactory.getLogger(PodAsLeaderSnapshotTest.class);
 
     @Test(timeout = 30000)
     public void processMessagesAsLeaderAndCreateSnapshotTest() {
@@ -66,10 +62,8 @@ public class PodAsLeaderSnapshotTest extends KafkaFullTopicsTests{
             assertNotNull(snapshot.getLastInsertedEventkey());
 
             int items = controlConsumer.poll(5000).count();
-            logger.warn("Found {} items.", items);
             while(items < 11){
-                items = items + controlConsumer.poll(1000).count();
-                logger.warn("Update items {}.", items);
+                items = controlConsumer.poll(100).count();
             }
             assertEquals(11, items); //1 fireUntilHalt + 10 stock ticket
         } catch (Exception ex) {
@@ -77,6 +71,7 @@ public class PodAsLeaderSnapshotTest extends KafkaFullTopicsTests{
         } finally {
             eventsConsumer.close();
             snapshotConsumer.close();
+            Bootstrap.stopEngine();
         }
     }
 }

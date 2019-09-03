@@ -25,28 +25,27 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.ConcurrentModificationException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadLocalRandom;
 
+import kafka.admin.AdminUtils;
+import kafka.admin.RackAwareMode;
 import kafka.server.KafkaConfig;
 import kafka.server.KafkaServer;
 import kafka.server.NotRunning;
 import kafka.utils.TestUtils;
+import kafka.utils.ZKStringSerializer$;
+import kafka.utils.ZkUtils;
 import kafka.zk.EmbeddedZookeeper;
-import org.apache.kafka.clients.admin.AdminClient;
-import org.apache.kafka.clients.admin.KafkaAdminClient;
+import org.I0Itec.zkclient.ZkClient;
+import org.I0Itec.zkclient.exception.ZkInterruptedException;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.TopicPartition;
-import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.common.utils.SystemTime;
 import org.apache.kafka.common.utils.Time;
 import org.kie.hacep.core.Bootstrap;
@@ -69,48 +68,37 @@ public class KafkaUtilTest implements AutoCloseable {
     private static final String BROKER_PORT = "9092";
     private final static Logger logger = LoggerFactory.getLogger(KafkaUtilTest.class);
     private KafkaServer kafkaServer;
+    private ZkUtils zkUtils;
+    private ZkClient zkClient;
     private EmbeddedZookeeper zkServer;
     private String tmpDir;
     private boolean serverUp = false;
-    private KafkaAdminClient adminClient;
-
-
-    public Map<String, Object> getKafkaProps() {
-        Map<String, Object> props = new HashMap<>();
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        props.put(ProducerConfig.RETRIES_CONFIG, 0);
-        props.put(ProducerConfig.BATCH_SIZE_CONFIG, 16384);
-        props.put(ProducerConfig.LINGER_MS_CONFIG, 1);
-        props.put(ProducerConfig.BUFFER_MEMORY_CONFIG, 33554432);
-        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        return props;
-    }
-
 
     public KafkaServer startServer() throws IOException {
         tmpDir = Files.createTempDirectory(Paths.get(System.getProperty("user.dir"), File.separator, "target"),
                                            "kafkatest-").toAbsolutePath().toString();
         zkServer = new EmbeddedZookeeper();
         String zkConnect = ZOOKEEPER_HOST + ":" + zkServer.port();
+        zkClient = new ZkClient(zkConnect,
+                                30000,
+                                30000,
+                                ZKStringSerializer$.MODULE$);
+        zkUtils = ZkUtils.apply(zkClient, false);
+
         Properties brokerProps = new Properties();
         brokerProps.setProperty("zookeeper.connect", zkConnect);
         brokerProps.setProperty("broker.id", "0");
         brokerProps.setProperty("log.dirs", tmpDir);
         brokerProps.setProperty("listeners", "PLAINTEXT://" + BROKER_HOST + ":" + BROKER_PORT);
         brokerProps.setProperty("offsets.topic.replication.factor", "1");
-        brokerProps.setProperty("auto.create.topics.enable","true");
         KafkaConfig config = new KafkaConfig(brokerProps);
         Time mock = new SystemTime();
         kafkaServer = TestUtils.createServer(config, mock);
         serverUp = true;
-        Map<String, Object>  props = getKafkaProps();
-        adminClient = (KafkaAdminClient) AdminClient.create(props);
         return kafkaServer;
     }
 
     public void shutdownServer() {
-        adminClient.close();
         logger.warn("Shutdown kafka server");
         Path tmp = Paths.get(tmpDir);
         try {
@@ -123,6 +111,11 @@ public class KafkaUtilTest implements AutoCloseable {
         }
         kafkaServer = null;
 
+        try {
+            zkClient.close();
+        } catch (ZkInterruptedException e) {
+            logger.error(e.getMessage(), e);
+        }
         try {
             zkServer.shutdown();
         } catch (Exception e) {
@@ -169,32 +162,47 @@ public class KafkaUtilTest implements AutoCloseable {
 
     private Properties getConsumerConfig() {
         Properties consumerProps = new Properties();
-        consumerProps.setProperty("bootstrap.servers", BROKER_HOST + ":" + BROKER_PORT);
-        consumerProps.setProperty("group.id", "group0");
-        consumerProps.setProperty("client.id", "consumer0");
-        consumerProps.put("auto.offset.reset", "earliest");
-        consumerProps.setProperty("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+        consumerProps.setProperty("bootstrap.servers",
+                                  BROKER_HOST + ":" + BROKER_PORT);
+        consumerProps.setProperty("group.id",
+                                  "group0");
+        consumerProps.setProperty("client.id",
+                                  "consumer0");
+        consumerProps.put("auto.offset.reset",
+                          "earliest");
+        consumerProps.setProperty("key.deserializer",
+                                  "org.apache.kafka.common.serialization.StringDeserializer");
         return consumerProps;
     }
 
     private Properties getProducerConfig() {
         Properties producerProps = new Properties();
-        producerProps.setProperty("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-        producerProps.setProperty("bootstrap.servers", BROKER_HOST + ":" + BROKER_PORT);
+        producerProps.setProperty("key.serializer",
+                                  "org.apache.kafka.common.serialization.StringSerializer");
+        producerProps.setProperty("bootstrap.servers",
+                                  BROKER_HOST + ":" + BROKER_PORT);
         return producerProps;
     }
 
-    private void deleteTopicIfExists(String topic) {
+    public void createTopics(String... topics) {
         try {
-            adminClient.deleteTopics(Arrays.asList(topic)).all().get();
-        }catch (Exception e){
-            if(e instanceof ExecutionException){
-                if(e.getMessage().startsWith("org.apache.kafka.common.errors.UnknownTopicOrPartitionException:")){
-                    //do nothing if the topics isn't present
-                }else{
-                    logger.error(e.getMessage(), e);
+            if (serverUp) {
+                for (String topic : topics) {
+
+                    if (!AdminUtils.topicExists(zkUtils, topic)) {
+
+                        logger.warn("topic:{} don't exist, going to create", topic);
+                        AdminUtils.createTopic(zkUtils,
+                                               topic,
+                                               1,
+                                               1,
+                                               new Properties(),
+                                               RackAwareMode.Disabled$.MODULE$);
+                    }
                 }
             }
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
         }
     }
 
@@ -202,8 +210,10 @@ public class KafkaUtilTest implements AutoCloseable {
         try {
             if (serverUp) {
                 for (String topic : topics) {
-                    if(adminClient.listTopics().listings().get().contains(topic)){
-                        deleteTopicIfExists(topic);
+                    if (AdminUtils.topicExists(zkUtils,
+                                               topic)) {
+                        AdminUtils.deleteTopic(zkUtils,
+                                               topic);
                     }
                 }
             }
@@ -319,6 +329,7 @@ public class KafkaUtilTest implements AutoCloseable {
                 withMaxSnapshotAgeSeconds("60000").
                 underTest(true);
     }
+
 
     public void tearDown() {
         try {
