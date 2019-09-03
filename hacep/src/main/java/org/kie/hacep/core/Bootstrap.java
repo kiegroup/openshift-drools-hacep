@@ -50,14 +50,15 @@ public class Bootstrap {
 
     public static void stopEngine() {
         logger.info("Stop engine");
-
-        LeaderElection leadership = coreKube.getLeaderElection();
-        try {
-            leadership.stop();
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage(), e);
+        if(coreKube != null) {
+            LeaderElection leadership = coreKube.getLeaderElection();
+            try {
+                leadership.stop();
+            } catch (Exception e) {
+                throw new RuntimeException(e.getMessage(), e);
+            }
         }
-        if ( consumerController != null) {
+        if (consumerController != null) {
             consumerController.stop();
         }
         if (eventProducer != null) {
