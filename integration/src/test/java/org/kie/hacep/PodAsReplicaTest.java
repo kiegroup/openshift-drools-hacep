@@ -145,8 +145,13 @@ public class PodAsReplicaTest extends KafkaFullTopicsTests {
 
     private ConsumerRecords waitForControlMessage(KafkaConsumer controlConsumer) throws InterruptedException {
         ConsumerRecords controlRecords = controlConsumer.poll(Duration.ofMillis(5000));
+        int attempts = 0;
         while (controlRecords.count() == 0) {
-            controlRecords = controlConsumer.poll(Duration.ofMillis(10000));
+            controlRecords = controlConsumer.poll(Duration.ofMillis(1000));
+            attempts ++;
+            if(attempts == 10){
+                throw new RuntimeException("No control message available after "+attempts + "attempts in waitForControlMessage");
+            }
         }
         return controlRecords;
     }
@@ -170,9 +175,7 @@ public class PodAsReplicaTest extends KafkaFullTopicsTests {
                      1);
         assertTrue(!controlMessage.getSideEffects().isEmpty());
         assertTrue(controlMessage.getSideEffects().size() == 1);
-        String sideEffect = controlMessage.getSideEffects().iterator().next().toString();
         //Same msg content on Events topic and control topics
-        assertEquals(controlRecord.key(),
-                     eventsRecord.key());
+        assertEquals(controlRecord.key(), eventsRecord.key());
     }
 }
