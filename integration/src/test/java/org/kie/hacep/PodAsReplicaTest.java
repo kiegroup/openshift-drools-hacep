@@ -146,10 +146,9 @@ public class PodAsReplicaTest extends KafkaFullTopicsTests {
     }
 
     private ConsumerRecords waitForControlMessage(KafkaConsumer controlConsumer) throws InterruptedException {
-        ConsumerRecords controlRecords = controlConsumer.poll(5000);
+        ConsumerRecords controlRecords = controlConsumer.poll(Duration.ofMillis(5000));
         while (controlRecords.count() == 0) {
-            Thread.sleep(10);
-            controlRecords = controlConsumer.poll(Duration.ofMillis(5000));
+            controlRecords = controlConsumer.poll(Duration.ofMillis(10000));
         }
         return controlRecords;
     }
