@@ -132,9 +132,7 @@ public class PodAsReplicaTest extends KafkaFullTopicsTests {
             }
             assertNotNull(sideEffectOnLeader);
             assertNotNull(sideEffectOnReplica);
-            assertEquals(sideEffectOnLeader,
-                         sideEffectOnReplica);
-            KafkaUtilTest.insertPoisonPillCommand();
+            assertEquals(sideEffectOnLeader, sideEffectOnReplica);
         } catch (Exception ex) {
             logger.error(ex.getMessage(),
                          ex);
