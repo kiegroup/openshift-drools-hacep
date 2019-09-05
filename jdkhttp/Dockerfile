@@ -1,8 +1,5 @@
-FROM openjdk:8-jre-alpine
-RUN apk add --no-cache curl
-ENV APP_HOME=/usr/app/
-WORKDIR $APP_HOME
-COPY target/*-jdkhttp-fat.jar /usr/app/
-RUN chmod 775 /usr/app
+FROM registry.access.redhat.com/ubi8/ubi-minimal
+RUN microdnf install --nodocs java-1.8.0-openjdk-headless && microdnf clean all
+COPY target/*-jdkhttp-fat.jar /deployments/app.jar
 EXPOSE 8080
-CMD ["java", "-jar","openshift-kie-jdkhttp-fat.jar"]
+CMD ["java","-jar","/deployments/app.jar"]
