@@ -15,8 +15,8 @@
  */
 package org.kie.hacep;
 
+import java.time.Duration;
 import java.util.ArrayList;
-import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.List;
 
@@ -78,21 +78,22 @@ public class SnapshotOnDemandTest {
                                                                      Config.getConsumerConfig("SnapshotOnDemandTest.createSnapshotOnDemandTest"));
 
         try {
-            ConsumerRecords eventsRecords = eventsConsumer.poll(1000);
+            ConsumerRecords eventsRecords = eventsConsumer.poll(Duration.ofMillis(1000));
             assertEquals(0, eventsRecords.count());
 
-            ConsumerRecords controlRecords = controlConsumer.poll(1000);
+            ConsumerRecords controlRecords = controlConsumer.poll(Duration.ofMillis(1000));
             assertEquals(0, controlRecords.count());
 
-            ConsumerRecords snapshotRecords = snapshotConsumer.poll(1000);
+            ConsumerRecords snapshotRecords = snapshotConsumer.poll(Duration.ofMillis(1000));
             assertEquals(0, snapshotRecords.count());
 
             KafkaUtilTest.insertSnapshotOnDemandCommand();
 
             List<SnapshotMessage> messages = new ArrayList<>();
             while (messages.size() < 1) {
-                snapshotRecords = snapshotConsumer.poll(5000);
+                snapshotRecords = snapshotConsumer.poll(Duration.ofMillis(5000));
                 Iterator<ConsumerRecord<String, byte[]>> snapshotRecordIterator = snapshotRecords.iterator();
+
                 if (snapshotRecordIterator.hasNext()) {
                     ConsumerRecord<String, byte[]> controlRecord = snapshotRecordIterator.next();
                     SnapshotMessage snapshotMessage = deserialize(controlRecord.value());
@@ -108,10 +109,10 @@ public class SnapshotOnDemandTest {
             assertEquals(0, msg.getLastInsertedEventOffset());
             assertNotNull(msg.getSerializedSession());
 
-            eventsRecords = eventsConsumer.poll(1000);
+            eventsRecords = eventsConsumer.poll(Duration.ofMillis(1000));
             assertEquals(1, eventsRecords.count());
 
-            controlRecords = controlConsumer.poll(1000);
+            controlRecords = controlConsumer.poll(Duration.ofMillis(1000));
             assertEquals(1, controlRecords.count());
         } catch (Exception ex) {
             throw new RuntimeException(ex.getMessage(), ex);
@@ -119,6 +120,7 @@ public class SnapshotOnDemandTest {
             eventsConsumer.close();
             controlConsumer.close();
             snapshotConsumer.close();
+            Bootstrap.stopEngine();
         }
     }
 }

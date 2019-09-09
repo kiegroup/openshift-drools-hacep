@@ -52,12 +52,12 @@ import org.apache.kafka.common.utils.Time;
 import org.kie.hacep.core.Bootstrap;
 import org.kie.hacep.sample.kjar.StockTickEvent;
 import org.kie.remote.CommonConfig;
-import org.kie.remote.RemoteStreamingKieSession;
 import org.kie.remote.RemoteKieSession;
+import org.kie.remote.RemoteStreamingKieSession;
 import org.kie.remote.TopicsConfig;
 import org.kie.remote.command.SnapshotOnDemandCommand;
-import org.kie.remote.impl.RemoteStreamingKieSessionImpl;
 import org.kie.remote.impl.RemoteKieSessionImpl;
+import org.kie.remote.impl.RemoteStreamingKieSessionImpl;
 import org.kie.remote.impl.producer.Sender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -257,7 +257,7 @@ public class KafkaUtilTest implements AutoCloseable {
     public void insertBatchStockTicketEvent(int items,
                                             TopicsConfig topicsConfig,
                                             Class sessionType) {
-        insertBatchStockTicketEvent(items, topicsConfig, sessionType, Config.getProducerConfig( "InsertBactchStockTickets" ));
+        insertBatchStockTicketEvent(items, topicsConfig, sessionType, Config.getProducerConfig("InsertBactchStockTickets" ));
     }
 
     public void insertBatchStockTicketEvent(int items,

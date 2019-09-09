@@ -24,9 +24,9 @@ import org.kie.hacep.core.infra.election.State;
 import org.kie.remote.RemoteKieSession;
 import org.kie.remote.impl.RemoteKieSessionImpl;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
-public class RemoteKieSessionImplTest extends KafkaFullTopicsTests{
+public class RemoteKieSessionImplTest extends KafkaFullTopicsTests {
 
     @Test
     public void getFactCountTest() {

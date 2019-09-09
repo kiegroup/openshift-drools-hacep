@@ -32,9 +32,7 @@ import org.kie.remote.RemoteEntryPoint;
 import org.kie.remote.RemoteFactHandle;
 import org.kie.remote.RemoteKieSession;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.kie.remote.CommonConfig.getTestProperties;
 import static org.kie.remote.impl.RemoteKieSessionImpl.DEFAULT_ENTRY_POINT;
 

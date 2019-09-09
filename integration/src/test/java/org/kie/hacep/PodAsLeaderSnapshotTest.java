@@ -15,6 +15,8 @@
  */
 package org.kie.hacep;
 
+import java.time.Duration;
+
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -23,15 +25,11 @@ import org.kie.hacep.core.Bootstrap;
 import org.kie.hacep.core.infra.election.State;
 import org.kie.hacep.message.SnapshotMessage;
 import org.kie.remote.RemoteKieSession;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static org.junit.Assert.*;
 import static org.kie.remote.util.SerializationUtil.deserialize;
 
-public class PodAsLeaderSnapshotTest extends KafkaFullTopicsTests{
-
-    private final static Logger logger = LoggerFactory.getLogger(PodAsLeaderSnapshotTest.class);
+public class PodAsLeaderSnapshotTest extends KafkaFullTopicsTests {
 
     @Test(timeout = 30000)
     public void processMessagesAsLeaderAndCreateSnapshotTest() {
@@ -50,11 +48,11 @@ public class PodAsLeaderSnapshotTest extends KafkaFullTopicsTests{
         try {
 
             //EVENTS TOPIC
-            ConsumerRecords eventsRecords = eventsConsumer.poll(5000);
+            ConsumerRecords eventsRecords = eventsConsumer.poll(Duration.ofMillis(5000));
             assertEquals(11, eventsRecords.count()); //1 fireUntilHalt + 10 stock ticket
 
             //SNAPSHOT TOPIC
-            ConsumerRecords snapshotRecords = snapshotConsumer.poll(5000);
+            ConsumerRecords snapshotRecords = snapshotConsumer.poll(Duration.ofMillis(5000));
             assertEquals(1, snapshotRecords.count());
             ConsumerRecord record = (ConsumerRecord) snapshotRecords.iterator().next();
             SnapshotMessage snapshot = deserialize((byte[]) record.value());
@@ -65,11 +63,9 @@ public class PodAsLeaderSnapshotTest extends KafkaFullTopicsTests{
             assertEquals(9, snapshot.getFhMapKeys().size());
             assertNotNull(snapshot.getLastInsertedEventkey());
 
-            int items = controlConsumer.poll(5000).count();
-            logger.warn("Found {} items.", items);
+            int items = controlConsumer.poll(Duration.ofMillis(5000)).count();
             while(items < 11){
-                items = items + controlConsumer.poll(1000).count();
-                logger.warn("Update items {}.", items);
+                items = items + controlConsumer.poll(Duration.ofMillis(1000)).count();
             }
             assertEquals(11, items); //1 fireUntilHalt + 10 stock ticket
         } catch (Exception ex) {
