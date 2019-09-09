@@ -82,6 +82,7 @@ public class PodAsLeaderTest extends KafkaFullTopicsTests {
             }
             //CONTROL TOPIC
             List<ControlMessage> messages = new ArrayList<>();
+            int attempts = 0;
             while (messages.size() < 2) {
                 ConsumerRecords controlRecords = controlConsumer.poll(Duration.ofMillis(2000));
                 Iterator<ConsumerRecord<String,byte[]>> controlRecordIterator = controlRecords.iterator();
@@ -89,6 +90,10 @@ public class PodAsLeaderTest extends KafkaFullTopicsTests {
                     ConsumerRecord<String,byte[]> controlRecord = controlRecordIterator.next();
                     ControlMessage controlMessage = deserialize(controlRecord.value());
                     messages.add(controlMessage);
+                }
+                attempts ++;
+                if(attempts == 10){
+                    throw new RuntimeException("No control message available after "+attempts + "attempts in waitForControlMessage");
                 }
             }
             assertEquals(2, messages.size());
