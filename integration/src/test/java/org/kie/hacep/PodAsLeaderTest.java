@@ -57,8 +57,8 @@ public class PodAsLeaderTest extends KafkaFullTopicsTests {
             ConsumerRecords eventsRecords = eventsConsumer.poll(Duration.ofMillis(5000));
             assertEquals(2, eventsRecords.count());
             Iterator<ConsumerRecord<String,byte[]>> eventsRecordIterator = eventsRecords.iterator();
-            ConsumerRecord<java.lang.String,byte[]> eventsRecord = null;
-            ConsumerRecord<java.lang.String,byte[]> eventsRecordTwo = null;
+            ConsumerRecord<String,byte[]> eventsRecord = null;
+            ConsumerRecord<String,byte[]> eventsRecordTwo = null;
             RemoteCommand remoteCommand ;
 
             if (eventsRecordIterator.hasNext()) {
@@ -82,13 +82,18 @@ public class PodAsLeaderTest extends KafkaFullTopicsTests {
             }
             //CONTROL TOPIC
             List<ControlMessage> messages = new ArrayList<>();
+            int attempts = 0;
             while (messages.size() < 2) {
                 ConsumerRecords controlRecords = controlConsumer.poll(Duration.ofMillis(2000));
                 Iterator<ConsumerRecord<String,byte[]>> controlRecordIterator = controlRecords.iterator();
                 if(controlRecordIterator.hasNext()) {
-                    ConsumerRecord<java.lang.String,byte[]> controlRecord = controlRecordIterator.next();
+                    ConsumerRecord<String,byte[]> controlRecord = controlRecordIterator.next();
                     ControlMessage controlMessage = deserialize(controlRecord.value());
                     messages.add(controlMessage);
+                }
+                attempts ++;
+                if(attempts == 10){
+                    throw new RuntimeException("No control message available after "+attempts + "attempts in waitForControlMessage");
                 }
             }
             assertEquals(2, messages.size());
@@ -107,7 +112,6 @@ public class PodAsLeaderTest extends KafkaFullTopicsTests {
             assertEquals(insert.getId(), eventsRecordTwo.key());
             assertTrue(!insert.getSideEffects().isEmpty());
 
-            KafkaUtilTest.insertPoisonPillCommand();
         } catch (Exception ex) {
             throw new RuntimeException(ex.getMessage(), ex);
         } finally {
