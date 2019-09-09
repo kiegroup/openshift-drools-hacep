@@ -32,12 +32,16 @@ import org.kie.remote.RemoteKieSession;
 import org.kie.remote.command.FireUntilHaltCommand;
 import org.kie.remote.command.InsertCommand;
 import org.kie.remote.command.RemoteCommand;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.junit.Assert.*;
 import static org.kie.remote.CommonConfig.SKIP_LISTENER_AUTOSTART;
 import static org.kie.remote.util.SerializationUtil.deserialize;
 
 public class PodAsLeaderTest extends KafkaFullTopicsTests {
+
+    private Logger logger = LoggerFactory.getLogger("org.hacep");
 
     @Test(timeout = 20000)
     public void processOneSentMessageAsLeaderTest() {
@@ -51,9 +55,11 @@ public class PodAsLeaderTest extends KafkaFullTopicsTests {
         Properties props = (Properties) Config.getProducerConfig("InsertBactchStockTickets").clone();
         props.put(SKIP_LISTENER_AUTOSTART, true);
 
+        logger.warn("Insert Stock Ticket event");
         kafkaServerTest.insertBatchStockTicketEvent(1, topicsConfig, RemoteKieSession.class, props);
         try {
             //EVENTS TOPIC
+            logger.warn("Checks on Events topic");
             ConsumerRecords eventsRecords = eventsConsumer.poll(Duration.ofMillis(5000));
             assertEquals(2, eventsRecords.count());
             Iterator<ConsumerRecord<String,byte[]>> eventsRecordIterator = eventsRecords.iterator();
@@ -81,6 +87,7 @@ public class PodAsLeaderTest extends KafkaFullTopicsTests {
                 assertTrue(remoteCommand instanceof InsertCommand);
             }
             //CONTROL TOPIC
+            logger.warn("Checks on Control topic");
             List<ControlMessage> messages = new ArrayList<>();
             int attempts = 0;
             while (messages.size() < 2) {
@@ -111,12 +118,14 @@ public class PodAsLeaderTest extends KafkaFullTopicsTests {
             assertTrue(fireUntilHalt.getSideEffects().isEmpty());
             assertEquals(insert.getId(), eventsRecordTwo.key());
             assertTrue(!insert.getSideEffects().isEmpty());
-
+            logger.warn("Test ended, going to stop kafka");
         } catch (Exception ex) {
             throw new RuntimeException(ex.getMessage(), ex);
         } finally {
             eventsConsumer.close();
+            logger.warn("Event consumer closed");
             controlConsumer.close();
+            logger.warn("Control consumer closed");
         }
     }
 }
