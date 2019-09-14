@@ -62,7 +62,7 @@ public class OldDefaultKafkaConsumer<T> implements EventConsumer {
     private DroolsConsumerHandler consumerHandler;
     private volatile State currentState;
     private volatile String processingKey = "";
-    private volatile long processingKeyOffset;
+    private volatile long processingKeyOffset, lastProcessedControlOffset, lastProcessedEventOffset;;
     private volatile boolean leader = false;
     private volatile boolean started = false;
     private volatile boolean processingLeader, processingReplica = false;
@@ -122,6 +122,9 @@ public class OldDefaultKafkaConsumer<T> implements EventConsumer {
 
     @Override
     public void updateStatus(State state) {
+        if(currentState == null ||  !state.equals(currentState)){
+            currentState = state;
+        }
         if (started) {
             updateOnRunningConsumer(state);
         } else {
@@ -136,7 +139,6 @@ public class OldDefaultKafkaConsumer<T> implements EventConsumer {
                 enableConsumeAndStartLoop(state);
             }
         }
-        currentState = state;
     }
 
     private void askAndProcessSnapshotOnDemand() {
@@ -189,7 +191,13 @@ public class OldDefaultKafkaConsumer<T> implements EventConsumer {
             kafkaConsumer.assignment().forEach(topicPartition -> kafkaConsumer.seek(partitionCollection.iterator().next(),
                                                                                     snapshotInfos.getOffsetDuringSnapshot()));
         } else {
-            kafkaConsumer.assignment().forEach(topicPartition -> kafkaConsumer.seekToBeginning(partitionCollection));
+            if(currentState.equals(State.LEADER)){
+                kafkaConsumer.assignment().forEach(topicPartition -> kafkaConsumer.seek(partitionCollection.iterator().next(),
+                                                                                        lastProcessedEventOffset));
+            }else if(currentState.equals(State.REPLICA)){
+                kafkaConsumer.assignment().forEach(topicPartition -> kafkaConsumer.seek(partitionCollection.iterator().next(),
+                                                                                        lastProcessedControlOffset));
+            }
         }
     }
 
@@ -449,6 +457,7 @@ public class OldDefaultKafkaConsumer<T> implements EventConsumer {
                                record);
         }
         if (record.key().equals(processingKey)) {
+            lastProcessedEventOffset = record.offset();
             stopPollingEvents();
             startPollingControl();
             stopProcessingNotLeader();
@@ -473,6 +482,7 @@ public class OldDefaultKafkaConsumer<T> implements EventConsumer {
                                record);
         }
         if (record.offset() == processingKeyOffset + 1 || record.offset() == 0) {
+            lastProcessedControlOffset = record.offset();
             processingKey = record.key();
             processingKeyOffset = record.offset();
             ControlMessage wr = deserialize((byte[]) record.value());
@@ -480,8 +490,8 @@ public class OldDefaultKafkaConsumer<T> implements EventConsumer {
             stopPollingControl();
             startPollingEvents();
             startProcessingNotLeader();
-            if (logger.isInfoEnabled()) {
-                logger.info("change topic, switch to consume events");
+            if (logger.isDebugEnabled()) {
+                logger.debug("change topic, switch to consume events");
             }
         }
         if (processingKey == null) { // empty topic
