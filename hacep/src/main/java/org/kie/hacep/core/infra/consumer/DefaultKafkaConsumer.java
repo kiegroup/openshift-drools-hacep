@@ -96,14 +96,17 @@ public class DefaultKafkaConsumer<T> implements EventConsumer {
     }
 
     protected void restartConsumer() {
+        loggerForTest.warn("restartConsumer:{}");
         if (logger.isInfoEnabled()) {
             logger.info("Restart Consumers");
         }
-        snapshotInfos = snapShooter.deserialize();
+        snapshotInfos = snapShooter.deserialize();//serve ancora ?
         kafkaConsumer = new KafkaConsumer<>(Config.getConsumerConfig("PrimaryConsumer"));
+        loggerForTest.warn("new KafkaConsumer:{}");
         assign();
         if (currentState.equals(State.REPLICA)) {
             kafkaSecondaryConsumer = new KafkaConsumer<>(Config.getConsumerConfig("SecondaryConsumer"));
+            loggerForTest.warn("new SecondaryKafkaConsumer:{}");
         } else {
             kafkaSecondaryConsumer = null;
         }
@@ -128,7 +131,6 @@ public class DefaultKafkaConsumer<T> implements EventConsumer {
         if (started) {
             updateOnRunningConsumer(state);
         } else {
-            logger.info("updateStatus:{}", state);
             if (state.equals(State.REPLICA)) {
                 //ask and wait a snapshot before start
                 if (!config.isSkipOnDemanSnapshot() && !askedSnapshotOnDemand) {
@@ -172,9 +174,15 @@ public class DefaultKafkaConsumer<T> implements EventConsumer {
     }
 
     protected void assignNotLeader() {
+        //TODO Checks this
+        loggerForTest.warn("AssignNotLeader assign kafkaConsumer:");
         assignConsumer(kafkaConsumer, config.getEventsTopicName());
+        loggerForTest.warn("AssignNotLeader assign kafkaSecondaryConsumer:");
         assignConsumer(kafkaSecondaryConsumer, config.getControlTopicName());
+
     }
+
+
 
     protected void assignConsumer(Consumer<String, T> kafkaConsumer, String topic) {
 
@@ -262,23 +270,33 @@ public class DefaultKafkaConsumer<T> implements EventConsumer {
     }
 
     protected void updateOnRunningConsumer(State state) {
+        if (state.equals(State.LEADER) ) {
+            DroolsExecutor.setAsLeader();
+            restart(state);
+        } else if (state.equals(State.REPLICA)) {
+            DroolsExecutor.setAsReplica();
+            restart(state);
+        }
+    }
+
+    protected void updateOnRunningConsumer2(State state) {
+        loggerForTest.warn("updateStatus:{} currentState:{}", state, currentState);
         if (state.equals(State.LEADER) && currentState.equals(State.REPLICA)) {
-            if (logger.isInfoEnabled()) {
-                logger.info("  DroolsExecutor.setAsLeader()");
-            }
             DroolsExecutor.setAsLeader();
             restart(state);
         } else if (state.equals(State.REPLICA) && currentState.equals(State.LEADER)) {
-            if (logger.isInfoEnabled()) {
-                logger.info("  DroolsExecutor.setAsReplica()");
-            }
             DroolsExecutor.setAsReplica();
+            logger.info("updateStatus:1");
             restart(state);
-        }/*else if (state.equals(State.LEADER) && currentState.equals(State.LEADER)) {
-            logger.info("  DroolsExecutor.setAsLeader()");
+        } else if(state.equals(State.LEADER) && currentState.equals(State.LEADER)){
+            logger.info("updateStatus:2");
             DroolsExecutor.setAsLeader();
             restart(state);
-        }*/
+        }else if(state.equals(State.REPLICA) && currentState.equals(State.REPLICA)){
+            DroolsExecutor.setAsReplica();
+            logger.info("updateStatus:3");
+            restart(state);
+        }
     }
 
     protected void restart(State state) {
