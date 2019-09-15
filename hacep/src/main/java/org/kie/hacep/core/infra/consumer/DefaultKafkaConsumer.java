@@ -96,17 +96,14 @@ public class DefaultKafkaConsumer<T> implements EventConsumer {
     }
 
     protected void restartConsumer() {
-        loggerForTest.warn("restartConsumer:{}");
         if (logger.isInfoEnabled()) {
             logger.info("Restart Consumers");
         }
-        snapshotInfos = snapShooter.deserialize();//serve ancora ?
+        snapshotInfos = snapShooter.deserialize();//is still useful ?
         kafkaConsumer = new KafkaConsumer<>(Config.getConsumerConfig("PrimaryConsumer"));
-        loggerForTest.warn("new KafkaConsumer:{}");
         assign();
         if (currentState.equals(State.REPLICA)) {
             kafkaSecondaryConsumer = new KafkaConsumer<>(Config.getConsumerConfig("SecondaryConsumer"));
-            loggerForTest.warn("new SecondaryKafkaConsumer:{}");
         } else {
             kafkaSecondaryConsumer = null;
         }
@@ -174,12 +171,8 @@ public class DefaultKafkaConsumer<T> implements EventConsumer {
     }
 
     protected void assignNotLeader() {
-        //TODO Checks this
-        loggerForTest.warn("AssignNotLeader assign kafkaConsumer:");
         assignConsumer(kafkaConsumer, config.getEventsTopicName());
-        loggerForTest.warn("AssignNotLeader assign kafkaSecondaryConsumer:");
         assignConsumer(kafkaSecondaryConsumer, config.getControlTopicName());
-
     }
 
 
@@ -275,26 +268,6 @@ public class DefaultKafkaConsumer<T> implements EventConsumer {
             restart(state);
         } else if (state.equals(State.REPLICA)) {
             DroolsExecutor.setAsReplica();
-            restart(state);
-        }
-    }
-
-    protected void updateOnRunningConsumer2(State state) {
-        loggerForTest.warn("updateStatus:{} currentState:{}", state, currentState);
-        if (state.equals(State.LEADER) && currentState.equals(State.REPLICA)) {
-            DroolsExecutor.setAsLeader();
-            restart(state);
-        } else if (state.equals(State.REPLICA) && currentState.equals(State.LEADER)) {
-            DroolsExecutor.setAsReplica();
-            logger.info("updateStatus:1");
-            restart(state);
-        } else if(state.equals(State.LEADER) && currentState.equals(State.LEADER)){
-            logger.info("updateStatus:2");
-            DroolsExecutor.setAsLeader();
-            restart(state);
-        }else if(state.equals(State.REPLICA) && currentState.equals(State.REPLICA)){
-            DroolsExecutor.setAsReplica();
-            logger.info("updateStatus:3");
             restart(state);
         }
     }
