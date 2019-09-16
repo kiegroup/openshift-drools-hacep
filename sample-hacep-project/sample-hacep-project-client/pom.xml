@@ -5,7 +5,7 @@
     <parent>
         <artifactId>sample-hacep-project</artifactId>
         <groupId>org.kie</groupId>
-        <version>7.27.0-SNAPSHOT</version>
+        <version>7.28.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -19,7 +19,7 @@
         <dependency>
             <groupId>org.kie</groupId>
             <artifactId>openshift-kie-hacep</artifactId>
-            <scope>test</scope>
+            <!--<scope>test</scope>-->
         </dependency>
         <dependency>
             <groupId>org.kie</groupId>

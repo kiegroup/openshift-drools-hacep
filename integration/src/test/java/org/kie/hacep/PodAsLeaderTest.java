@@ -17,6 +17,7 @@ package org.kie.hacep;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -80,6 +81,7 @@ public class PodAsLeaderTest extends KafkaFullTopicsTests {
                 assertNotNull(remoteCommand.getId());
                 assertTrue(remoteCommand instanceof InsertCommand);
             }
+
             //CONTROL TOPIC
             List<ControlMessage> messages = new ArrayList<>();
             int attempts = 0;
@@ -97,7 +99,6 @@ public class PodAsLeaderTest extends KafkaFullTopicsTests {
                 }
             }
             assertEquals(2, messages.size());
-
             ControlMessage fireUntilHalt = null;
             ControlMessage insert = null;
             Iterator<ControlMessage> messagesIter = messages.iterator();
@@ -111,12 +112,16 @@ public class PodAsLeaderTest extends KafkaFullTopicsTests {
             assertTrue(fireUntilHalt.getSideEffects().isEmpty());
             assertEquals(insert.getId(), eventsRecordTwo.key());
             assertTrue(!insert.getSideEffects().isEmpty());
-
         } catch (Exception ex) {
             throw new RuntimeException(ex.getMessage(), ex);
         } finally {
             eventsConsumer.close();
             controlConsumer.close();
+            try {
+                Bootstrap.stopEngine();
+            } catch (ConcurrentModificationException ex) {
+                throw new RuntimeException(ex.getMessage(), ex);
+            }
         }
     }
 }

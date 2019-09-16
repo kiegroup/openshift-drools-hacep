@@ -111,7 +111,9 @@ public class KafkaUtilTest implements AutoCloseable {
     }
 
     public void shutdownServer() {
-        adminClient.close();
+        if(adminClient != null) {
+            adminClient.close();
+        }
         logger.warn("Shutdown kafka server");
         Path tmp = Paths.get(tmpDir);
         try {
