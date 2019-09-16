@@ -22,7 +22,6 @@
     <version.fabric8.docker-plugin>0.30.0</version.fabric8.docker-plugin>
     <surefire.forkCount>1</surefire.forkCount>
     <version.hibernate.validator>6.0.17.Final</version.hibernate.validator>
-    <version.javax.cdi>2.0.SP1</version.javax.cdi>
     <version.javax.el>3.0.1-b08</version.javax.el>
     <version.javax.ws.rs>2.1.1</version.javax.ws.rs>
     <version.junit>4.12</version.junit>
