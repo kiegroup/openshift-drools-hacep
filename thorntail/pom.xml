@@ -16,7 +16,7 @@
     <dependencies>
       <dependency>
         <groupId>io.thorntail</groupId>
-        <artifactId>bom-all</artifactId>
+        <artifactId>bom</artifactId>
         <version>${version.thorntail}</version>
         <scope>import</scope>
         <type>pom</type>
@@ -121,11 +121,6 @@
                 </image>
               </images>
             </configuration>
-          </plugin>
-          <plugin>
-            <groupId>io.fabric8</groupId>
-            <artifactId>fabric8-maven-plugin</artifactId>
-            <version>${version.fabric8.plugin}</version>
           </plugin>
           <plugin>
             <groupId>io.fabric8</groupId>
