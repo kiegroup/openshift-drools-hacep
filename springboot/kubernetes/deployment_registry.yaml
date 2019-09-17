@@ -20,7 +20,7 @@ spec:
       containers:
         - env:
           name: openshift-kie-springboot
-          image: desmax74/openshift-kie-springboot:5.5
+          image: <user>/openshift-kie-springboot:<version>
           imagePullPolicy: IfNotPresent
           livenessProbe:
             exec:

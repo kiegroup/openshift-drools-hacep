@@ -438,8 +438,15 @@ public class DefaultKafkaConsumer<T> implements EventConsumer {
 
         if (record.key().equals(processingKey)) {
             lastProcessedEventOffset = record.offset();
-            if (logger.isInfoEnabled()) {
-                logger.info("change topic, switch to consume control");
+            stopPollingEvents();
+            startPollingControl();
+            stopProcessingNotLeader();
+            consumerHandler.process(ItemToProcess.getItemToProcess(record),
+                                    currentState);
+            saveOffset(record,
+                       kafkaConsumer);
+            if (logger.isDebugEnabled()) {
+                logger.debug("change topic, switch to consume control");
             }
 
             pollControl();
@@ -462,7 +469,7 @@ public class DefaultKafkaConsumer<T> implements EventConsumer {
             processingKeyOffset = record.offset();
             ControlMessage wr = deserialize((byte[]) record.value());
             consumerHandler.processSideEffectsOnReplica(wr.getSideEffects());
-
+            
             pollEvents();
             if (logger.isDebugEnabled()) {
                 logger.debug("change topic, switch to consume events");

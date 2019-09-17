@@ -45,6 +45,7 @@
     <module>thorntail</module>
     <module>sample-hacep-project</module>
     <module>integration</module>
+    <module>distribution</module>
   </modules>
 
   <dependencyManagement>
@@ -62,6 +63,11 @@
       <dependency>
         <groupId>org.kie</groupId>
         <artifactId>sample-hacep-project-kjar</artifactId>
+        <version>${version.org.kie}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.kie</groupId>
+        <artifactId>openshift-kie-springboot</artifactId>
         <version>${version.org.kie}</version>
       </dependency>
 
