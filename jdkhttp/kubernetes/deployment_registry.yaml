@@ -20,7 +20,7 @@ spec:
       containers:
         - env:
           name: openshift-kie-jdkhttp
-          image: desmax74/openshift-kie-jdkhttp:m.4.03
+          image: <user>/openshift-kie-jdkhttp:<version>
           imagePullPolicy: IfNotPresent
           livenessProbe:
             exec:
