@@ -438,8 +438,8 @@ public class DefaultKafkaConsumer<T> implements EventConsumer {
 
         if (record.key().equals(processingKey)) {
             lastProcessedEventOffset = record.offset();
-            if (logger.isInfoEnabled()) {
-                logger.info("change topic, switch to consume control");
+            if (logger.isDebugEnabled()) {
+                logger.debug("change topic, switch to consume control");
             }
 
             pollControl();
