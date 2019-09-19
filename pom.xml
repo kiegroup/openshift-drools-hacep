@@ -145,7 +145,7 @@
 
       <!-- Validation used by fabric8 client-->
       <dependency>
-        <groupId>org.jboss.spec.javax.validation</groupId>
+        <groupId>javax.validation</groupId>
         <artifactId>validation-api</artifactId>
         <version>${version.validation.api}</version>
       </dependency>
