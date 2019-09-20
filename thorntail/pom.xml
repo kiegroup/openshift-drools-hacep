@@ -35,11 +35,25 @@
     </dependency>
     <dependency>
       <groupId>io.thorntail</groupId>
-      <artifactId>undertow</artifactId>
+      <artifactId>jaxrs</artifactId>
       <exclusions>
         <exclusion>
           <groupId>io.thorntail.jdk-specific</groupId>
           <artifactId>thorntail-jdk-specific</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.jboss.spec.javax.ws.rs</groupId>
+          <artifactId>jboss-jaxrs-api_2.1_spec</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>io.thorntail</groupId>
+      <artifactId>undertow</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>org.jboss.spec.javax.ws.rs</groupId>
+          <artifactId>jboss-jaxrs-api_2.1_spec</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
@@ -62,12 +76,8 @@
       <artifactId>hibernate-validator</artifactId>
     </dependency>
     <dependency>
-      <groupId>javax.ws.rs</groupId>
-      <artifactId>javax.ws.rs-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>javax.servlet-api</artifactId>
+      <groupId>org.jboss.spec.javax.servlet</groupId>
+      <artifactId>jboss-servlet-api_4.0_spec</artifactId>
       <scope>compile</scope>
     </dependency>
   </dependencies>
