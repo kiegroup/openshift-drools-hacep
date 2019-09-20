@@ -260,7 +260,7 @@ public class KafkaUtilTest implements AutoCloseable {
     public void insertBatchStockTicketEvent(int items,
                                             TopicsConfig topicsConfig,
                                             Class sessionType) {
-        insertBatchStockTicketEvent(items, topicsConfig, sessionType, Config.getProducerConfig( "InsertBactchStockTickets" ));
+        insertBatchStockTicketEvent(items, topicsConfig, sessionType, Config.getProducerConfig( "InsertBatchStockTicketEvent" ));
     }
 
     public void insertBatchStockTicketEvent(int items,
