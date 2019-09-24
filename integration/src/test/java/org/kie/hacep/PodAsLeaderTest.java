@@ -102,6 +102,8 @@ public class PodAsLeaderTest extends KafkaFullTopicsTests {
                     ConsumerRecord<String,byte[]> controlRecord = controlRecordIterator.next();
                     assertNotNull(controlRecord);
                     ControlMessage controlMessage = deserialize(controlRecord.value());
+                    controlMessage.setOffset(controlRecord.offset());
+                    logger.warn("Control message found:{}", controlMessage);
                     messages.add(controlMessage);
                 }
                 attempts ++;
