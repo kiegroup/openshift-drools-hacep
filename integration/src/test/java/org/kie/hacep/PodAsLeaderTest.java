@@ -134,7 +134,6 @@ public class PodAsLeaderTest extends KafkaFullTopicsTests {
             logger.warn("Event consumer closed");
             controlConsumer.close();
             logger.warn("Control consumer closed");
-            Bootstrap.stopEngine();
         }
     }
 }
