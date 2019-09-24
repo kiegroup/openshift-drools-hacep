@@ -102,7 +102,7 @@ public class DroolsConsumerHandler implements ConsumerHandler {
             Queue<Object> sideEffectsResults = DroolsExecutor.getInstance().getAndReset();
             if (config.isUnderTest()) { loggerForTest.warn("DroolsConsumerHandler.process sideEffects:{}", sideEffectsResults); }
             ControlMessage newControlMessage = new ControlMessage(command.getId(), sideEffectsResults);
-            if (config.isUnderTest()) { loggerForTest.warn("DroolsConsumerHandler.process new ControlMessage to sent to contol topic:{}", newControlMessage); }
+            if (config.isUnderTest()) { loggerForTest.warn("DroolsConsumerHandler.process new ControlMessage sent to control topic:{}", newControlMessage); }
             producer.produceSync(config.getControlTopicName(), command.getId(), newControlMessage);
             if (config.isUnderTest()) { loggerForTest.warn("sideEffectOnLeader:{}", sideEffectsResults); }
         } else {
