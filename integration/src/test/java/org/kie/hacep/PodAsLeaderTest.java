@@ -76,6 +76,7 @@ public class PodAsLeaderTest extends KafkaFullTopicsTests {
                 assertEquals(eventsRecord.offset(), 0);
 
                 remoteCommand = deserialize(eventsRecord.value());
+                logger.warn("First Event:{} offset:{}", remoteCommand, eventsRecord.offset());
                 assertNotNull(remoteCommand.getId());
                 assertTrue(remoteCommand instanceof FireUntilHaltCommand);
             }
@@ -87,6 +88,7 @@ public class PodAsLeaderTest extends KafkaFullTopicsTests {
                 assertEquals(eventsRecordTwo.offset(), 1);
 
                 remoteCommand = deserialize(eventsRecordTwo.value());
+                logger.warn("Second Event:{} offset:{}", remoteCommand, eventsRecordTwo.offset());
                 assertNotNull(remoteCommand.getId());
                 assertTrue(remoteCommand instanceof InsertCommand);
             }

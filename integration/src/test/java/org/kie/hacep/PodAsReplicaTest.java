@@ -43,7 +43,8 @@ public class PodAsReplicaTest extends KafkaFullTopicsTests {
 
         try {
             //EVENTS TOPIC
-            ConsumerRecords eventsRecords = eventsConsumer.poll(Duration.ofMillis(5000));
+            logger.warn("Checks on Events topic");
+            ConsumerRecords eventsRecords = eventsConsumer.poll(Duration.ofSeconds(2));
             assertEquals(2,
                          eventsRecords.count());
             Iterator<ConsumerRecord<String, byte[]>> eventsRecordIterator = eventsRecords.iterator();
@@ -51,6 +52,7 @@ public class PodAsReplicaTest extends KafkaFullTopicsTests {
             RemoteCommand remoteCommand;
             if (eventsRecordIterator.hasNext()) {
                 eventsRecord = eventsRecordIterator.next();
+                assertNotNull(eventsRecord);
                 assertEquals(eventsRecord.topic(),
                              envConfig.getEventsTopicName());
                 remoteCommand = deserialize(eventsRecord.value());
@@ -62,6 +64,7 @@ public class PodAsReplicaTest extends KafkaFullTopicsTests {
 
             if (eventsRecordIterator.hasNext()) {
                 eventsRecord = eventsRecordIterator.next();
+                assertNotNull(eventsRecord);
                 assertEquals(eventsRecord.topic(),
                              envConfig.getEventsTopicName());
                 remoteCommand = deserialize(eventsRecord.value());
@@ -80,6 +83,7 @@ public class PodAsReplicaTest extends KafkaFullTopicsTests {
             }
 
             //CONTROL TOPIC
+            logger.warn("Checks on Control topic");
             ConsumerRecords controlRecords = waitForControlMessage(controlConsumer);
 
             Iterator<ConsumerRecord<String, byte[]>> controlRecordIterator = controlRecords.iterator();
@@ -98,22 +102,28 @@ public class PodAsReplicaTest extends KafkaFullTopicsTests {
             }
 
             //no more msg to consume as a leader
-            eventsRecords = eventsConsumer.poll(Duration.ofMillis(5000));
+            eventsRecords = eventsConsumer.poll(Duration.ofSeconds(2));
             assertEquals(0,
                          eventsRecords.count());
-            controlRecords = controlConsumer.poll(Duration.ofMillis(5000));
+            controlRecords = controlConsumer.poll(Duration.ofSeconds(2));
             assertEquals(0,
                          controlRecords.count());
 
             // SWITCH AS a REPLICA
+            logger.warn("Switch as a replica");
             Bootstrap.getConsumerController().getCallback().updateStatus(State.REPLICA);
-            ConsumerRecords<byte[], String> recordsLog = kafkaLogConsumer.poll(Duration.ofMillis(20000));
+            ConsumerRecords<byte[], String> recordsLog = kafkaLogConsumer.poll(Duration.ofSeconds(5));
             Iterator<ConsumerRecord<byte[], String>> recordIterator = recordsLog.iterator();
             java.util.List<java.lang.String> kafkaLoggerMsgs = new ArrayList<>();
 
             while (recordIterator.hasNext()) {
                 ConsumerRecord<byte[], String> record = recordIterator.next();
+                assertNotNull(record);
                 kafkaLoggerMsgs.add(record.value());
+                if(envConfig.isUnderTest()){
+                    logger.warn("msg:{}", record.value());
+                }
+
             }
             String sideEffectOnLeader = null;
             String sideEffectOnReplica = null;
@@ -144,10 +154,10 @@ public class PodAsReplicaTest extends KafkaFullTopicsTests {
     }
 
     private ConsumerRecords waitForControlMessage(KafkaConsumer controlConsumer) throws InterruptedException {
-        ConsumerRecords controlRecords = controlConsumer.poll(Duration.ofMillis(5000));
+        ConsumerRecords controlRecords = controlConsumer.poll(Duration.ofSeconds(1));
         int attempts = 0;
         while (controlRecords.count() == 0) {
-            controlRecords = controlConsumer.poll(Duration.ofMillis(1000));
+            controlRecords = controlConsumer.poll(Duration.ofSeconds(1));
             attempts ++;
             if(attempts == 10){
                 throw new RuntimeException("No control message available after "+attempts + "attempts in waitForControlMessage");
