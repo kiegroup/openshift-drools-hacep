@@ -162,7 +162,7 @@ public class DefaultKafkaConsumer<T> implements EventConsumer {
         if (currentState.equals(State.LEADER)) {
             assignAsALeader();
         } else {
-            assignNotLeader();
+            assignReplica();
         }
     }
 
@@ -170,7 +170,7 @@ public class DefaultKafkaConsumer<T> implements EventConsumer {
         assignConsumer(kafkaConsumer, config.getEventsTopicName());
     }
 
-    protected void assignNotLeader() {
+    protected void assignReplica() {
         assignConsumer(kafkaConsumer, config.getEventsTopicName());
         assignConsumer(kafkaSecondaryConsumer, config.getControlTopicName());
     }
@@ -354,16 +354,21 @@ public class DefaultKafkaConsumer<T> implements EventConsumer {
     }
 
     protected void consumeEventsFromBufferAsALeader() {
+        if (config.isUnderTest()) {
+            loggerForTest.warn("Pre consumeEventsFromBufferAsALeader eventsBufferSize:{}", eventsBuffer.size());
+        }
         int index = 0;
         int end = eventsBuffer.size();
         for (ConsumerRecord<String, T> record : eventsBuffer) {
             processLeader(record);
-
             index++;
             if (end > index) {
                 eventsBuffer = eventsBuffer.subList(index, end);
             }
             break;
+        }
+        if (config.isUnderTest()) {
+            loggerForTest.warn("post consumeEventsFromBufferAsALeader eventsBufferSize:{}", eventsBuffer.size());
         }
         if (end == index) {
             eventsBuffer = null;
@@ -411,6 +416,9 @@ public class DefaultKafkaConsumer<T> implements EventConsumer {
     }
 
     protected void consumeEventsFromBufferAsAReplica() {
+        if (config.isUnderTest()) {
+            loggerForTest.warn("consumeEventsFromBufferAsAReplica eventsBufferSize:{}", eventsBuffer.size());
+        }
         int index = 0;
         int end = eventsBuffer.size();
         for (ConsumerRecord<String, T> record : eventsBuffer) {
