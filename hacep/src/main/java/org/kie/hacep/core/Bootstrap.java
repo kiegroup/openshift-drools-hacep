@@ -57,13 +57,16 @@ public class Bootstrap {
             } catch (Exception e) {
                 throw new RuntimeException(e.getMessage(), e);
             }
+            logger.info("Stop leaderElection");
         }
         if (consumerController != null) {
             consumerController.stop();
         }
+        logger.info("Stop consumerController");
         if (eventProducer != null) {
             eventProducer.stop();
         }
+        logger.info("Stop eventProducer");
         eventProducer = null;
         consumerController = null;
     }

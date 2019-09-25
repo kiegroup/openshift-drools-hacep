@@ -60,7 +60,7 @@ public class DefaultKafkaConsumer<T> implements EventConsumer {
     private DroolsConsumerHandler consumerHandler;
     private volatile String processingKey = "";
     private volatile long processingKeyOffset, lastProcessedControlOffset, lastProcessedEventOffset;
-    private volatile boolean started = false;
+    private volatile boolean started, exit = false;
     private volatile State currentState = State.REPLICA;
     private volatile PolledTopic polledTopic = PolledTopic.CONTROL;
     private int iterationBetweenSnapshot;
@@ -117,6 +117,7 @@ public class DefaultKafkaConsumer<T> implements EventConsumer {
         if (kafkaSecondaryConsumer != null) {
             kafkaSecondaryConsumer.wakeup();
         }
+        exit = true;
         consumerHandler.stop();
     }
 
@@ -233,7 +234,7 @@ public class DefaultKafkaConsumer<T> implements EventConsumer {
         }
 
         try {
-            while (true) {
+            while (!exit) {
                 consume(durationMillis);
             }
         } catch (WakeupException e) {

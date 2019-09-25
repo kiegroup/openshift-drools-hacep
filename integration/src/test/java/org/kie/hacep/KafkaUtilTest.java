@@ -72,6 +72,7 @@ public class KafkaUtilTest implements AutoCloseable {
     private EmbeddedZookeeper zkServer;
     private String tmpDir;
     private KafkaAdminClient adminClient;
+    private Logger kafkaLogger = LoggerFactory.getLogger("org.hacep");
 
 
     public Map<String, Object> getKafkaProps() {
@@ -303,11 +304,13 @@ public class KafkaUtilTest implements AutoCloseable {
     }
 
     public void tearDown() {
+        kafkaLogger.warn("tearDown");
         try {
             Bootstrap.stopEngine();
         } catch (ConcurrentModificationException ex) {
             throw new RuntimeException(ex.getMessage(), ex);
         }
+        kafkaLogger.warn("shutdownServer");
         shutdownServer();
     }
 }
