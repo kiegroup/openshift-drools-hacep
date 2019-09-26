@@ -3,6 +3,8 @@ package org.kie.hacep;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -45,41 +47,45 @@ public class PodAsReplicaTest extends KafkaFullTopicsTests {
             //EVENTS TOPIC
             logger.warn("Checks on Events topic");
             ConsumerRecords eventsRecords = eventsConsumer.poll(Duration.ofSeconds(2));
-            assertEquals(2,
-                         eventsRecords.count());
-            Iterator<ConsumerRecord<String, byte[]>> eventsRecordIterator = eventsRecords.iterator();
-            ConsumerRecord<java.lang.String, byte[]> eventsRecord = null;
-            RemoteCommand remoteCommand;
-            if (eventsRecordIterator.hasNext()) {
-                eventsRecord = eventsRecordIterator.next();
-                assertNotNull(eventsRecord);
-                assertEquals(eventsRecord.topic(),
-                             envConfig.getEventsTopicName());
-                remoteCommand = deserialize(eventsRecord.value());
-                assertEquals(eventsRecord.offset(),
-                             0);
-                assertNotNull(remoteCommand.getId());
-                assertTrue(remoteCommand instanceof FireUntilHaltCommand);
-            }
 
-            if (eventsRecordIterator.hasNext()) {
-                eventsRecord = eventsRecordIterator.next();
-                assertNotNull(eventsRecord);
-                assertEquals(eventsRecord.topic(),
-                             envConfig.getEventsTopicName());
-                remoteCommand = deserialize(eventsRecord.value());
-                assertEquals(eventsRecord.offset(),
-                             1);
-                assertNotNull(remoteCommand.getId());
-                InsertCommand insertCommand = (InsertCommand) remoteCommand;
-                assertEquals(insertCommand.getEntryPoint(),
-                             "DEFAULT");
-                assertNotNull(insertCommand.getId());
-                assertNotNull(insertCommand.getFactHandle());
-                RemoteFactHandle remoteFactHandle = insertCommand.getFactHandle();
-                StockTickEvent eventsTicket = (StockTickEvent) remoteFactHandle.getObject();
-                assertEquals(eventsTicket.getCompany(),
-                             "RHT");
+            AtomicReference<ConsumerRecord<String, byte[]>> lastEvent = new AtomicReference<>();
+            final AtomicInteger index = new AtomicInteger(0);
+            final AtomicInteger attempts = new AtomicInteger(0);
+            while (index.get() < 2) {
+                eventsRecords.forEach(o -> {
+                    ConsumerRecord<String, byte[]> eventsRecord = (ConsumerRecord<String, byte[]>) o;
+                    assertNotNull(eventsRecord);
+                    assertEquals(eventsRecord.topic(), envConfig.getEventsTopicName());
+                    RemoteCommand remoteCommand = deserialize(eventsRecord.value());
+                    assertEquals(eventsRecord.offset(), index.get());
+                    assertNotNull(remoteCommand.getId());
+
+                    if (index.get() == 0) {
+                        assertTrue(remoteCommand instanceof FireUntilHaltCommand);
+                    }
+
+                    if (index.get() == 1) {
+                        assertTrue(remoteCommand instanceof InsertCommand);
+                        InsertCommand insertCommand = (InsertCommand) remoteCommand;
+                        assertEquals(insertCommand.getEntryPoint(), "DEFAULT");
+                        assertNotNull(insertCommand.getId());
+                        assertNotNull(insertCommand.getFactHandle());
+                        RemoteFactHandle remoteFactHandle = insertCommand.getFactHandle();
+                        StockTickEvent eventsTicket = (StockTickEvent) remoteFactHandle.getObject();
+                        assertEquals(eventsTicket.getCompany(), "RHT");
+                    }
+
+                    index.incrementAndGet();
+
+                    if (index.get() > 2) {
+                        throw new RuntimeException("Found " + index.get() + " messages, more than the 2 expected.");
+                    }
+                    lastEvent.set(eventsRecord);
+                });
+                logger.warn("Attempt number:{}", attempts.incrementAndGet());
+                if(attempts.get() == 10){
+                    throw new RuntimeException("No Events message available after "+attempts + "attempts.");
+                }
             }
 
             //CONTROL TOPIC
@@ -91,23 +97,19 @@ public class PodAsReplicaTest extends KafkaFullTopicsTests {
                 checkFireSideEffects(controlRecordIterator.next());
 
                 if (controlRecords.count() == 2) {
-                    checkInsertSideEffects(eventsRecord,
-                                           controlRecordIterator.next());
+                    checkInsertSideEffects(lastEvent.get(), controlRecordIterator.next());
                 } else {
                     // wait for second control message
                     controlRecords = waitForControlMessage(controlConsumer);
-                    checkInsertSideEffects(eventsRecord,
-                                           (ConsumerRecord<String, byte[]>) controlRecords.iterator().next());
+                    checkInsertSideEffects(lastEvent.get(), (ConsumerRecord<String, byte[]>) controlRecords.iterator().next());
                 }
             }
 
             //no more msg to consume as a leader
             eventsRecords = eventsConsumer.poll(Duration.ofSeconds(2));
-            assertEquals(0,
-                         eventsRecords.count());
+            assertEquals(0, eventsRecords.count());
             controlRecords = controlConsumer.poll(Duration.ofSeconds(2));
-            assertEquals(0,
-                         controlRecords.count());
+            assertEquals(0, controlRecords.count());
 
             // SWITCH AS a REPLICA
             logger.warn("Switch as a replica");
@@ -153,7 +155,7 @@ public class PodAsReplicaTest extends KafkaFullTopicsTests {
         }
     }
 
-    private ConsumerRecords waitForControlMessage(KafkaConsumer controlConsumer) throws InterruptedException {
+    private ConsumerRecords waitForControlMessage(KafkaConsumer controlConsumer) {
         ConsumerRecords controlRecords = controlConsumer.poll(Duration.ofSeconds(1));
         int attempts = 0;
         while (controlRecords.count() == 0) {
@@ -168,21 +170,16 @@ public class PodAsReplicaTest extends KafkaFullTopicsTests {
 
     private void checkFireSideEffects(ConsumerRecord<String, byte[]> controlRecord) {
         // FireUntilHalt command has no side effects
-        assertEquals(controlRecord.topic(),
-                     envConfig.getControlTopicName());
+        assertEquals(controlRecord.topic(), envConfig.getControlTopicName());
         ControlMessage controlMessage = deserialize(controlRecord.value());
-        assertEquals(controlRecord.offset(),
-                     0);
+        assertEquals(controlRecord.offset(), 0);
         assertTrue(controlMessage.getSideEffects().isEmpty());
     }
 
-    private void checkInsertSideEffects(ConsumerRecord<String, byte[]> eventsRecord,
-                                        ConsumerRecord<String, byte[]> controlRecord) {
-        assertEquals(controlRecord.topic(),
-                     envConfig.getControlTopicName());
+    private void checkInsertSideEffects(ConsumerRecord<String, byte[]> eventsRecord, ConsumerRecord<String, byte[]> controlRecord) {
+        assertEquals(controlRecord.topic(), envConfig.getControlTopicName());
         ControlMessage controlMessage = deserialize(controlRecord.value());
-        assertEquals(controlRecord.offset(),
-                     1);
+        assertEquals(controlRecord.offset(), 1);
         assertTrue(!controlMessage.getSideEffects().isEmpty());
         assertTrue(controlMessage.getSideEffects().size() == 1);
         //Same msg content on Events topic and control topics

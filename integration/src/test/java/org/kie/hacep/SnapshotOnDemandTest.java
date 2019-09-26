@@ -19,6 +19,8 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -30,6 +32,8 @@ import org.kie.hacep.core.Bootstrap;
 import org.kie.hacep.core.infra.election.State;
 import org.kie.hacep.message.SnapshotMessage;
 import org.kie.remote.CommonConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.junit.Assert.*;
 import static org.kie.remote.util.SerializationUtil.deserialize;
@@ -38,6 +42,7 @@ public class SnapshotOnDemandTest {
 
     private KafkaUtilTest kafkaServerTest;
     private EnvConfig config;
+    private Logger logger = LoggerFactory.getLogger(SnapshotOnDemandTest.class);
 
     public static EnvConfig getEnvConfig() {
         return EnvConfig.anEnvConfig().
@@ -78,26 +83,30 @@ public class SnapshotOnDemandTest {
                                                                      Config.getConsumerConfig("SnapshotOnDemandTest.createSnapshotOnDemandTest"));
 
         try {
-            ConsumerRecords eventsRecords = eventsConsumer.poll(Duration.ofMillis(1000));
+            ConsumerRecords eventsRecords = eventsConsumer.poll(Duration.ofSeconds(2));
             assertEquals(0, eventsRecords.count());
 
-            ConsumerRecords controlRecords = controlConsumer.poll(Duration.ofMillis(1000));
+            ConsumerRecords controlRecords = controlConsumer.poll(Duration.ofSeconds(2));
             assertEquals(0, controlRecords.count());
 
-            ConsumerRecords snapshotRecords = snapshotConsumer.poll(Duration.ofMillis(1000));
+            ConsumerRecords snapshotRecords = snapshotConsumer.poll(Duration.ofSeconds(2));
             assertEquals(0, snapshotRecords.count());
 
             KafkaUtilTest.insertSnapshotOnDemandCommand();
 
             List<SnapshotMessage> messages = new ArrayList<>();
+            final AtomicInteger attempts = new AtomicInteger(0);
             while (messages.size() < 1) {
-                snapshotRecords = snapshotConsumer.poll(Duration.ofMillis(5000));
-                Iterator<ConsumerRecord<String, byte[]>> snapshotRecordIterator = snapshotRecords.iterator();
-
-                if (snapshotRecordIterator.hasNext()) {
-                    ConsumerRecord<String, byte[]> controlRecord = snapshotRecordIterator.next();
+                snapshotRecords = snapshotConsumer.poll(Duration.ofSeconds(5));
+                snapshotRecords.forEach(o -> {
+                    ConsumerRecord<String, byte[]> controlRecord = (ConsumerRecord<String,byte[]>)o;
                     SnapshotMessage snapshotMessage = deserialize(controlRecord.value());
                     messages.add(snapshotMessage);
+                });
+
+                logger.warn("Attempt number:{}", attempts.incrementAndGet());
+                if(attempts.get() == 10){
+                    throw new RuntimeException("No control message available after "+attempts + "attempts in waitForControlMessage");
                 }
             }
 
@@ -109,10 +118,10 @@ public class SnapshotOnDemandTest {
             assertEquals(0, msg.getLastInsertedEventOffset());
             assertNotNull(msg.getSerializedSession());
 
-            eventsRecords = eventsConsumer.poll(Duration.ofMillis(1000));
+            eventsRecords = eventsConsumer.poll(Duration.ofSeconds(1));
             assertEquals(1, eventsRecords.count());
 
-            controlRecords = controlConsumer.poll(Duration.ofMillis(1000));
+            controlRecords = controlConsumer.poll(Duration.ofSeconds(1));
             assertEquals(1, controlRecords.count());
         } catch (Exception ex) {
             throw new RuntimeException(ex.getMessage(), ex);

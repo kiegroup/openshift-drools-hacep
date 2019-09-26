@@ -17,10 +17,11 @@ package org.kie.hacep;
 
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -44,7 +45,7 @@ public class PodAsLeaderTest extends KafkaFullTopicsTests {
 
     private Logger logger = LoggerFactory.getLogger("org.hacep");
 
-    @Test(timeout = 20000)
+    @Test(timeout = 15000)
     public void processOneSentMessageAsLeaderTest() {
         Bootstrap.startEngine(envConfig);
         Bootstrap.getConsumerController().getCallback().updateStatus(State.LEADER);
@@ -62,74 +63,84 @@ public class PodAsLeaderTest extends KafkaFullTopicsTests {
             //EVENTS TOPIC
             logger.warn("Checks on Events topic");
 
-            ConsumerRecords eventsRecords = eventsConsumer.poll(Duration.ofSeconds(2));
-            assertEquals(2, eventsRecords.count());
-            Iterator<ConsumerRecord<String,byte[]>> eventsRecordIterator = eventsRecords.iterator();
-            ConsumerRecord<String,byte[]> eventsRecord = null;
-            ConsumerRecord<String,byte[]> eventsRecordTwo = null;
-            RemoteCommand remoteCommand ;
+            AtomicReference<ConsumerRecord<String, byte[]>> firstEvent = new AtomicReference<>();
+            AtomicReference<ConsumerRecord<String, byte[]>> secondEvent = new AtomicReference<>();
 
-            if (eventsRecordIterator.hasNext()) {
-                eventsRecord = eventsRecordIterator.next();
-                assertNotNull(eventsRecord);
-                assertEquals(eventsRecord.topic(), envConfig.getEventsTopicName());
-                assertEquals(eventsRecord.offset(), 0);
+            final AtomicInteger index = new AtomicInteger(0);
+            final AtomicInteger attempts = new AtomicInteger(0);
+            while (index.get() < 2) {
+                ConsumerRecords eventsRecords = eventsConsumer.poll(Duration.ofSeconds(2));
 
-                remoteCommand = deserialize(eventsRecord.value());
-                logger.warn("First Event:{} offset:{}", remoteCommand, eventsRecord.offset());
-                assertNotNull(remoteCommand.getId());
-                assertTrue(remoteCommand instanceof FireUntilHaltCommand);
+                eventsRecords.forEach(o -> {
+                    ConsumerRecord<String, byte[]> event = (ConsumerRecord<String, byte[]>) o;
+                    assertNotNull(event);
+                    assertEquals(event.topic(),
+                                 envConfig.getEventsTopicName());
+                    assertEquals(event.offset(),
+                                 index.get());
+                    RemoteCommand remoteCommand = deserialize(event.value());
+                    logger.warn("Event {}:{} offset:{}", index.get(), remoteCommand, event.offset());
+                    assertNotNull(remoteCommand.getId());
+                    if (index.get() == 0) {
+                        firstEvent.set(event);
+                        assertTrue(remoteCommand instanceof FireUntilHaltCommand);
+                    }
+                    if (index.get() == 1) {
+                        assertTrue(remoteCommand instanceof InsertCommand);
+                        secondEvent.set(event);
+                    }
+                    index.incrementAndGet();
+                });
+
+                logger.warn("Attempt number:{}", attempts.incrementAndGet());
+                if(attempts.get() == 10){
+                    throw new RuntimeException("No Events message available after "+attempts + "attempts.");
+                }
             }
 
-            if (eventsRecordIterator.hasNext()) {
-                eventsRecordTwo = eventsRecordIterator.next();
-                assertNotNull(eventsRecordTwo);
-                assertEquals(eventsRecordTwo.topic(), envConfig.getEventsTopicName());
-                assertEquals(eventsRecordTwo.offset(), 1);
-
-                remoteCommand = deserialize(eventsRecordTwo.value());
-                logger.warn("Second Event:{} offset:{}", remoteCommand, eventsRecordTwo.offset());
-                assertNotNull(remoteCommand.getId());
-                assertTrue(remoteCommand instanceof InsertCommand);
-            }
 
             //CONTROL TOPIC
             logger.warn("Checks on Control topic");
+
             List<ControlMessage> messages = new ArrayList<>();
-            int attempts = 0;
+            attempts.set(0);
             while (messages.size() < 2) {
-                ConsumerRecords controlRecords = controlConsumer.poll(Duration.ofSeconds(1));
-                Iterator<ConsumerRecord<String,byte[]>> controlRecordIterator = controlRecords.iterator();
-                if(controlRecordIterator.hasNext()) {
-                    ConsumerRecord<String,byte[]> controlRecord = controlRecordIterator.next();
-                    assertNotNull(controlRecord);
-                    ControlMessage controlMessage = deserialize(controlRecord.value());
-                    controlMessage.setOffset(controlRecord.offset());
+                ConsumerRecords controlRecords = controlConsumer.poll(Duration.ofSeconds(2));
+                controlRecords.forEach(o -> {
+                    ConsumerRecord<String,byte[]> control = (ConsumerRecord<String,byte[]>)o;
+                    assertNotNull(control);
+                    ControlMessage controlMessage = deserialize(control.value());
+                    controlMessage.setOffset(control.offset());
                     logger.warn("Control message found:{}", controlMessage);
                     messages.add(controlMessage);
-                }
-                attempts ++;
-                logger.warn("Attempt number:{}", attempts);
-                if(attempts == 10){
-                    throw new RuntimeException("No control message available after "+attempts + "attempts in waitForControlMessage");
+                });
+                logger.warn("Attempt number:{}", attempts.incrementAndGet());
+                if(attempts.get() == 10){
+                    throw new RuntimeException("No control message available after "+attempts + "attempts.");
                 }
             }
+
             assertEquals(2, messages.size());
-            ControlMessage fireUntilHalt = null;
-            ControlMessage insert = null;
-            Iterator<ControlMessage> messagesIter = messages.iterator();
-            if(messagesIter.hasNext()) {
-                fireUntilHalt = messagesIter.next();
-                assertNotNull(fireUntilHalt);
-            }
-            if(messagesIter.hasNext()) {
-                insert = messagesIter.next();
-                assertNotNull(insert);
-            }
-            assertEquals(fireUntilHalt.getId(), eventsRecord.key());
-            assertTrue(fireUntilHalt.getSideEffects().isEmpty());
-            assertEquals(insert.getId(), eventsRecordTwo.key());
-            assertTrue(!insert.getSideEffects().isEmpty());
+
+            AtomicReference<ControlMessage> fireUntilHalt = new AtomicReference<>();
+            AtomicReference<ControlMessage> insert = new AtomicReference<>();
+            index.set(0);
+            messages.forEach(controlMessage -> {
+                if(index.get()==0){
+                    assertNotNull(controlMessage);
+                    fireUntilHalt.set(controlMessage);
+                }
+                if(index.get()==1){
+                    assertNotNull(controlMessage);
+                    insert.set(controlMessage);
+                }
+                index.incrementAndGet();
+            });
+
+            assertEquals(fireUntilHalt.get().getId(), firstEvent.get().key());
+            assertTrue(fireUntilHalt.get().getSideEffects().isEmpty());
+            assertEquals(insert.get().getId(), secondEvent.get().key());
+            assertTrue(!insert.get().getSideEffects().isEmpty());
             logger.warn("Test ended, going to stop kafka");
         } catch (Exception ex) {
             throw new RuntimeException(ex.getMessage(), ex);

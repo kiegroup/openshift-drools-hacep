@@ -16,6 +16,7 @@
 package org.kie.hacep;
 
 import java.time.Duration;
+import java.util.function.Consumer;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -48,20 +49,23 @@ public class PodAsLeaderSnapshotTest extends KafkaFullTopicsTests{
         try {
 
             //EVENTS TOPIC
-            ConsumerRecords eventsRecords = eventsConsumer.poll(Duration.ofMillis(5000));
+            ConsumerRecords eventsRecords = eventsConsumer.poll(Duration.ofSeconds(5));
             assertEquals(11, eventsRecords.count()); //1 fireUntilHalt + 10 stock ticket
 
             //SNAPSHOT TOPIC
-            ConsumerRecords snapshotRecords = snapshotConsumer.poll(Duration.ofMillis(5000));
+            ConsumerRecords snapshotRecords = snapshotConsumer.poll(Duration.ofSeconds(5));
             assertEquals(1, snapshotRecords.count());
-            ConsumerRecord record = (ConsumerRecord) snapshotRecords.iterator().next();
-            SnapshotMessage snapshot = deserialize((byte[]) record.value());
-            assertNotNull(snapshot);
-            assertTrue(snapshot.getLastInsertedEventOffset() > 0);
-            assertFalse(snapshot.getFhMapKeys().isEmpty());
-            assertNotNull(snapshot.getLastInsertedEventkey());
-            assertEquals(9, snapshot.getFhMapKeys().size());
-            assertNotNull(snapshot.getLastInsertedEventkey());
+
+            snapshotRecords.forEach(o -> {
+                ConsumerRecord record = (ConsumerRecord)o;
+                SnapshotMessage snapshot = deserialize((byte[]) record.value());
+                assertNotNull(snapshot);
+                assertTrue(snapshot.getLastInsertedEventOffset() > 0);
+                assertFalse(snapshot.getFhMapKeys().isEmpty());
+                assertNotNull(snapshot.getLastInsertedEventkey());
+                assertEquals(9, snapshot.getFhMapKeys().size());
+                assertNotNull(snapshot.getLastInsertedEventkey());
+            });
 
             int items = controlConsumer.poll(Duration.ofMillis(5000)).count();
             while(items < 11){

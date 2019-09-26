@@ -121,6 +121,9 @@ public class CommandHandler implements VisitorCommand {
         if (firingUntilHalt) {
             kieSessionContext.getKieSession().fireAllRules();
         }
+        if(logger.isDebugEnabled()){
+            logger.debug("firingUntilHalt:{}", firingUntilHalt);
+        }
         return fh;
     }
 
