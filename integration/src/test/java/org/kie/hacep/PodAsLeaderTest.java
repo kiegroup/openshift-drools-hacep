@@ -74,10 +74,8 @@ public class PodAsLeaderTest extends KafkaFullTopicsTests {
                 eventsRecords.forEach(o -> {
                     ConsumerRecord<String, byte[]> event = (ConsumerRecord<String, byte[]>) o;
                     assertNotNull(event);
-                    assertEquals(event.topic(),
-                                 envConfig.getEventsTopicName());
-                    assertEquals(event.offset(),
-                                 index.get());
+                    assertEquals(event.topic(), envConfig.getEventsTopicName());
+                    assertEquals(event.offset(), index.get());
                     RemoteCommand remoteCommand = deserialize(event.value());
                     logger.warn("Event {}:{} offset:{}", index.get(), remoteCommand, event.offset());
                     assertNotNull(remoteCommand.getId());
