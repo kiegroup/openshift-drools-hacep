@@ -123,12 +123,13 @@ public class DefaultKafkaConsumer<T> implements EventConsumer {
 
     @Override
     public void updateStatus(State state) {
-        if(currentState == null ||  !state.equals(currentState)){
+        boolean changedState = !state.equals(currentState);
+        if(currentState == null ||  changedState){
             currentState = state;
         }
-        if (started) {
+        if (started && changedState && !currentState.equals(State.BECOMING_LEADER)) {
             updateOnRunningConsumer(state);
-        } else {
+        } else if(!started) {
             if (state.equals(State.REPLICA)) {
                 //ask and wait a snapshot before start
                 if (!config.isSkipOnDemanSnapshot() && !askedSnapshotOnDemand) {
@@ -262,6 +263,7 @@ public class DefaultKafkaConsumer<T> implements EventConsumer {
     }
 
     protected void updateOnRunningConsumer(State state) {
+        logger.info("updateOnRunning COnsumer");
         if (state.equals(State.LEADER) ) {
             DroolsExecutor.setAsLeader();
             restart(state);
@@ -278,9 +280,6 @@ public class DefaultKafkaConsumer<T> implements EventConsumer {
     }
 
     protected void enableConsumeAndStartLoop(State state) {
-        if (logger.isInfoEnabled()) {
-            logger.info("enableConsumeAndStartLoop:state{} currentState:{}", state, currentState);
-        }
         if (state.equals(State.LEADER)) {
             currentState = State.LEADER;
             DroolsExecutor.setAsLeader();
@@ -512,7 +511,9 @@ public class DefaultKafkaConsumer<T> implements EventConsumer {
     }
 
     protected void startConsume() {
+
         started = true;
+        logger.info("startConsume started {}", started);
     }
 
     protected void stopConsume() {
