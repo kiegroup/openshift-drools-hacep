@@ -145,7 +145,7 @@ public class Config {
     }
 
     private static void logConfig(String subject,Properties producerProperties) {
-        if (logger.isInfoEnabled()) {
+        if (logger.isDebugEnabled()) {
             StringBuilder sb = new StringBuilder();
             sb.append("\n");
             sb.append(subject);
@@ -154,7 +154,7 @@ public class Config {
                 sb.append(" ").append(entry.getKey().toString()).append(":").append(entry.getValue()).append("  \n");
             }
             sb.append("\n}\n");
-            logger.info(sb.toString());
+            logger.debug(sb.toString());
         }
     }
 }

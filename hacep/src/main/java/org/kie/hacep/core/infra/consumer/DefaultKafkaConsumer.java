@@ -511,9 +511,7 @@ public class DefaultKafkaConsumer<T> implements EventConsumer {
     }
 
     protected void startConsume() {
-
         started = true;
-        logger.info("startConsume started {}", started);
     }
 
     protected void stopConsume() {
