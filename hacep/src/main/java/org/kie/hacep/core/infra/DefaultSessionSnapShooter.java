@@ -46,14 +46,14 @@ import org.kie.remote.util.SerializationUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DeafultSessionSnapShooter implements SessionSnapshooter {
+public class DefaultSessionSnapShooter implements SessionSnapshooter {
 
     private final String key = "LAST-SNAPSHOT";
-    private final Logger logger = LoggerFactory.getLogger(DeafultSessionSnapShooter.class);
+    private final Logger logger = LoggerFactory.getLogger(DefaultSessionSnapShooter.class);
     private KieContainer kieContainer;
     private EnvConfig envConfig;
 
-    public DeafultSessionSnapShooter(EnvConfig envConfig) {
+    public DefaultSessionSnapShooter(EnvConfig envConfig) {
         this.envConfig = envConfig;
         KieServices srv = KieServices.get();
         if (srv != null) {

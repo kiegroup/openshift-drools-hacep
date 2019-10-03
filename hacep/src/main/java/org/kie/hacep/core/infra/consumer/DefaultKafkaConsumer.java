@@ -35,7 +35,7 @@ import org.apache.kafka.common.errors.WakeupException;
 import org.kie.hacep.Config;
 import org.kie.hacep.EnvConfig;
 import org.kie.hacep.consumer.DroolsConsumerHandler;
-import org.kie.hacep.core.infra.DeafultSessionSnapShooter;
+import org.kie.hacep.core.infra.DefaultSessionSnapShooter;
 import org.kie.hacep.core.infra.OffsetManager;
 import org.kie.hacep.core.infra.SnapshotInfos;
 import org.kie.hacep.core.infra.election.State;
@@ -68,7 +68,7 @@ public class DefaultKafkaConsumer<T> implements EventConsumer {
     private List<ConsumerRecord<String, T>> controlBuffer;
     private AtomicInteger counter ;
     private SnapshotInfos snapshotInfos;
-    private DeafultSessionSnapShooter snapShooter;
+    private DefaultSessionSnapShooter snapShooter;
     private Printer printer;
     private EnvConfig config;
     private Logger loggerForTest;
