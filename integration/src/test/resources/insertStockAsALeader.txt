@@ -1,4 +1,0 @@
-DroolsConsumerHandler.process Remote command on process:Fire until halt of
-DroolsConsumerHandler.process sideEffects:[]
-DroolsConsumerHandler.process new ControlMessage sent to control topic:ControlMessage{offset=0, sideEffects=[], id='{}', timestamp=0}
-sideEffectOnLeader:[]
