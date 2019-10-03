@@ -90,7 +90,8 @@ public class PodAsLeaderTest extends KafkaFullTopicsTests {
                     index.incrementAndGet();
                 });
 
-                logger.warn("Attempt number:{}", attempts.incrementAndGet());
+                int attemptNumber = attempts.incrementAndGet();
+                logger.warn("Attempt number:{}", attemptNumber);
                 if(attempts.get() == 10){
                     throw new RuntimeException("No Events message available after "+attempts + "attempts.");
                 }
@@ -112,7 +113,9 @@ public class PodAsLeaderTest extends KafkaFullTopicsTests {
                     logger.warn("Control message found:{}", controlMessage);
                     messages.add(controlMessage);
                 });
-                logger.warn("Attempt number:{}", attempts.incrementAndGet());
+
+                int attemptNumber = attempts.incrementAndGet();
+                logger.warn("Attempt number:{}", attemptNumber);
                 if(attempts.get() == 10){
                     throw new RuntimeException("No control message available after "+attempts + "attempts.");
                 }

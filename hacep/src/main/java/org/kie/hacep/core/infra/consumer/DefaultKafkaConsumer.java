@@ -533,4 +533,8 @@ public class DefaultKafkaConsumer<T> implements EventConsumer {
     protected void pollNothing(){
         polledTopic = PolledTopic.NONE;
     }
+
+    public enum PolledTopic {
+        EVENTS, CONTROL, NONE;
+    }
 }

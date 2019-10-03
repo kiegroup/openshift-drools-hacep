@@ -104,7 +104,8 @@ public class SnapshotOnDemandTest {
                     messages.add(snapshotMessage);
                 });
 
-                logger.warn("Attempt number:{}", attempts.incrementAndGet());
+                int attemptNumber = attempts.incrementAndGet();
+                logger.warn("Attempt number:{}", attemptNumber);
                 if(attempts.get() == 10){
                     throw new RuntimeException("No control message available after "+attempts + "attempts in waitForControlMessage");
                 }

@@ -55,6 +55,7 @@ public class Bootstrap {
             try {
                 leadership.stop();
             } catch (Exception e) {
+                GlobalStatus.nodeLive = false;
                 throw new RuntimeException(e.getMessage(), e);
             }
             logger.info("Stop leaderElection");
