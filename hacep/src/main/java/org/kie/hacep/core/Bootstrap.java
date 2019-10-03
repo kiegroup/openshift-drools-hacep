@@ -70,6 +70,7 @@ public class Bootstrap {
         logger.info("Stop eventProducer");
         eventProducer = null;
         consumerController = null;
+        GlobalStatus.nodeLive = false;
     }
 
     // only for tests
