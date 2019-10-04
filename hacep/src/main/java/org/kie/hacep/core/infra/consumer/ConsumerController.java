@@ -26,7 +26,6 @@ public class ConsumerController {
     private InfraCallback callback;
     private Thread thread;
     private EnvConfig envConfig;
-    private boolean running;
 
     public ConsumerController( EnvConfig envConfig, Producer producer ) {
         this.callback = new InfraCallback();
@@ -37,22 +36,14 @@ public class ConsumerController {
     }
 
     public void start() {
-        running = true;
         consumeEvents();
     }
 
     public void stop() {
-        if(running) {
-            running = false;
-            consumer.stop();
-            stopConsumeEvents();
-        }
+        consumer.stop();
+        stopConsumeEvents();
     }
-
-    public boolean isRunning(){
-        return running;
-    }
-
+    
     public EventConsumer getConsumer() {
         return consumer;
     }
