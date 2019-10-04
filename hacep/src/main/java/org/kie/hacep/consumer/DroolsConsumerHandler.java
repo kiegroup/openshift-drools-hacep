@@ -51,18 +51,16 @@ public class DroolsConsumerHandler implements ConsumerHandler {
     private CommandHandler commandHandler;
     private SnapshotInfos infos;
     private boolean shutdown;
-    private ConsumerController container;
 
-    public DroolsConsumerHandler(Producer producer, EnvConfig envConfig, ConsumerController container) {
+    public DroolsConsumerHandler(Producer producer, EnvConfig envConfig) {
         this.config = envConfig;
         this.snapshooter = new DefaultSessionSnapShooter(config);
         initializeKieSessionFromSnapshot(config);
         this.producer = producer;
-        commandHandler = new CommandHandler(kieSessionContext, config, producer, snapshooter, container);
+        commandHandler = new CommandHandler(kieSessionContext, config, producer, snapshooter);
         if (config.isUnderTest()) {
             loggerForTest = PrinterUtil.getKafkaLoggerForTest(envConfig);
         }
-        this.container = container;
     }
 
     private void initializeKieSessionFromSnapshot(EnvConfig config) {

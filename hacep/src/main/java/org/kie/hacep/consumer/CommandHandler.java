@@ -65,18 +65,15 @@ public class CommandHandler implements VisitorCommand {
     private Producer producer;
     private SessionSnapshooter sessionSnapshooter;
     private volatile boolean firingUntilHalt;
-    private ConsumerController container;
 
     public CommandHandler(KieSessionContext kieSessionContext,
                           EnvConfig envConfig,
                           Producer producer,
-                          SessionSnapshooter sessionSnapshooter,
-                          ConsumerController container) {
+                          SessionSnapshooter sessionSnapshooter) {
         this.kieSessionContext = kieSessionContext;
         this.envConfig = envConfig;
         this.producer = producer;
         this.sessionSnapshooter = sessionSnapshooter;
-        this.container = container;
     }
 
     @Override
