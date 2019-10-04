@@ -112,7 +112,6 @@ public class DefaultKafkaConsumer<T> implements EventConsumer {
     @Override
     public void stop() {
         stopConsume();
-        pollNothing();
         kafkaConsumer.wakeup();
         if (kafkaSecondaryConsumer != null) {
             kafkaSecondaryConsumer.wakeup();
@@ -525,11 +524,7 @@ public class DefaultKafkaConsumer<T> implements EventConsumer {
     protected void pollEvents(){
         polledTopic = PolledTopic.EVENTS;
     }
-
-    protected void pollNothing(){
-        polledTopic = PolledTopic.NONE;
-    }
-
+    
     public enum PolledTopic {
         EVENTS, CONTROL, NONE;
     }
