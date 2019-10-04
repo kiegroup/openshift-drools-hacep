@@ -43,7 +43,7 @@ public class ConsumerController {
         consumer.stop();
         stopConsumeEvents();
     }
-    
+
     public EventConsumer getConsumer() {
         return consumer;
     }

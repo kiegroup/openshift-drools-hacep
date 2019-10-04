@@ -519,15 +519,11 @@ public class DefaultKafkaConsumer<T> implements EventConsumer {
     }
 
     protected void pollControl(){
-        if(!polledTopic.equals(PolledTopic.CONTROL)) {
-            polledTopic = PolledTopic.CONTROL;
-        }
+        polledTopic = PolledTopic.CONTROL;
     }
 
     protected void pollEvents(){
-        if(!polledTopic.equals(PolledTopic.EVENTS)) {
-            polledTopic = PolledTopic.EVENTS;
-        }
+        polledTopic = PolledTopic.EVENTS;
     }
 
     protected void pollNothing(){
