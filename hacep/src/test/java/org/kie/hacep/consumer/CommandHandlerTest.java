@@ -134,8 +134,7 @@ public class CommandHandlerTest {
         commandHandler = new CommandHandler(kieSessionContextMock,
                                             envConfig,
                                             producerMock,
-                                            sessionSnapshooterMock,
-                                            consumerController);
+                                            sessionSnapshooterMock);
         DroolsExecutor.setAsLeader();
     }
 
