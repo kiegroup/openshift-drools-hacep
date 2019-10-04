@@ -29,7 +29,6 @@ import org.kie.hacep.EnvConfig;
 import org.kie.hacep.core.KieSessionContext;
 import org.kie.hacep.core.infra.SessionSnapshooter;
 import org.kie.hacep.core.infra.consumer.ConsumerController;
-import org.kie.hacep.core.infra.consumer.ConsumerHandler;
 import org.kie.hacep.core.infra.utils.ConsumerUtils;
 import org.kie.hacep.message.ControlMessage;
 import org.kie.hacep.message.FactCountMessage;
@@ -49,7 +48,6 @@ import org.kie.remote.command.InsertCommand;
 import org.kie.remote.command.ListObjectsCommand;
 import org.kie.remote.command.ListObjectsCommandClassType;
 import org.kie.remote.command.ListObjectsCommandNamedQuery;
-import org.kie.remote.command.PoisonPillCommand;
 import org.kie.remote.command.SnapshotOnDemandCommand;
 import org.kie.remote.command.UpdateCommand;
 import org.kie.remote.command.VisitorCommand;
@@ -271,10 +269,4 @@ public class CommandHandler implements VisitorCommand {
         return firingUntilHalt;
     }
 
-    @Override
-    public void visit(PoisonPillCommand command) {
-        if(container.isRunning()) {
-            container.stop();
-        }
-    }
 }

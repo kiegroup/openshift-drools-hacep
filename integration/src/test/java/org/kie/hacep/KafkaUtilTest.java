@@ -31,7 +31,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
-
 import kafka.server.KafkaConfig;
 import kafka.server.KafkaServer;
 import kafka.server.NotRunning;
@@ -54,7 +53,6 @@ import org.kie.remote.CommonConfig;
 import org.kie.remote.RemoteStreamingKieSession;
 import org.kie.remote.RemoteKieSession;
 import org.kie.remote.TopicsConfig;
-import org.kie.remote.command.PoisonPillCommand;
 import org.kie.remote.command.SnapshotOnDemandCommand;
 import org.kie.remote.impl.RemoteStreamingKieSessionImpl;
 import org.kie.remote.impl.RemoteKieSessionImpl;
@@ -275,15 +273,6 @@ public class KafkaUtilTest implements AutoCloseable {
         Sender sender = new Sender(props);
         sender.start();
         SnapshotOnDemandCommand command = new SnapshotOnDemandCommand();
-        sender.sendCommand(command, TopicsConfig.getDefaultTopicsConfig().getEventsTopicName());
-        sender.stop();
-    }
-
-    public static void insertPoisonPillCommand() {
-        Properties props = Config.getProducerConfig("insertPoisonPillCommand");
-        Sender sender = new Sender(props);
-        sender.start();
-        PoisonPillCommand command = new PoisonPillCommand();
         sender.sendCommand(command, TopicsConfig.getDefaultTopicsConfig().getEventsTopicName());
         sender.stop();
     }
