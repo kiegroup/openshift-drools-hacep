@@ -86,7 +86,6 @@ public class PodAsLeaderSnapshotTest extends KafkaFullTopicsTests{
                 });
 
                 events = events + snapshotRecords.count();
-                attempts.incrementAndGet();
                 int attemptNumber = attempts.incrementAndGet();
                 logger.warn("Attempt number:{}", attemptNumber);
                 if(attemptNumber == 10){
