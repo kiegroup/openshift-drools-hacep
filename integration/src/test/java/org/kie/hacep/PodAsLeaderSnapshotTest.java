@@ -99,7 +99,7 @@ public class PodAsLeaderSnapshotTest extends KafkaFullTopicsTests{
             attempts.set(0);
             events = 0;
             while (events < 11) {
-                events = events + controlConsumer.poll(Duration.ofMillis(1000)).count();
+                events = events + controlConsumer.poll(Duration.ofSeconds(5)).count();
                 int attemptNumber = attempts.incrementAndGet();
                 logger.warn("Attempt number:{}", attemptNumber);
                 if(attemptNumber == 11){
