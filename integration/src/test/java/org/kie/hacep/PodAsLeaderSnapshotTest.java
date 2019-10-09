@@ -55,25 +55,42 @@ public class PodAsLeaderSnapshotTest extends KafkaFullTopicsTests{
             final AtomicInteger attempts = new AtomicInteger(0);
 
             //EVENTS TOPIC
-
+            logger.warn("Checks on Events Topic");
             int events = 0;
             while(events < 11) {
-                ConsumerRecords eventsRecords = eventsConsumer.poll(Duration.ofSeconds(5));
+                ConsumerRecords eventsRecords = eventsConsumer.poll(Duration.ofSeconds(3));
                 events = events + eventsRecords.count();
                 int attemptNumber = attempts.incrementAndGet();
-                logger.warn("Attempt number:{}", attemptNumber);
+                logger.warn("Attempt number on events topic:{}", attemptNumber);
                 if(attemptNumber == 11){
-                    throw new RuntimeException("No enough Events message available after "+attempts + "attempts.");
+                    throw new RuntimeException("No enough Events message available "+ events +" after "+attempts + "attempts.");
                 }
             }
-            assertEquals(11, events); //1 fireUntilHalt + 10 stock ticket
+            assertEquals(11, events); //1 fireUntilHalt + 11 stock ticket
 
+            //CONTROL TOPIC
+            logger.warn("Checks on Control Topic");
+            attempts.set(0);
+            events = 0;
+            while (events < 11) {
+                ConsumerRecords records = controlConsumer.poll(Duration.ofSeconds(3));
+                events = events + records.count();
+                int attemptNumber = attempts.incrementAndGet();
+                logger.warn("Attempt number on control topic:{}", attemptNumber);
+                if(attemptNumber == 11){
+                    throw new RuntimeException("No enough Control message available "+ events +" after "+attempts + "attempts.");
+                }
+            }
+
+            assertEquals(11, events); //1 fireUntilHalt + 11 stock ticket
 
             //SNAPSHOT TOPIC
+            logger.warn("Checks on Snapshot Topic");
             attempts.set(0);
             events = 0;
             while(events < 1) {
-                ConsumerRecords snapshotRecords = snapshotConsumer.poll(Duration.ofSeconds(5));
+                ConsumerRecords snapshotRecords = snapshotConsumer.poll(Duration.ofSeconds(3));
+                events = events + snapshotRecords.count();
                 snapshotRecords.forEach(o -> {
                     ConsumerRecord record = (ConsumerRecord)o;
                     SnapshotMessage snapshot = deserialize((byte[]) record.value());
@@ -84,29 +101,13 @@ public class PodAsLeaderSnapshotTest extends KafkaFullTopicsTests{
                     assertEquals(9, snapshot.getFhMapKeys().size());
                     assertNotNull(snapshot.getLastInsertedEventkey());
                 });
-
-                events = events + snapshotRecords.count();
                 int attemptNumber = attempts.incrementAndGet();
-                logger.warn("Attempt number:{}", attemptNumber);
-                if(attemptNumber == 10){
-                    throw new RuntimeException("No enough Snapshot message available after "+attempts + "attempts.");
+                logger.warn("Attempt number on snapshot topic:{}", attemptNumber);
+                if(attemptNumber == 11){
+                    throw new RuntimeException("No enough Snapshot message available "+ events +" after "+attempts + "attempts.");
                 }
             }
             assertEquals(1, events);
-
-            //CONTROL TOPIC
-            attempts.set(0);
-            events = 0;
-            while (events < 11) {
-                events = events + controlConsumer.poll(Duration.ofSeconds(5)).count();
-                int attemptNumber = attempts.incrementAndGet();
-                logger.warn("Attempt number:{}", attemptNumber);
-                if(attemptNumber == 11){
-                    throw new RuntimeException("No enough Control message available after "+attempts + "attempts.");
-                }
-            }
-
-            assertEquals(11, events); //1 fireUntilHalt + 10 stock ticket
         } catch (Exception ex) {
             throw new RuntimeException(ex.getMessage(), ex);
         } finally {
