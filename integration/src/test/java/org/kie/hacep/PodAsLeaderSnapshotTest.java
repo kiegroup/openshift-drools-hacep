@@ -16,7 +16,7 @@
 package org.kie.hacep;
 
 import java.time.Duration;
-import java.util.function.Consumer;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -26,11 +26,15 @@ import org.kie.hacep.core.Bootstrap;
 import org.kie.hacep.core.infra.election.State;
 import org.kie.hacep.message.SnapshotMessage;
 import org.kie.remote.RemoteKieSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.junit.Assert.*;
 import static org.kie.remote.util.SerializationUtil.deserialize;
 
 public class PodAsLeaderSnapshotTest extends KafkaFullTopicsTests{
+
+    private Logger logger = LoggerFactory.getLogger("org.hacep");
 
     @Test(timeout = 30000)
     public void processMessagesAsLeaderAndCreateSnapshotTest() {
@@ -48,30 +52,62 @@ public class PodAsLeaderSnapshotTest extends KafkaFullTopicsTests{
                                                     RemoteKieSession.class);
         try {
 
+            final AtomicInteger attempts = new AtomicInteger(0);
+
             //EVENTS TOPIC
-            ConsumerRecords eventsRecords = eventsConsumer.poll(Duration.ofSeconds(5));
-            assertEquals(11, eventsRecords.count()); //1 fireUntilHalt + 10 stock ticket
+            logger.warn("Checks on Events Topic");
+            int events = 0;
+            while(events < 11) {
+                ConsumerRecords eventsRecords = eventsConsumer.poll(Duration.ofSeconds(3));
+                events = events + eventsRecords.count();
+                int attemptNumber = attempts.incrementAndGet();
+                logger.warn("Attempt number on events topic:{}", attemptNumber);
+                if(attemptNumber == 11){
+                    throw new RuntimeException("No enough Events message available "+ events +" after "+attempts + "attempts.");
+                }
+            }
+            assertEquals(11, events); //1 fireUntilHalt + 11 stock ticket
+
+            //CONTROL TOPIC
+            logger.warn("Checks on Control Topic");
+            attempts.set(0);
+            events = 0;
+            while (events < 11) {
+                ConsumerRecords records = controlConsumer.poll(Duration.ofSeconds(3));
+                events = events + records.count();
+                int attemptNumber = attempts.incrementAndGet();
+                logger.warn("Attempt number on control topic:{}", attemptNumber);
+                if(attemptNumber == 11){
+                    throw new RuntimeException("No enough Control message available "+ events +" after "+attempts + "attempts.");
+                }
+            }
+
+            assertEquals(11, events); //1 fireUntilHalt + 11 stock ticket
 
             //SNAPSHOT TOPIC
-            ConsumerRecords snapshotRecords = snapshotConsumer.poll(Duration.ofSeconds(5));
-            assertEquals(1, snapshotRecords.count());
-
-            snapshotRecords.forEach(o -> {
-                ConsumerRecord record = (ConsumerRecord)o;
-                SnapshotMessage snapshot = deserialize((byte[]) record.value());
-                assertNotNull(snapshot);
-                assertTrue(snapshot.getLastInsertedEventOffset() > 0);
-                assertFalse(snapshot.getFhMapKeys().isEmpty());
-                assertNotNull(snapshot.getLastInsertedEventkey());
-                assertEquals(9, snapshot.getFhMapKeys().size());
-                assertNotNull(snapshot.getLastInsertedEventkey());
-            });
-
-            int items = controlConsumer.poll(Duration.ofMillis(5000)).count();
-            while(items < 11){
-                items = items + controlConsumer.poll(Duration.ofMillis(1000)).count();
+            logger.warn("Checks on Snapshot Topic");
+            attempts.set(0);
+            events = 0;
+            while(events < 1) {
+                ConsumerRecords snapshotRecords = snapshotConsumer.poll(Duration.ofSeconds(3));
+                events = events + snapshotRecords.count();
+                snapshotRecords.forEach(o -> {
+                    ConsumerRecord record = (ConsumerRecord)o;
+                    SnapshotMessage snapshot = deserialize((byte[]) record.value());
+                    assertNotNull(snapshot);
+                    assertTrue(snapshot.getLastInsertedEventOffset() > 0);
+                    assertFalse(snapshot.getFhMapKeys().isEmpty());
+                    assertNotNull(snapshot.getLastInsertedEventkey());
+                    assertEquals(9, snapshot.getFhMapKeys().size());
+                    assertNotNull(snapshot.getLastInsertedEventkey());
+                });
+                int attemptNumber = attempts.incrementAndGet();
+                logger.warn("Attempt number on snapshot topic:{}", attemptNumber);
+                if(attemptNumber == 11){
+                    throw new RuntimeException("No enough Snapshot message available "+ events +" after "+attempts + "attempts.");
+                }
             }
-            assertEquals(11, items); //1 fireUntilHalt + 10 stock ticket
+            assertEquals(1, events);
         } catch (Exception ex) {
             throw new RuntimeException(ex.getMessage(), ex);
         } finally {

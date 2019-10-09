@@ -24,7 +24,6 @@ import org.kie.hacep.core.GlobalStatus;
 import org.kie.hacep.core.KieSessionContext;
 import org.kie.hacep.core.infra.DefaultSessionSnapShooter;
 import org.kie.hacep.core.infra.SnapshotInfos;
-import org.kie.hacep.core.infra.consumer.ConsumerController;
 import org.kie.hacep.core.infra.consumer.ConsumerHandler;
 import org.kie.hacep.core.infra.consumer.ItemToProcess;
 import org.kie.hacep.core.infra.election.State;

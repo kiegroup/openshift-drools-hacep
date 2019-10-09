@@ -328,7 +328,7 @@ public class DefaultKafkaConsumer<T> implements EventConsumer {
             consumeEventsFromBufferAsALeader();
         }
         ConsumerRecords<String, T> records = kafkaConsumer.poll(Duration.of(millisTimeout, ChronoUnit.MILLIS));
-        if (!records.isEmpty()) {
+        if (!records.isEmpty() && eventsBuffer == null) {
             ConsumerRecord<String, T> first = records.iterator().next();
             eventsBuffer = records.records(new TopicPartition(first.topic(), first.partition()));
             consumeEventsFromBufferAsALeader();
@@ -353,25 +353,10 @@ public class DefaultKafkaConsumer<T> implements EventConsumer {
     }
 
     protected void consumeEventsFromBufferAsALeader() {
-        if (config.isUnderTest()) {
-            loggerForTest.warn("Pre consumeEventsFromBufferAsALeader eventsBufferSize:{}", eventsBuffer.size());
-        }
-        int index = 0;
-        int end = eventsBuffer.size();
         for (ConsumerRecord<String, T> record : eventsBuffer) {
             processLeader(record);
-            index++;
-            if (end > index) {
-                eventsBuffer = eventsBuffer.subList(index, end);
-            }
-            break;
         }
-        if (config.isUnderTest()) {
-            loggerForTest.warn("post consumeEventsFromBufferAsALeader eventsBufferSize:{}", eventsBuffer.size());
-        }
-        if (end == index) {
-            eventsBuffer = null;
-        }
+        eventsBuffer = null;
     }
 
     protected void handleSnapshotBetweenIteration(ConsumerRecord<String, T> record) {
@@ -436,24 +421,10 @@ public class DefaultKafkaConsumer<T> implements EventConsumer {
     }
 
     protected void consumeControlFromBufferAsAReplica() {
-        if (config.isUnderTest()) {
-            loggerForTest.warn("consumeControlFromBufferAsAReplica:{}", controlBuffer.size());
-        }
-        int index = 0;
-        int end = controlBuffer.size();
         for (ConsumerRecord<String, T> record : controlBuffer) {
             processControlAsAReplica(record);
-            index++;
-            if (polledTopic.equals(PolledTopic.EVENTS)) {
-                if (end > index) {
-                    controlBuffer = controlBuffer.subList(index, end);
-                }
-                break;
-            }
         }
-        if (end == index) {
-            controlBuffer = null;
-        }
+        controlBuffer = null;
     }
 
     protected void processEventsAsAReplica(ConsumerRecord<String, T> record) {
@@ -501,7 +472,7 @@ public class DefaultKafkaConsumer<T> implements EventConsumer {
     }
 
     protected void saveOffset(ConsumerRecord<String, T> record,
-                            Consumer<String, T> kafkaConsumer) {
+                              Consumer<String, T> kafkaConsumer) {
         Map<TopicPartition, OffsetAndMetadata> map = new HashMap<>();
         map.put(new TopicPartition(record.topic(),
                                    record.partition()),
@@ -524,7 +495,7 @@ public class DefaultKafkaConsumer<T> implements EventConsumer {
     protected void pollEvents(){
         polledTopic = PolledTopic.EVENTS;
     }
-    
+
     public enum PolledTopic {
         EVENTS, CONTROL, NONE;
     }
