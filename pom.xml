@@ -41,7 +41,6 @@
     <module>hacep</module>
     <module>springboot</module>
     <module>jdkhttp</module>
-    <module>thorntail</module>
     <module>sample-hacep-project</module>
     <module>integration</module>
     <module>distribution</module>
