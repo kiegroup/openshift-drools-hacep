@@ -90,7 +90,50 @@ oc start-build openshift-kie-springboot --from-dir=. --follow
 After the build completes, your new custom builder image is available in your project in an image stream tag 
 that is named openshift-kie-springboot:latest.
 
-Get the image URL from the image stream
+
+To see the images stream of our namespace e.g. my-kafka-project
+```sh
+oc get is -n my-kafka-project -o yaml
+```
+
+This return something like 
+```sh
+apiVersion: v1
+items:
+- apiVersion: image.openshift.io/v1
+  kind: ImageStream
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewBuild
+    creationTimestamp: "2019-10-15T13:30:59Z"
+    generation: 1
+    labels:
+      build: openshift-kie-springboot
+    name: openshift-kie-springboot
+    namespace: my-kafka-project
+    resourceVersion: "483982"
+    selfLink: /apis/image.openshift.io/v1/namespaces/my-kafka-project/imagestreams/openshift-kie-springboot
+    uid: 0629b104-ef50-11e9-8212-0a580a800198
+  spec:
+    lookupPolicy:
+      local: false
+  status:
+    dockerImageRepository: image-registry.openshift-image-registry.svc:5000/my-kafka-project/openshift-kie-springboot
+    publicDockerImageRepository: default-route-openshift-image-registry.apps-crc.testing/my-kafka-project/openshift-kie-springboot
+    tags:
+    - items:
+      - created: "2019-10-15T14:52:52Z"
+        dockerImageReference: image-registry.openshift-image-registry.svc:5000/my-kafka-project/openshift-kie-springboot@sha256:ac6d04a11bbda4a236abc65118101f16f515bcdefc7e5e86c9f6bb21cd227ca0
+        generation: 1
+        image: sha256:ac6d04a11bbda4a236abc65118101f16f515bcdefc7e5e86c9f6bb21cd227ca0
+      tag: latest
+kind: List
+metadata:
+  resourceVersion: ""
+  selfLink: ""
+```
+
+But to Get the image URL from the image stream yaml skipping the useless information we use the Go template syntax
 ```sh
 oc get is/openshift-kie-springboot -o template --template='{{range .status.tags}}{{range .items}}{{.dockerImageReference}}{{end}}{{end}}'
 ```
