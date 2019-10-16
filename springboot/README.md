@@ -70,6 +70,37 @@ then create a yaml from the UI using the content
 of kubernetes/deployment_registry.yaml
 
 changing the image with the name of your docker image.
+
+#### Build and using a local registry 
+
+With OpenShift Container Platform 4.1, a Docker socket will not be present on the host nodes. 
+This means the mount docker socket option of a custom build is not guaranteed to provide an 
+accessible Docker socket for use within a custom build image.
+
+Define the BuildConfig
+```sh
+oc new-build --binary --strategy=docker --name openshift-kie-springboot
+```
+
+Run the build from the dir with Dockerfile
+```sh
+oc start-build openshift-kie-springboot --from-dir=. --follow
+```
+
+After the build completes, your new custom builder image is available in your project in an image stream tag 
+that is named openshift-kie-springboot:latest.
+
+Get the image URL from the image stream
+```sh
+oc get is/openshift-kie-springboot -o template --template='{{range .status.tags}}{{range .items}}{{.dockerImageReference}}{{end}}{{end}}'
+```
+Open the deployment_registry yaml and replace existing image URL with the result of the previous command trimming the tail after @ symbol then add :latest. 
+E.g. image: 
+```sh
+ - env:
+   name: openshift-kie-springboot
+   image: image-registry.openshift-image-registry.svc:5000/my-kafka-project/openshift-kie-springboot:latest
+```
   
 ### Remote debug    
     
