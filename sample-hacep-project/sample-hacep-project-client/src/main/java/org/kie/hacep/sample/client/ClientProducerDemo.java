@@ -16,6 +16,7 @@
 package org.kie.hacep.sample.client;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -23,14 +24,13 @@ import org.kie.hacep.sample.kjar.StockTickEvent;
 import org.kie.remote.CommonConfig;
 import org.kie.remote.RemoteStreamingKieSession;
 import org.kie.remote.TopicsConfig;
-import org.kie.remote.impl.RemoteKieSessionImpl;
 
 public class ClientProducerDemo {
 
     public static void main(String[] args) {
         try {
             insertBatchEvent(1);
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
     }
@@ -50,14 +50,13 @@ public class ClientProducerDemo {
 
     private static Properties getProperties() {
         Properties props = CommonConfig.getStatic();
-        // for openshift 3.11 minishift -> props.put("bootstrap.servers", "my-cluster-kafka-bootstrap-my-kafka-project.<ip>.nip.io:443");
-        // for openshift 4.X  crc -> props.put("bootstrap.servers", "my-cluster-kafka-bootstrap-my-kafka-project.apps-crc.testing:443");
-        props.put("bootstrap.servers", "<kafka_bootstrap_exposed>:443");
-        props.put("security.protocol", "SSL");
-        props.put("ssl.keystore.location", "/<path>/openshift-drools-hacep/sample-hacep-project/sample-hacep-project-client/src/main/resources/keystore.jks");
-        props.put("ssl.keystore.password", "<password>");
-        props.put("ssl.truststore.location", "/<path>/openshift-drools-hacep/sample-hacep-project/sample-hacep-project-client/src/main/resources/keystore.jks");
-        props.put("ssl.truststore.password", "<password>");
+
+        try (InputStream is = ClientProducerDemo.class.getClassLoader().getResourceAsStream("configuration.properties")) {
+            props.load(is);
+        } catch (IOException io) {
+            io.printStackTrace();
+        }
+
         return props;
     }
 }
