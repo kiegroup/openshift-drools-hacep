@@ -48,13 +48,14 @@ public class ClientProducerDemo {
         }
     }
 
-    private static Properties getProperties() {
+    private static Properties getProperties() throws IOException {
         Properties props = CommonConfig.getStatic();
 
         try (InputStream is = ClientProducerDemo.class.getClassLoader().getResourceAsStream("configuration.properties")) {
             props.load(is);
         } catch (IOException io) {
             io.printStackTrace();
+            throw io;
         }
 
         return props;
