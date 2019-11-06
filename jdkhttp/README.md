@@ -69,7 +69,7 @@ docker push <user_username>/openshift-kie-jdkhttp:<tag>
 ```
 then create a yaml from the UI using the content 
 
-of kubernetes/deployment_registry.yaml
+of kubernetes/deployment.yaml
 
 
 changing the image with the name of your docker image.
@@ -140,7 +140,7 @@ But to Get the image URL from the image stream yaml skipping the useless informa
 ```sh
 oc get is/openshift-kie-jdkhttp -o template --template='{{range .status.tags}}{{range .items}}{{.dockerImageReference}}{{end}}{{end}}'
 ```
-Open the deployment_registry yaml and replace existing image URL with the result of the previous command trimming the tail after @ symbol then add :latest. 
+Open the deployment yaml and replace existing image URL with the result of the previous command trimming the tail after @ symbol then add :latest. 
 E.g. image: 
 ```sh
  - env:
@@ -148,40 +148,6 @@ E.g. image:
    image: image-registry.openshift-image-registry.svc:5000/my-kafka-project/openshift-kie-jdkhttp:latest
 ```
   
-
-### Remote debug    
-    
-#### Using docker hub registry
-```sh
-docker login --username=<user username>
-docker build -t <user_username>/openshift-kie-jdkhttp:<tag> .  
-docker push <user_username>/openshift-kie-jdkhttp:<tag>
-```
-
-#### Deploy
-Change the image name with your image name in the following files before run the create command 
-```sh
-kubectl create -f kubernetes/debug_pod.yaml
-kubectl create -f kubernetes/deployment_registry.yaml
-```
-
-
-#### Port forward
-port forwarding 
-```sh
-oc port-forward <POD> 8000 3000 3001
-```
-```sh
-jdb -connect com.sun.jdi.SocketAttach:hostname=localhost,port=8000
-```
-
-#### Visualvm
-visualvm --openjmx localhost:3000
-
-#### IntellijIdea
-Attach to process
-
-
 ### REST API
 ```sh
  http://<address>/rest/env/all
