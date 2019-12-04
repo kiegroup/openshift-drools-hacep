@@ -18,8 +18,8 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.kie</groupId>
-      <artifactId>openshift-kie-hacep</artifactId>
+      <groupId>org.drools</groupId>
+      <artifactId>ha-core</artifactId>
       <scope>test</scope>
     </dependency>
     <!-- log -->

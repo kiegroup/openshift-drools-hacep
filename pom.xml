@@ -36,8 +36,6 @@
   </properties>
 
   <modules>
-    <module>kie-remote</module>
-    <module>hacep</module>
     <module>springboot</module>
     <module>jdkhttp</module>
     <module>sample-hacep-project</module>
@@ -48,13 +46,13 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>org.kie</groupId>
-        <artifactId>kie-remote</artifactId>
+        <groupId>org.drools</groupId>
+        <artifactId>ha-remote</artifactId>
         <version>${version.org.kie}</version>
       </dependency>
       <dependency>
-        <groupId>org.kie</groupId>
-        <artifactId>openshift-kie-hacep</artifactId>
+        <groupId>org.drools</groupId>
+        <artifactId>ha-core</artifactId>
         <version>${version.org.kie}</version>
       </dependency>
       <dependency>

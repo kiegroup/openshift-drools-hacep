@@ -25,8 +25,8 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.kie</groupId>
-      <artifactId>openshift-kie-hacep</artifactId>
+      <groupId>org.drools</groupId>
+      <artifactId>ha-core</artifactId>
     </dependency>
     <dependency>
       <groupId>org.kie</groupId>

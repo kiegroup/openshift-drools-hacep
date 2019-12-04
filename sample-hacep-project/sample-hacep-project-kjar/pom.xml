@@ -15,8 +15,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.kie</groupId>
-            <artifactId>kie-remote</artifactId>
+            <groupId>org.drools</groupId>
+            <artifactId>ha-remote</artifactId>
         </dependency>
         <dependency>
             <groupId>org.kie</groupId>
