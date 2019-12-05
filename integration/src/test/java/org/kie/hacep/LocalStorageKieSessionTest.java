@@ -36,7 +36,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.kie.remote.CommonConfig.getTestProperties;
-import static org.kie.remote.impl.RemoteKieSessionImpl.DEFAULT_ENTRY_POINT;
+import static org.kie.remote.impl.EntryPointUtil.DEFAULT_ENTRY_POINT;
 
 public class LocalStorageKieSessionTest {
 
