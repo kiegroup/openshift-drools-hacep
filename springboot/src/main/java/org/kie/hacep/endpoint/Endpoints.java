@@ -38,7 +38,7 @@ public class Endpoints {
 
     @GetMapping("/readiness")
     public ResponseEntity<Void> getReadiness() {
-        if(GlobalStatus.nodeReady) {
+        if(GlobalStatus.isNodeReady()) {
             return ResponseEntity.status(HttpStatus.OK).build();
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
@@ -47,7 +47,7 @@ public class Endpoints {
 
     @GetMapping("/liveness")
     public ResponseEntity<Void> getLiveness() {
-        if(GlobalStatus.nodeLive) {
+        if(GlobalStatus.isNodeLive()) {
             return ResponseEntity.status(HttpStatus.OK).build();
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();

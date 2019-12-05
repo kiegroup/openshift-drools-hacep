@@ -51,7 +51,7 @@ public class JdkHttpServer {
 
         @Override
         public void handle(HttpExchange httpExchange) throws IOException {
-            initResponse(httpExchange, GlobalStatus.nodeReady);
+            initResponse(httpExchange, GlobalStatus.isNodeReady());
         }
     }
 
@@ -59,7 +59,7 @@ public class JdkHttpServer {
 
         @Override
         public void handle(HttpExchange httpExchange) throws IOException {
-            initResponse(httpExchange, GlobalStatus.nodeLive);
+            initResponse(httpExchange, GlobalStatus.isNodeLive());
         }
     }
 
