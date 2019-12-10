@@ -22,6 +22,23 @@
             <groupId>org.kie</groupId>
             <artifactId>kie-api</artifactId>
         </dependency>
+
+      <dependency>
+        <groupId>org.drools</groupId>
+        <artifactId>drools-model-compiler</artifactId>
+      </dependency>
+      <dependency>
+        <groupId>org.drools</groupId>
+        <artifactId>drools-canonical-model</artifactId>
+      </dependency>
+      <dependency>
+        <groupId>org.drools</groupId>
+        <artifactId>drools-core</artifactId>
+      </dependency>
+      <dependency>
+        <groupId>org.drools</groupId>
+        <artifactId>drools-compiler</artifactId>
+      </dependency>
     </dependencies>
 
     <build>
