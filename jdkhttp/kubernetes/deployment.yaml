@@ -18,9 +18,6 @@ spec:
         version: v1
     spec:
       serviceAccountName: openshift-kie-jdkhttp
-      securityContext:
-        runAsUser: <id_user>
-        runAsNonRoot: true
       containers:
         - env:
           name: openshift-kie-jdkhttp

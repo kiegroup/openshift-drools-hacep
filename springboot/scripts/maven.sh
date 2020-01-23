@@ -1,5 +1,5 @@
 # common shell routines for use with maven
-source "/home/app/deployments/logging.sh"
+source "/app/scripts/logging.sh"
 
 # default settings.xml file
 __JBOSS_MAVEN_DEFAULT_SETTINGS_FILE="${HOME}/.m2/settings.xml"
