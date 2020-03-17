@@ -100,6 +100,19 @@ then deploy
 ```sh
 oc create -f <path>/kubernetes/deployment.yaml
 ```
+
+#### Configure log level
+Log level can be configured using pod environment variables. Environment variables are
+specified in section spec -> template -> spec -> containers -> env in deployment.yaml.
+Following environment variables can be used for log level configuration:
+
+| Property name | Description |
+| --- | --- |
+| HACEP_LOG_LEVEL | Log level of HA-CEP components |
+| KAFKA_LOG_LEVEL | Log level of Kafka |
+| KIE_SCANNER_LOG_LEVEL | Log level of Kie scanner |
+| ROOT_LOG_LEVEL | Log level of other components |
+| SPRING_LOG_LEVEL | Log level of Spring |
   
 ### REST API
 ```sh

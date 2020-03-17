@@ -39,7 +39,19 @@ oc expose service  openshift-kie-springboot
     
   Your address will be
   http://openshift-kie-springboot-my-kafka-project.192.168.99.109.nip.io/rest/env/all
+  
+#### Configure log level
+Log level can be configured using pod environment variables. Environment variables are
+specified in section spec -> template -> spec -> containers -> env in deployment.yaml.
+Following environment variables can be used for log level configuration:
 
+| Property name | Description |
+| --- | --- |
+| HACEP_LOG_LEVEL | Log level of HA-CEP components |
+| KAFKA_LOG_LEVEL | Log level of Kafka |
+| KIE_SCANNER_LOG_LEVEL | Log level of Kie scanner |
+| ROOT_LOG_LEVEL | Log level of other components |
+| SPRING_LOG_LEVEL | Log level of Spring |
   
 #### Build Container and deploy with fabric8
 In the springboot module

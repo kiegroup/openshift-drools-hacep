@@ -1,11 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
   <include resource="org/springframework/boot/logging/logback/base.xml"/>
-  <root level="INFO">
+
+  <variable name="ROOT_LOG_LEVEL" value="${ROOT_LOG_LEVEL:-INFO}" />
+  <variable name="SPRING_LOG_LEVEL" value="${SPRING_LOG_LEVEL:-ERROR}" />
+  <variable name="HACEP_LOG_LEVEL" value="${HACEP_LOG_LEVEL:-INFO}" />
+  <variable name="KIE_SCANNER_LOG_LEVEL" value="${KIE_SCANNER_LOG_LEVEL:-INFO}" />
+  <variable name="KAFKA_LOG_LEVEL" value="${KAFKA_LOG_LEVEL:-WARN}" />
+
+  <root level="${ROOT_LOG_LEVEL}">
     <appender-ref ref="CONSOLE" />
   </root>
-  <logger name="org.springframework.web" level="ERROR"/>
-  <logger name="org.kie.hacep" level="INFO"/>
-  <logger name="org.kie.api.builder.KieScanner " level="INFO"/>
-  <logger name="org.apache.kafka" level="WARN"/>
+
+  <logger name="org.springframework.web" level="${SPRING_LOG_LEVEL}"/>
+  <logger name="org.kie.hacep" level="${HACEP_LOG_LEVEL}"/>
+  <logger name="org.kie.api.builder.KieScanner " level="${KIE_SCANNER_LOG_LEVEL}"/>
+  <logger name="org.apache.kafka" level="${KAFKA_LOG_LEVEL}"/>
 </configuration>

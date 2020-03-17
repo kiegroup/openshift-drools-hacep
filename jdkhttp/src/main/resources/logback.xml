@@ -1,15 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
+
+  <variable name="ROOT_LOG_LEVEL" value="${ROOT_LOG_LEVEL:-INFO}" />
+  <variable name="HIBERNATE_VALIDATOR_LOG_LEVEL" value="${HIBERNATE_VALIDATOR_LOG_LEVEL:-WARN}" />
+  <variable name="HACEP_LOG_LEVEL" value="${HACEP_LOG_LEVEL:-INFO}" />
+  <variable name="KIE_SCANNER_LOG_LEVEL" value="${KIE_SCANNER_LOG_LEVEL:-INFO}" />
+  <variable name="KAFKA_LOG_LEVEL" value="${KAFKA_LOG_LEVEL:-WARN}" />
+
   <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
       <pattern>%-4relative [%thread] %-5level %logger{35} - %msg %n</pattern>
     </encoder>
   </appender>
-  <root level="INFO">
+  <root level="${ROOT_LOG_LEVEL}">
     <appender-ref ref="CONSOLE" />
   </root>
-  <logger name="org.hibernate.validator.internal.util.Version" level="WARN"/>
-  <logger name="org.kie.hacep" level="INFO"/>
-  <logger name="org.kie.api.builder.KieScanner " level="INFO"/>
-  <logger name="org.apache.kafka" level="WARN"/>
+  <logger name="org.hibernate.validator.internal.util.Version" level="${HIBERNATE_VALIDATOR_LOG_LEVEL}"/>
+  <logger name="org.kie.hacep" level="${HACEP_LOG_LEVEL}"/>
+  <logger name="org.kie.api.builder.KieScanner " level="${KIE_SCANNER_LOG_LEVEL}"/>
+  <logger name="org.apache.kafka" level="${KAFKA_LOG_LEVEL}"/>
 </configuration>

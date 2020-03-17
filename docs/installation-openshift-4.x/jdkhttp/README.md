@@ -32,6 +32,20 @@ of kubernetes/deployment.yaml
 
 changing the image with the name of your docker image.
 
+#### Configure log level
+Log level can be configured using pod environment variables. Environment variables are
+specified in section spec -> template -> spec -> containers -> env in deployment.yaml.
+Following environment variables can be used for log level configuration:
+
+| Property name | Description |
+| --- | --- |
+| HACEP_LOG_LEVEL | Log level of HA-CEP components |
+| HIBERNATE_VALIDATOR_LOG_LEVEL | Log level of Hibernate validator |
+| KAFKA_LOG_LEVEL | Log level of Kafka |
+| KIE_SCANNER_LOG_LEVEL | Log level of Kie scanner |
+| ROOT_LOG_LEVEL | Log level of other components |
+
+
 #### Build and using a local registry 
 
 With OpenShift Container Platform 4.3, a Docker socket will not be present on the host nodes.
